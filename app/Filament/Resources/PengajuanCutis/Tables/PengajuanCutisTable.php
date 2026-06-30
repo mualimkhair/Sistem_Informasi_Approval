@@ -5,9 +5,9 @@ namespace App\Filament\Resources\PengajuanCutis\Tables;
 use App\Models\PengajuanCuti;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DatePicker;
@@ -20,7 +20,7 @@ class PengajuanCutisTable
     {
         return $table
             ->headerActions([
-                \Filament\Tables\Actions\Action::make('export')
+                \Filament\Actions\Action::make('export')
                     ->label('Export Excel')
                     ->icon('heroicon-o-document-arrow-down')
                     ->action(function ($livewire) {
