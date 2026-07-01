@@ -41,6 +41,10 @@ class PengajuanCutiObserver
     {
         $oldStatus = $pengajuanCuti->getOriginal('status');
         
+        if ($oldStatus === 'disetujui' && $pengajuanCuti->status !== 'disetujui') {
+            CutiService::kembalikanSaldo($pengajuanCuti);
+        }
+        
         if (auth()->check() && auth()->id() === $pengajuanCuti->user_id && $oldStatus === 'perubahan' && !$pengajuanCuti->isDirty(['keputusan_kanit', 'keputusan_kasubag', 'keputusan_pejabat'])) {
             $pengajuanCuti->status = 'menunggu_atasan';
             $pengajuanCuti->keputusan_kanit = null;

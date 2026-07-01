@@ -19,7 +19,8 @@ class CutiService
 
         $holidayDates = HariLibur::query()
             ->whereBetween('tanggal', [$start->format('Y-m-d'), $end->format('Y-m-d')])
-            ->pluck('keterangan', 'tanggal')
+            ->get()
+            ->mapWithKeys(fn ($holiday) => [Carbon::parse($holiday->tanggal)->format('Y-m-d') => $holiday->keterangan])
             ->toArray();
 
         $invalid = [];
@@ -146,6 +147,26 @@ class CutiService
             $field = 'saldo_cuti_' . $jenis;
             if (in_array($jenis, ['besar', 'sakit', 'melahirkan', 'alasan_penting'])) {
                 $saldo->{$field} -= $lama;
+            }
+        }
+
+        $saldo->save();
+    }
+
+    public static function kembalikanSaldo(PengajuanCuti $pengajuan)
+    {
+        $saldo = $pengajuan->user->saldoCuti;
+        if (!$saldo) return;
+
+        $lama = $pengajuan->lama_cuti;
+        $jenis = $pengajuan->jenis_cuti;
+
+        if ($jenis === 'tahunan') {
+            $saldo->saldo_n += $lama;
+        } else {
+            $field = 'saldo_cuti_' . $jenis;
+            if (in_array($jenis, ['besar', 'sakit', 'melahirkan', 'alasan_penting'])) {
+                $saldo->{$field} += $lama;
             }
         }
 

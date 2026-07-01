@@ -12,4 +12,9 @@ class KelompokKerja extends Model
     {
         return $this->belongsTo(UnitKerja::class);
     }
+
+    public function pengajuanCutis()
+    {
+        return $this->hasMany(PengajuanCuti::class);
+    }
 }

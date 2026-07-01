@@ -16,12 +16,11 @@ return new class extends Migration
             $table->string('nip', 18)->unique();
             $table->string('nama');
             $table->string('password');
-            $table->text('alamat')->nullable();
-            $table->date('tanggal_masuk')->nullable();
-            $table->string('jabatan')->nullable();
-            $table->string('pangkat_gol')->nullable();
-            $table->foreignId('unit_kerja_id')->nullable()->constrained('unit_kerjas');
-            $table->string('nomor_telp')->nullable();
+            $table->text('alamat');
+            $table->date('tanggal_masuk');
+            $table->string('jabatan');
+            $table->foreignId('unit_kerja_id')->constrained('unit_kerjas');
+            $table->string('nomor_telp');
             $table->string('signature_path')->nullable();
             $table->boolean('is_profile_completed')->default(false);
             $table->rememberToken();

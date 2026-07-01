@@ -23,6 +23,11 @@ class PengajuanCutiResource extends Resource
         return 'heroicon-o-rectangle-stack';
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return true;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return PengajuanCutiForm::configure($schema);
@@ -59,11 +64,14 @@ class PengajuanCutiResource extends Resource
         }
 
         if ($user->hasRole('pejabat_berwenang')) {
-            return $query->where('user_id', $user->id)
-                ->orWhere(function($q) {
-                    $q->where('keputusan_kanit', 'disetujui')
-                      ->where('keputusan_kasubag', 'disetujui');
-                });
+            return $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQ) {
+                      $subQ->where('status', 'menunggu_pejabat')
+                           ->where('keputusan_kanit', 'disetujui')
+                           ->where('keputusan_kasubag', 'disetujui');
+                  });
+            });
         }
 
         if ($user->hasRole('kanit')) {
