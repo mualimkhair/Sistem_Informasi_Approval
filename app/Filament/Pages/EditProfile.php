@@ -57,7 +57,7 @@ class EditProfile extends BaseEditProfile
                             ->required(),
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),
-                    ])->columns(2),
+                    ])->columns(1),
             ]);
     }
 
