@@ -5,6 +5,7 @@ namespace App\Filament\Resources\KelompokKerjas\Schemas;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use App\Models\UnitKerja;
 
 class KelompokKerjaForm
 {
@@ -13,9 +14,14 @@ class KelompokKerjaForm
         return $schema
             ->components([
                 Select::make('unit_kerja_id')
-                    ->relationship('unitKerja', 'nama_unit', fn ($query) => $query->where('jenis', 'operasional'))
+                    ->relationship(
+                        name: 'unitKerja', 
+                        titleAttribute: 'nama_unit', 
+                        modifyQueryUsing: fn ($query) => $query->where('unit_kerjas.jenis', 'operasional')
+                    )
                     ->required()
                     ->searchable()
+                    ->preload()
                     ->label('Unit Kerja (Operasional)'),
                 TextInput::make('nama_kelompok')
                     ->required()
