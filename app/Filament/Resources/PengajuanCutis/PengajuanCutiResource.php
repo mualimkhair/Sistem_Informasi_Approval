@@ -54,7 +54,7 @@ class PengajuanCutiResource extends Resource
         $query = parent::getEloquentQuery();
         $user = auth()->user();
 
-        if ($user->hasRole(['super_admin', 'admin'])) {
+        if ($user->hasRole(['super_admin', 'admin', 'kasubag'])) {
             return $query;
         }
 
@@ -66,7 +66,7 @@ class PengajuanCutiResource extends Resource
                 });
         }
 
-        if ($user->hasRole(['kanit', 'kasubag'])) {
+        if ($user->hasRole('kanit')) {
             return $query->where('user_id', $user->id)
                 ->orWhereHas('user', function($q) use ($user) {
                     $q->where('unit_kerja_id', $user->unit_kerja_id)

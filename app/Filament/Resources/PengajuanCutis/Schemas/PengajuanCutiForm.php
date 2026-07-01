@@ -62,6 +62,7 @@ class PengajuanCutiForm
                                 }
                                 return [];
                             })
+                            ->searchable()
                             ->visible(fn () => Auth::user()->unitKerja?->jenis === 'operasional')
                             ->required(fn () => Auth::user()->unitKerja?->jenis === 'operasional')
                             ->live()
@@ -79,6 +80,7 @@ class PengajuanCutiForm
                                 'alasan_penting' => 'Cuti Alasan Penting',
                                 'diluar_tanggungan_negara' => 'Cuti Diluar Tanggungan Negara',
                             ])
+                            ->searchable()
                             ->required()
                             ->live(),
 
@@ -89,6 +91,8 @@ class PengajuanCutiForm
                         DatePicker::make('tanggal_mulai')
                             ->label('Tanggal Mulai')
                             ->required()
+                            ->native(false)
+                            ->minDate(now())
                             ->live()
                             ->rules([
                                 fn ($get) => function (string $attribute, $value, \Closure $fail) use ($get) {
@@ -107,6 +111,8 @@ class PengajuanCutiForm
                         DatePicker::make('tanggal_selesai')
                             ->label('Tanggal Selesai')
                             ->required()
+                            ->native(false)
+                            ->minDate(now())
                             ->afterOrEqual('tanggal_mulai')
                             ->live()
                             ->rules([
@@ -131,50 +137,34 @@ class PengajuanCutiForm
 
                         Placeholder::make('tanggal_alert')
                             ->label('Tanggal Libur Dikecualikan')
-                            ->content(fn (Get $get): string => self::invalidDateSummary($get))
+                            ->content(fn ($get): string => self::invalidDateSummary($get))
                             ->columnSpanFull(),
 
-                        Placeholder::make('sisa_saldo')
-                            ->label('Catatan Cuti (Saldo Tahunan)')
-                            ->content(function ($get) {
-                                $saldo = Auth::user()->saldoCuti;
-                                if (!$saldo) return 'Saldo tidak ditemukan';
-                                
-                                $lama = (int) $get('lama_cuti');
-                                $jenis = $get('jenis_cuti');
-                                
-                                if ($jenis !== 'tahunan' || $lama <= 0) {
-                                    return "N: {$saldo->saldo_n} | N-1: {$saldo->saldo_n1} | N-2: {$saldo->saldo_n2}";
-                                }
-                                
-                                $n2 = $saldo->saldo_n2;
-                                $n1 = $saldo->saldo_n1;
-                                $n = $saldo->saldo_n;
-                                
-                                if ($n2 >= $lama) {
-                                    $n2 -= $lama;
-                                    $lama = 0;
-                                } else {
-                                    $lama -= $n2;
-                                    $n2 = 0;
-                                }
-                                
-                                if ($lama > 0) {
-                                    if ($n1 >= $lama) {
-                                        $n1 -= $lama;
-                                        $lama = 0;
-                                    } else {
-                                        $lama -= $n1;
-                                        $n1 = 0;
-                                    }
-                                }
-                                
-                                if ($lama > 0) {
-                                    $n -= $lama;
-                                }
-                                
-                                return "Sisa Saldo Setelah Cuti -> N: {$n} | N-1: {$n1} | N-2: {$n2}";
-                            }),
+                        \Filament\Schemas\Components\Fieldset::make('Informasi Sisa Saldo Cuti')
+                            ->schema([
+                                Placeholder::make('sisa_n2')
+                                    ->label('Saldo N-2')
+                                    ->content(fn ($get) => self::getSimulasiSaldo($get)['n2']),
+                                Placeholder::make('sisa_n1')
+                                    ->label('Saldo N-1')
+                                    ->content(fn ($get) => self::getSimulasiSaldo($get)['n1']),
+                                Placeholder::make('sisa_n')
+                                    ->label('Saldo N')
+                                    ->content(fn ($get) => self::getSimulasiSaldo($get)['n']),
+                                Placeholder::make('sisa_besar')
+                                    ->label('Cuti Besar')
+                                    ->content(fn ($get) => self::getSimulasiSaldo($get)['besar']),
+                                Placeholder::make('sisa_sakit')
+                                    ->label('Cuti Sakit')
+                                    ->content(fn ($get) => self::getSimulasiSaldo($get)['sakit']),
+                                Placeholder::make('sisa_melahirkan')
+                                    ->label('Melahirkan')
+                                    ->content(fn ($get) => self::getSimulasiSaldo($get)['melahirkan']),
+                                Placeholder::make('sisa_alasan_penting')
+                                    ->label('Alasan Penting')
+                                    ->content(fn ($get) => self::getSimulasiSaldo($get)['penting']),
+                            ])
+                            ->columns(4),
 
                         Textarea::make('alamat_selama_cuti')
                             ->label('Alamat Selama Cuti')
@@ -184,7 +174,7 @@ class PengajuanCutiForm
             ]);
     }
 
-    public static function kalkulasiLamaCuti(Get $get, Set $set)
+    public static function kalkulasiLamaCuti($get, $set)
     {
         $start = $get('tanggal_mulai');
         $end = $get('tanggal_selesai');
@@ -204,7 +194,7 @@ class PengajuanCutiForm
         }
     }
 
-    private static function invalidDateSummary(Get $get): string
+    private static function invalidDateSummary($get): string
     {
         $start = $get('tanggal_mulai');
         $end = $get('tanggal_selesai');
@@ -240,5 +230,53 @@ class PengajuanCutiForm
         }
 
         return implode(', ', $invalidDates);
+    }
+
+    public static function getSimulasiSaldo($get): array
+    {
+        $saldo = Auth::user()->saldoCuti;
+        $default = ['n2' => '-', 'n1' => '-', 'n' => '-', 'besar' => '-', 'sakit' => '-', 'melahirkan' => '-', 'penting' => '-'];
+        
+        if (!$saldo) return $default;
+
+        $lama = (int) $get('lama_cuti');
+        $jenis = $get('jenis_cuti');
+
+        $n2 = $saldo->saldo_n2;
+        $n1 = $saldo->saldo_n1;
+        $n = $saldo->saldo_n;
+        $besar = $saldo->saldo_cuti_besar;
+        $sakit = $saldo->saldo_cuti_sakit;
+        $melahirkan = $saldo->saldo_cuti_melahirkan;
+        $penting = $saldo->saldo_cuti_alasan_penting;
+
+        if ($lama > 0) {
+            switch ($jenis) {
+                case 'tahunan':
+                    if ($n2 >= $lama) { $n2 -= $lama; $lama = 0; } 
+                    else { $lama -= $n2; $n2 = 0; }
+                    
+                    if ($lama > 0) {
+                        if ($n1 >= $lama) { $n1 -= $lama; $lama = 0; } 
+                        else { $lama -= $n1; $n1 = 0; }
+                    }
+                    if ($lama > 0) { $n -= $lama; }
+                    break;
+                case 'besar': $besar -= $lama; break;
+                case 'sakit': $sakit -= $lama; break;
+                case 'melahirkan': $melahirkan -= $lama; break;
+                case 'alasan_penting': $penting -= $lama; break;
+            }
+        }
+
+        return [
+            'n2' => $n2 . ' hari',
+            'n1' => $n1 . ' hari',
+            'n' => $n . ' hari',
+            'besar' => $besar . ' hari',
+            'sakit' => $sakit . ' hari',
+            'melahirkan' => $melahirkan . ' hari',
+            'penting' => $penting . ' hari',
+        ];
     }
 }

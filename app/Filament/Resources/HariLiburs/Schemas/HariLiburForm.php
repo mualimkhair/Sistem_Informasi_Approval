@@ -20,6 +20,7 @@ class HariLiburForm
                         'libur_nasional' => 'Libur Nasional',
                         'cuti_bersama' => 'Cuti Bersama',
                     ])
+                    ->searchable()
                     ->required(),
             ]);
     }

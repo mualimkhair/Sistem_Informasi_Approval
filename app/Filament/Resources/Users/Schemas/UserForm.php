@@ -40,7 +40,7 @@ class UserForm
                             ->relationship('unitKerja', 'nama_unit')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required(false),
                         TextInput::make('nomor_telp')
                             ->label('Nomor Telepon')
                             ->tel(),
@@ -54,55 +54,61 @@ class UserForm
                             ->visible($isSuperAdmin),
                     ])->columns(2),
 
-                \Filament\Schemas\Components\Section::make('Saldo Cuti')
+                \Filament\Schemas\Components\Group::make()
+                    ->relationship('saldoCuti')
                     ->schema([
-                        TextInput::make('saldoCuti.saldo_n')
-                            ->label('Saldo N (Tahun Berjalan)')
-                            ->numeric()
-                            ->minValue(0)
-                            ->default(12),
-                        TextInput::make('saldoCuti.saldo_n1')
-                            ->label('Saldo N-1 (Tahun Lalu)')
-                            ->numeric()
-                            ->minValue(0)
-                            ->default(0),
-                        TextInput::make('saldoCuti.saldo_n2')
-                            ->label('Saldo N-2 (2 Tahun Lalu)')
-                            ->numeric()
-                            ->minValue(0)
-                            ->default(0),
-                        TextInput::make('saldoCuti.saldo_cuti_besar')
-                            ->label('Saldo Cuti Besar')
-                            ->numeric()
-                            ->minValue(0)
-                            ->default(90),
-                        TextInput::make('saldoCuti.saldo_cuti_sakit')
-                            ->label('Saldo Cuti Sakit')
-                            ->numeric()
-                            ->minValue(0)
-                            ->default(365),
-                        TextInput::make('saldoCuti.saldo_cuti_melahirkan')
-                            ->label('Saldo Cuti Melahirkan')
-                            ->numeric()
-                            ->minValue(0)
-                            ->default(90),
-                        TextInput::make('saldoCuti.saldo_cuti_alasan_penting')
-                            ->label('Saldo Cuti Alasan Penting')
-                            ->numeric()
-                            ->minValue(0)
-                            ->default(30),
+                        \Filament\Schemas\Components\Section::make('Saldo Cuti')
+                            ->schema([
+                                TextInput::make('saldo_n')
+                                    ->label('Saldo N (Tahun Berjalan)')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(12),
+                                TextInput::make('saldo_n1')
+                                    ->label('Saldo N-1 (Tahun Lalu)')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(0),
+                                TextInput::make('saldo_n2')
+                                    ->label('Saldo N-2 (2 Tahun Lalu)')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(0),
+                                TextInput::make('saldo_cuti_besar')
+                                    ->label('Saldo Cuti Besar')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(90),
+                                TextInput::make('saldo_cuti_sakit')
+                                    ->label('Saldo Cuti Sakit')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(365),
+                                TextInput::make('saldo_cuti_melahirkan')
+                                    ->label('Saldo Cuti Melahirkan')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(90),
+                                TextInput::make('saldo_cuti_alasan_penting')
+                                    ->label('Saldo Cuti Alasan Penting')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(30),
+                            ])
+                            ->columns(3)
+                            ->collapsible()
                     ])
-                    ->columns(3)
-                    ->visible($isSuperAdmin)
-                    ->collapsible(),
+                    ->visible($isSuperAdmin),
 
                 \Filament\Schemas\Components\Section::make('Role & Hak Akses')
                     ->schema([
                         Select::make('roles')
                             ->label('Role')
-                            ->relationship('roles', 'name')
+                            ->relationship('roles', 'name', fn ($query) => $query->where('name', '!=', 'super_admin'))
                             ->multiple()
                             ->preload()
+                            ->searchable()
+                            ->default(fn () => [\Spatie\Permission\Models\Role::where('name', 'pegawai')->value('id')])
                             ->required(),
                     ])
                     ->visible($isSuperAdmin)
