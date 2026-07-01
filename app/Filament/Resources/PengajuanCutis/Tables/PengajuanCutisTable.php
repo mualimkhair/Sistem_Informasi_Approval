@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
 
 class PengajuanCutisTable
@@ -64,6 +65,8 @@ class PengajuanCutisTable
                             );
                     })
             ])
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->filtersFormColumns(2)
             ->actions([
                 Action::make('keputusan_kanit')
                     ->label('Keputusan Kanit')
@@ -76,6 +79,15 @@ class PengajuanCutisTable
                         && $record->user_id !== auth()->id()
                     )
                     ->form([
+                        \Filament\Forms\Components\Placeholder::make('detail_pengajuan')
+                            ->label('Detail Pengajuan')
+                            ->content(fn ($record) => new \Illuminate\Support\HtmlString(
+                                "<strong>Pegawai:</strong> {$record->user->nama}<br>
+                                <strong>Jenis Cuti:</strong> {$record->jenis_cuti}<br>
+                                <strong>Tanggal:</strong> {$record->tanggal_mulai} s/d {$record->tanggal_selesai} ({$record->lama_cuti} hari)<br>
+                                <strong>Alasan:</strong> {$record->alasan_cuti}"
+                            ))
+                            ->columnSpanFull(),
                         Select::make('keputusan_kanit')
                             ->label('Keputusan')
                             ->options([
@@ -111,6 +123,16 @@ class PengajuanCutisTable
                         && $record->user_id !== auth()->id()
                     )
                     ->form([
+                        \Filament\Forms\Components\Placeholder::make('detail_pengajuan')
+                            ->label('Detail Pengajuan')
+                            ->content(fn ($record) => new \Illuminate\Support\HtmlString(
+                                "<strong>Pegawai:</strong> {$record->user->nama}<br>
+                                <strong>Jenis Cuti:</strong> {$record->jenis_cuti}<br>
+                                <strong>Tanggal:</strong> {$record->tanggal_mulai} s/d {$record->tanggal_selesai} ({$record->lama_cuti} hari)<br>
+                                <strong>Alasan:</strong> {$record->alasan_cuti}<br>
+                                <strong>Catatan Kanit:</strong> " . ($record->alasan_kanit ?? '-')
+                            ))
+                            ->columnSpanFull(),
                         Select::make('keputusan_kasubag')
                             ->label('Keputusan')
                             ->options([
@@ -145,6 +167,17 @@ class PengajuanCutisTable
                         && $record->user_id !== auth()->id()
                     )
                     ->form([
+                        \Filament\Forms\Components\Placeholder::make('detail_pengajuan')
+                            ->label('Detail Pengajuan')
+                            ->content(fn ($record) => new \Illuminate\Support\HtmlString(
+                                "<strong>Pegawai:</strong> {$record->user->nama}<br>
+                                <strong>Jenis Cuti:</strong> {$record->jenis_cuti}<br>
+                                <strong>Tanggal:</strong> {$record->tanggal_mulai} s/d {$record->tanggal_selesai} ({$record->lama_cuti} hari)<br>
+                                <strong>Alasan:</strong> {$record->alasan_cuti}<br>
+                                <strong>Catatan Kanit:</strong> " . ($record->alasan_kanit ?? '-') . "<br>
+                                <strong>Catatan Kasubag:</strong> " . ($record->alasan_kasubag ?? '-')
+                            ))
+                            ->columnSpanFull(),
                         Select::make('keputusan_pejabat')
                             ->label('Keputusan Final')
                             ->options([

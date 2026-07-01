@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Enums\FiltersLayout;
 
 class UsersTable
 {
@@ -98,6 +99,8 @@ class UsersTable
                 \Filament\Tables\Filters\TernaryFilter::make('is_profile_completed')
                     ->label('Profil Dilengkapi'),
             ])
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->filtersFormColumns(3)
             ->actions([
                 \Filament\Actions\Action::make('reset_saldo')
                     ->label('Reset Saldo')

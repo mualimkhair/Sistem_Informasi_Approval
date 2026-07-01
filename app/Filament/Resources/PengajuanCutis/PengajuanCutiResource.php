@@ -59,7 +59,7 @@ class PengajuanCutiResource extends Resource
         $query = parent::getEloquentQuery();
         $user = auth()->user();
 
-        if ($user->hasRole(['super_admin', 'admin'])) {
+        if ($user->hasRole(['super_admin', 'admin', 'kasubag'])) {
             return $query;
         }
 
@@ -75,31 +75,11 @@ class PengajuanCutiResource extends Resource
         }
 
         if ($user->hasRole('kanit')) {
-            return $query->where(function($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->orWhere(function($subQ) use ($user) {
-                      $subQ->whereHas('user', function($userQ) use ($user) {
-                          $userQ->where('unit_kerja_id', $user->unit_kerja_id)
-                                ->where('id', '!=', $user->id);
-                      })
-                      ->where('status', 'menunggu_atasan')
-                      ->whereNull('keputusan_kanit');
-                  });
-            });
-        }
-
-        if ($user->hasRole('kasubag')) {
-            return $query->where(function($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->orWhere(function($subQ) use ($user) {
-                      $subQ->whereHas('user', function($userQ) use ($user) {
-                          $userQ->where('unit_kerja_id', $user->unit_kerja_id)
-                                ->where('id', '!=', $user->id);
-                      })
-                      ->where('status', 'menunggu_atasan')
-                      ->whereNull('keputusan_kasubag');
-                  });
-            });
+            return $query->where('user_id', $user->id)
+                ->orWhereHas('user', function($q) use ($user) {
+                    $q->where('unit_kerja_id', $user->unit_kerja_id)
+                      ->where('id', '!=', $user->id);
+                });
         }
 
         return $query->where('user_id', $user->id);

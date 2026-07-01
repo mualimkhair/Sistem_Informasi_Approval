@@ -16,6 +16,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 
 class UnitKerjaResource extends Resource
 {
@@ -36,6 +38,7 @@ class UnitKerjaResource extends Resource
                     ->required(),
                 Select::make('jenis')
                     ->options(['administrasi' => 'Administrasi', 'operasional' => 'Operasional'])
+                    ->searchable()
                     ->required(),
             ]);
     }
@@ -58,8 +61,14 @@ class UnitKerjaResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('jenis')
+                    ->options([
+                        'administrasi' => 'Administrasi',
+                        'operasional' => 'Operasional',
+                    ]),
             ])
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->filtersFormColumns(2)
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),

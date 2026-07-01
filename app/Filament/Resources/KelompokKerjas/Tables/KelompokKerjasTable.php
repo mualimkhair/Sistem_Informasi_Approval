@@ -6,6 +6,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Enums\FiltersLayout;
 
 class KelompokKerjasTable
 {
@@ -18,6 +20,13 @@ class KelompokKerjasTable
                 TextColumn::make('hari_libur_1'),
                 TextColumn::make('hari_libur_2'),
             ])
+            ->filters([
+                SelectFilter::make('unit_kerja_id')
+                    ->label('Unit Kerja')
+                    ->relationship('unitKerja', 'nama_unit'),
+            ])
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->filtersFormColumns(2)
             ->actions([
                 EditAction::make(),
                 DeleteAction::make(),

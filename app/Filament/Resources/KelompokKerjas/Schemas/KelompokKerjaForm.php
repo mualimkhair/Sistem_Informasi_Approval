@@ -15,6 +15,7 @@ class KelompokKerjaForm
                 Select::make('unit_kerja_id')
                     ->relationship('unitKerja', 'nama_unit', fn ($query) => $query->where('jenis', 'operasional'))
                     ->required()
+                    ->searchable()
                     ->label('Unit Kerja (Operasional)'),
                 TextInput::make('nama_kelompok')
                     ->required()
@@ -24,12 +25,14 @@ class KelompokKerjaForm
                         'Senin' => 'Senin', 'Selasa' => 'Selasa', 'Rabu' => 'Rabu',
                         'Kamis' => 'Kamis', 'Jumat' => 'Jumat', 'Sabtu' => 'Sabtu', 'Minggu' => 'Minggu',
                     ])
+                    ->searchable()
                     ->required(),
                 Select::make('hari_libur_2')
                     ->options([
                         'Senin' => 'Senin', 'Selasa' => 'Selasa', 'Rabu' => 'Rabu',
                         'Kamis' => 'Kamis', 'Jumat' => 'Jumat', 'Sabtu' => 'Sabtu', 'Minggu' => 'Minggu',
                     ])
+                    ->searchable()
                     ->required(),
             ]);
     }
