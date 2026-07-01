@@ -125,7 +125,7 @@ class LengkapiProfil extends Page
         ]);
 
         if (!empty($data['password'])) {
-            auth()->user()->update(['password' => Hash::make($data['password'])]);
+            auth()->user()->update(['password' => $data['password']]);
         }
 
         Notification::make()
