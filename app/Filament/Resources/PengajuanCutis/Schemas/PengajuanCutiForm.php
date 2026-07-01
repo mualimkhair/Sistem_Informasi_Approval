@@ -78,7 +78,7 @@ class PengajuanCutiForm
                                 'sakit' => 'Cuti Sakit',
                                 'melahirkan' => 'Cuti Melahirkan',
                                 'alasan_penting' => 'Cuti Alasan Penting',
-                                'diluar_tanggungan_negara' => 'Cuti Diluar Tanggungan Negara',
+                                // 'diluar_tanggungan_negara' => 'Cuti Diluar Tanggungan Negara',
                             ])
                             ->searchable()
                             ->required()

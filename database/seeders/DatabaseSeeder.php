@@ -68,9 +68,9 @@ class DatabaseSeeder extends Seeder
         ]);
         
         $superAdmin = User::create([
-            'nip' => '199001012020121001',
+            'nip' => '199001012020121002',
             'nama' => 'Super Admin',
-            'password' => Hash::make('199001012020121001'),
+            'password' => Hash::make('199001012020121002'),
             'unit_kerja_id' => 1,
             'is_profile_completed' => true,
         ]);

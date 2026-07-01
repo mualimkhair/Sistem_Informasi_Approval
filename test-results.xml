@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\phpunit.xml" tests="97" assertions="130" errors="8" failures="18" skipped="0" time="41.362499">
+    <testsuite name="Unit" tests="5" assertions="12" errors="0" failures="0" skipped="0" time="1.104078">
+      <testsuite name="Tests\Unit\ExampleTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Unit\ExampleTest.php" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.001671">
+        <testcase name="test_that_true_is_true" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Unit\ExampleTest.php" line="12" class="Tests\Unit\ExampleTest" classname="Tests.Unit.ExampleTest" assertions="1" time="0.001671"/>
+      </testsuite>
+      <testsuite name="Tests\Unit\PengajuanCutiModelTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Unit\PengajuanCutiModelTest.php" tests="4" assertions="11" errors="0" failures="0" skipped="0" time="1.102407">
+        <testcase name="test_pengajuan_cuti_uses_ulid" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Unit\PengajuanCutiModelTest.php" line="20" class="Tests\Unit\PengajuanCutiModelTest" classname="Tests.Unit.PengajuanCutiModelTest" assertions="2" time="0.844960"/>
+        <testcase name="test_jenis_cuti_values_are_valid" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Unit\PengajuanCutiModelTest.php" line="37" class="Tests\Unit\PengajuanCutiModelTest" classname="Tests.Unit.PengajuanCutiModelTest" assertions="3" time="0.074559"/>
+        <testcase name="test_status_values_are_valid" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Unit\PengajuanCutiModelTest.php" line="46" class="Tests\Unit\PengajuanCutiModelTest" classname="Tests.Unit.PengajuanCutiModelTest" assertions="3" time="0.094770"/>
+        <testcase name="test_keputusan_values_are_valid" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Unit\PengajuanCutiModelTest.php" line="64" class="Tests\Unit\PengajuanCutiModelTest" classname="Tests.Unit.PengajuanCutiModelTest" assertions="3" time="0.088118"/>
+      </testsuite>
+    </testsuite>
+    <testsuite name="Feature" tests="92" assertions="118" errors="8" failures="18" skipped="0" time="40.258421">
+      <testsuite name="Tests\Feature\AuthenticationTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\AuthenticationTest.php" tests="7" assertions="6" errors="1" failures="1" skipped="0" time="14.562505">
+        <testcase name="test_login_page_can_be_accessed" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\AuthenticationTest.php" line="19" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="1" time="0.274534"/>
+        <testcase name="test_user_can_login_with_valid_credentials" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\AuthenticationTest.php" line="25" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="1" time="6.946403">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\AuthenticationTest::test_user_can_login_with_valid_credentials&#13;
+The current user is not authenticated.
+Failed asserting that null is not null.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithAuthentication.php:104
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\AuthenticationTest.php:34</failure>
+        </testcase>
+        <testcase name="test_user_cannot_login_with_invalid_credentials" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\AuthenticationTest.php" line="37" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="1" time="6.377183"/>
+        <testcase name="test_user_can_logout" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\AuthenticationTest.php" line="47" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="1" time="0.143920"/>
+        <testcase name="test_profile_completion_required_for_new_users" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\AuthenticationTest.php" line="56" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="0" time="0.177690">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\AuthenticationTest::test_profile_completion_required_for_new_users&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1 table users has no column named name (Connection: sqlite, Database: :memory:, SQL: insert into "users" ("name", "email", "email_verified_at", "password", "remember_token", "is_profile_completed", "alamat", "nomor_telp", "updated_at", "created_at") values (Maudie Renner V, bins.kirstin@example.com, 2026-07-01 03:02:24, $2y$04$Pk2l4ojKNRuoklC/sPecueEQ0KdlAtCLraX7PpfXmvFi/yvxxlswC, DcCVlBB48f, 0, ?, ?, 2026-07-01 03:02:24, 2026-07-01 03:02:24))
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:857
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:813
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:590
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:554
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\Processor.php:32
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4257
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2271
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1662
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1578
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1382
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:379
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:275
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:374
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:330
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:324
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\AuthenticationTest.php:58</error>
+        </testcase>
+        <testcase name="test_super_admin_can_access_admin_panel" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\AuthenticationTest.php" line="69" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="1" time="0.342053"/>
+        <testcase name="test_pegawai_can_access_admin_panel" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\AuthenticationTest.php" line="79" class="Tests\Feature\AuthenticationTest" classname="Tests.Feature.AuthenticationTest" assertions="1" time="0.300722"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\CutiServiceTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php" tests="8" assertions="11" errors="1" failures="3" skipped="0" time="1.083821">
+        <testcase name="test_calculate_leave_duration_excludes_weekends_for_administrative" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php" line="26" class="Tests\Feature\CutiServiceTest" classname="Tests.Feature.CutiServiceTest" assertions="1" time="0.138392">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\CutiServiceTest::test_calculate_leave_duration_excludes_weekends_for_administrative&#13;
+Failed asserting that 4 matches expected 5.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php:40</failure>
+        </testcase>
+        <testcase name="test_calculate_leave_duration_excludes_national_holidays" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php" line="43" class="Tests\Feature\CutiServiceTest" classname="Tests.Feature.CutiServiceTest" assertions="1" time="0.132304">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\CutiServiceTest::test_calculate_leave_duration_excludes_national_holidays&#13;
+Failed asserting that 4 matches expected 3.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php:63</failure>
+        </testcase>
+        <testcase name="test_calculate_leave_duration_for_operational_with_custom_off_days" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php" line="66" class="Tests\Feature\CutiServiceTest" classname="Tests.Feature.CutiServiceTest" assertions="0" time="0.142867">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\CutiServiceTest::test_calculate_leave_duration_for_operational_with_custom_off_days&#13;
+Illuminate\Database\QueryException: SQLSTATE[23000]: Integrity constraint violation: 19 CHECK constraint failed: hari_libur_1 (Connection: sqlite, Database: :memory:, SQL: insert into "kelompok_kerjas" ("unit_kerja_id", "nama_kelompok", "hari_libur_1", "hari_libur_2", "updated_at", "created_at") values (14, Shift A, Wednesday, Thursday, 2026-07-01 03:02:25, 2026-07-01 03:02:25))
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:857
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:813
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:590
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:554
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\Processor.php:32
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4257
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2271
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1662
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1578
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1382
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:1225
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Support\helpers.php:393
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:1224
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:23
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:2809
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:2825
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php:70</error>
+        </testcase>
+        <testcase name="test_invalid_dates_returns_excluded_dates_with_reasons" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php" line="90" class="Tests\Feature\CutiServiceTest" classname="Tests.Feature.CutiServiceTest" assertions="2" time="0.139500"/>
+        <testcase name="test_single_day_leave_calculation" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php" line="114" class="Tests\Feature\CutiServiceTest" classname="Tests.Feature.CutiServiceTest" assertions="1" time="0.130444"/>
+        <testcase name="test_leave_on_weekend_for_administrative_equals_zero" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php" line="131" class="Tests\Feature\CutiServiceTest" classname="Tests.Feature.CutiServiceTest" assertions="1" time="0.130481"/>
+        <testcase name="test_leave_duration_calculation_accuracy" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php" line="148" class="Tests\Feature\CutiServiceTest" classname="Tests.Feature.CutiServiceTest" assertions="3" time="0.131892"/>
+        <testcase name="test_collective_leave_is_excluded" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php" line="166" class="Tests\Feature\CutiServiceTest" classname="Tests.Feature.CutiServiceTest" assertions="2" time="0.137940">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\CutiServiceTest::test_collective_leave_is_excluded&#13;
+Failed asserting that 4 is equal to 3 or is less than 3.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\CutiServiceTest.php:186</failure>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Feature\ExampleTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ExampleTest.php" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.113899">
+        <testcase name="test_the_application_returns_a_successful_response" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ExampleTest.php" line="13" class="Tests\Feature\ExampleTest" classname="Tests.Feature.ExampleTest" assertions="1" time="0.113899"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\MasterDataTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php" tests="9" assertions="9" errors="2" failures="1" skipped="0" time="1.244542">
+        <testcase name="test_unit_kerja_can_be_created" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php" line="21" class="Tests\Feature\MasterDataTest" classname="Tests.Feature.MasterDataTest" assertions="1" time="0.133846"/>
+        <testcase name="test_unit_kerja_has_two_types" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php" line="34" class="Tests\Feature\MasterDataTest" classname="Tests.Feature.MasterDataTest" assertions="2" time="0.134829"/>
+        <testcase name="test_kelompok_kerja_belongs_to_unit_kerja" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php" line="43" class="Tests\Feature\MasterDataTest" classname="Tests.Feature.MasterDataTest" assertions="0" time="0.149872">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\MasterDataTest::test_kelompok_kerja_belongs_to_unit_kerja&#13;
+Illuminate\Database\QueryException: SQLSTATE[23000]: Integrity constraint violation: 19 CHECK constraint failed: hari_libur_1 (Connection: sqlite, Database: :memory:, SQL: insert into "kelompok_kerjas" ("unit_kerja_id", "nama_kelompok", "hari_libur_1", "hari_libur_2", "updated_at", "created_at") values (14, Shift Test, Wednesday, Thursday, 2026-07-01 03:02:26, 2026-07-01 03:02:26))
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:857
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:813
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:590
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:554
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\Processor.php:32
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4257
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2271
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1662
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1578
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1382
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:1225
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Support\helpers.php:393
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:1224
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:23
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:2809
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:2825
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php:47</error>
+        </testcase>
+        <testcase name="test_kelompok_kerja_has_custom_off_days" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php" line="58" class="Tests\Feature\MasterDataTest" classname="Tests.Feature.MasterDataTest" assertions="0" time="0.144998">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\MasterDataTest::test_kelompok_kerja_has_custom_off_days&#13;
+Illuminate\Database\QueryException: SQLSTATE[23000]: Integrity constraint violation: 19 CHECK constraint failed: hari_libur_1 (Connection: sqlite, Database: :memory:, SQL: insert into "kelompok_kerjas" ("unit_kerja_id", "nama_kelompok", "hari_libur_1", "hari_libur_2", "updated_at", "created_at") values (14, Shift A, Monday, Tuesday, 2026-07-01 03:02:26, 2026-07-01 03:02:26))
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:857
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:813
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:590
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:554
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\Processor.php:32
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4257
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2271
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1662
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1578
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1382
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:1225
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Support\helpers.php:393
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:1224
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:23
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:2809
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:2825
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php:62</error>
+        </testcase>
+        <testcase name="test_hari_libur_can_be_created" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php" line="73" class="Tests\Feature\MasterDataTest" classname="Tests.Feature.MasterDataTest" assertions="1" time="0.140253">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\MasterDataTest::test_hari_libur_can_be_created&#13;
+Failed asserting that a row in the table [hari_liburs] matches the attributes {
+    "tanggal": "2026-08-17",
+    "jenis": "libur_nasional"
+}.
+
+Found: [
+    {
+        "tanggal": "2026-08-17 00:00:00",
+        "jenis": "libur_nasional"
+    }
+].
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithDatabase.php:51
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php:81</failure>
+        </testcase>
+        <testcase name="test_hari_libur_has_two_types" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php" line="87" class="Tests\Feature\MasterDataTest" classname="Tests.Feature.MasterDataTest" assertions="2" time="0.134665"/>
+        <testcase name="test_hari_libur_tanggal_is_unique" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php" line="105" class="Tests\Feature\MasterDataTest" classname="Tests.Feature.MasterDataTest" assertions="1" time="0.139194"/>
+        <testcase name="test_unit_kerja_administrasi_count" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php" line="122" class="Tests\Feature\MasterDataTest" classname="Tests.Feature.MasterDataTest" assertions="1" time="0.129503"/>
+        <testcase name="test_unit_kerja_operasional_count" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\MasterDataTest.php" line="128" class="Tests\Feature\MasterDataTest" classname="Tests.Feature.MasterDataTest" assertions="1" time="0.137383"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\PdfGenerationTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PdfGenerationTest.php" tests="3" assertions="4" errors="0" failures="1" skipped="0" time="7.061809">
+        <testcase name="test_pdf_generation_route_exists" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PdfGenerationTest.php" line="21" class="Tests\Feature\PdfGenerationTest" classname="Tests.Feature.PdfGenerationTest" assertions="1" time="0.378621"/>
+        <testcase name="test_pdf_has_correct_content_type" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PdfGenerationTest.php" line="43" class="Tests\Feature\PdfGenerationTest" classname="Tests.Feature.PdfGenerationTest" assertions="2" time="0.256459"/>
+        <testcase name="test_only_authenticated_user_can_generate_pdf" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PdfGenerationTest.php" line="62" class="Tests\Feature\PdfGenerationTest" classname="Tests.Feature.PdfGenerationTest" assertions="1" time="6.426728">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\PdfGenerationTest::test_only_authenticated_user_can_generate_pdf&#13;
+Expected response status code [201, 301, 302, 303, 307, 308] but received 500.
+Failed asserting that false is true.&#13;
+&#13;
+The following exception occurred during the last request:
+
+Symfony\Component\Routing\Exception\RouteNotFoundException: Route [login] not defined. in C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Routing\UrlGenerator.php:546
+Stack trace:
+#0 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\helpers.php(870): Illuminate\Routing\UrlGenerator-&gt;route('login', Array, true)
+#1 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Configuration\ApplicationBuilder.php(291): route('login')
+#2 [internal function]: Illuminate\Foundation\Configuration\ApplicationBuilder-&gt;{closure:{closure:Illuminate\Foundation\Configuration\ApplicationBuilder::withMiddleware():289}:291}(Object(Illuminate\Http\Request))
+#3 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Auth\Middleware\Authenticate.php(117): call_user_func(Object(Closure), Object(Illuminate\Http\Request))
+#4 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Auth\Middleware\Authenticate.php(104): Illuminate\Auth\Middleware\Authenticate-&gt;redirectTo(Object(Illuminate\Http\Request))
+#5 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Auth\Middleware\Authenticate.php(87): Illuminate\Auth\Middleware\Authenticate-&gt;unauthenticated(Object(Illuminate\Http\Request), Array)
+#6 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Auth\Middleware\Authenticate.php(61): Illuminate\Auth\Middleware\Authenticate-&gt;authenticate(Object(Illuminate\Http\Request), Array)
+#7 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Auth\Middleware\Authenticate-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#8 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\PreventRequestForgery.php(104): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#9 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\PreventRequestForgery-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#10 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\View\Middleware\ShareErrorsFromSession.php(48): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#11 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\View\Middleware\ShareErrorsFromSession-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#12 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php(120): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#13 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Session\Middleware\StartSession.php(63): Illuminate\Session\Middleware\StartSession-&gt;handleStatefulRequest(Object(Illuminate\Http\Request), Object(Illuminate\Session\Store), Object(Closure))
+#14 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Session\Middleware\StartSession-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#15 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse.php(36): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#16 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#17 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Cookie\Middleware\EncryptCookies.php(74): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#18 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Cookie\Middleware\EncryptCookies-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#19 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(137): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#20 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Routing\Router.php(821): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#21 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Routing\Router.php(800): Illuminate\Routing\Router-&gt;runRouteWithinStack(Object(Illuminate\Routing\Route), Object(Illuminate\Http\Request))
+#22 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Routing\Router.php(764): Illuminate\Routing\Router-&gt;runRoute(Object(Illuminate\Http\Request), Object(Illuminate\Routing\Route))
+#23 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Routing\Router.php(753): Illuminate\Routing\Router-&gt;dispatchToRoute(Object(Illuminate\Http\Request))
+#24 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(200): Illuminate\Routing\Router-&gt;dispatch(Object(Illuminate\Http\Request))
+#25 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(180): Illuminate\Foundation\Http\Kernel-&gt;{closure:Illuminate\Foundation\Http\Kernel::dispatchToRouter():197}(Object(Illuminate\Http\Request))
+#26 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\livewire\livewire\src\Features\SupportDisablingBackButtonCache\DisableBackButtonCacheMiddleware.php(19): Illuminate\Pipeline\Pipeline-&gt;{closure:Illuminate\Pipeline\Pipeline::prepareDestination():178}(Object(Illuminate\Http\Request))
+#27 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Livewire\Features\SupportDisablingBackButtonCache\DisableBackButtonCacheMiddleware-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#28 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#29 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull.php(31): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#30 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#31 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TransformsRequest.php(21): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#32 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\TrimStrings.php(51): Illuminate\Foundation\Http\Middleware\TransformsRequest-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#33 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\TrimStrings-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#34 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePostSize.php(27): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#35 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\ValidatePostSize-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#36 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance.php(109): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#37 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#38 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Http\Middleware\HandleCors.php(61): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#39 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\HandleCors-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#40 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Http\Middleware\TrustProxies.php(58): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#41 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\TrustProxies-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#42 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks.php(22): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#43 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#44 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Http\Middleware\ValidatePathEncoding.php(28): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#45 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(219): Illuminate\Http\Middleware\ValidatePathEncoding-&gt;handle(Object(Illuminate\Http\Request), Object(Closure))
+#46 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Pipeline\Pipeline.php(137): Illuminate\Pipeline\Pipeline-&gt;{closure:{closure:Illuminate\Pipeline\Pipeline::carry():194}:195}(Object(Illuminate\Http\Request))
+#47 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(175): Illuminate\Pipeline\Pipeline-&gt;then(Object(Closure))
+#48 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Http\Kernel.php(144): Illuminate\Foundation\Http\Kernel-&gt;sendRequestThroughRouter(Object(Illuminate\Http\Request))
+#49 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\MakesHttpRequests.php(607): Illuminate\Foundation\Http\Kernel-&gt;handle(Object(Illuminate\Http\Request))
+#50 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\MakesHttpRequests.php(368): Illuminate\Foundation\Testing\TestCase-&gt;call('GET', '/pengajuan-cuti...', Array, Array, Array, Array)
+#51 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PdfGenerationTest.php(76): Illuminate\Foundation\Testing\TestCase-&gt;get('/pengajuan-cuti...')
+#52 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\phpunit\phpunit\src\Framework\TestCase.php(1318): Tests\Feature\PdfGenerationTest-&gt;test_only_authenticated_user_can_generate_pdf()
+#53 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\phpunit\phpunit\src\Framework\TestCase.php(1355): PHPUnit\Framework\TestCase-&gt;invokeTestMethod('test_only_authe...', Array)
+#54 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\phpunit\phpunit\src\Framework\TestCase.php(521): PHPUnit\Framework\TestCase-&gt;runTest()
+#55 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\phpunit\phpunit\src\Framework\TestRunner\TestRunner.php(99): PHPUnit\Framework\TestCase-&gt;runBare()
+#56 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\phpunit\phpunit\src\Framework\TestCase.php(361): PHPUnit\Framework\TestRunner-&gt;run(Object(Tests\Feature\PdfGenerationTest))
+#57 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\phpunit\phpunit\src\Framework\TestSuite.php(374): PHPUnit\Framework\TestCase-&gt;run()
+#58 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\phpunit\phpunit\src\Framework\TestSuite.php(374): PHPUnit\Framework\TestSuite-&gt;run()
+#59 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\phpunit\phpunit\src\Framework\TestSuite.php(374): PHPUnit\Framework\TestSuite-&gt;run()
+#60 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\phpunit\phpunit\src\TextUI\TestRunner.php(64): PHPUnit\Framework\TestSuite-&gt;run()
+#61 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\phpunit\phpunit\src\TextUI\Application.php(229): PHPUnit\TextUI\TestRunner-&gt;run(Object(PHPUnit\TextUI\Configuration\Configuration), Object(PHPUnit\Runner\ResultCache\DefaultResultCache), Object(PHPUnit\Framework\TestSuite))
+#62 C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\phpunit\phpunit\phpunit(104): PHPUnit\TextUI\Application-&gt;run(Array)
+#63 {main}
+
+----------------------------------------------------------------------------------
+
+Route [login] not defined.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:201
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PdfGenerationTest.php:78</failure>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Feature\PengajuanCutiTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php" tests="10" assertions="9" errors="1" failures="1" skipped="0" time="1.573638">
+        <testcase name="test_pegawai_can_create_leave_request" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php" line="23" class="Tests\Feature\PengajuanCutiTest" classname="Tests.Feature.PengajuanCutiTest" assertions="1" time="0.156275"/>
+        <testcase name="test_leave_request_status_is_pending_after_creation" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php" line="53" class="Tests\Feature\PengajuanCutiTest" classname="Tests.Feature.PengajuanCutiTest" assertions="1" time="0.159345">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\PengajuanCutiTest::test_leave_request_status_is_pending_after_creation&#13;
+Failed asserting that null matches expected 'menunggu_atasan'.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php:66</failure>
+        </testcase>
+        <testcase name="test_kanit_can_approve_leave_request" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php" line="69" class="Tests\Feature\PengajuanCutiTest" classname="Tests.Feature.PengajuanCutiTest" assertions="1" time="0.158248"/>
+        <testcase name="test_kasubag_can_approve_leave_request" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php" line="96" class="Tests\Feature\PengajuanCutiTest" classname="Tests.Feature.PengajuanCutiTest" assertions="1" time="0.157235"/>
+        <testcase name="test_status_changes_to_waiting_official_after_both_supervisors_approve" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php" line="123" class="Tests\Feature\PengajuanCutiTest" classname="Tests.Feature.PengajuanCutiTest" assertions="1" time="0.154618"/>
+        <testcase name="test_pejabat_can_give_final_approval" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php" line="147" class="Tests\Feature\PengajuanCutiTest" classname="Tests.Feature.PengajuanCutiTest" assertions="1" time="0.159578"/>
+        <testcase name="test_leave_request_can_be_rejected_by_kanit" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php" line="175" class="Tests\Feature\PengajuanCutiTest" classname="Tests.Feature.PengajuanCutiTest" assertions="1" time="0.147286"/>
+        <testcase name="test_leave_request_can_be_rejected_by_pejabat" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php" line="199" class="Tests\Feature\PengajuanCutiTest" classname="Tests.Feature.PengajuanCutiTest" assertions="1" time="0.163770"/>
+        <testcase name="test_leave_balance_is_deducted_after_approval" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php" line="225" class="Tests\Feature\PengajuanCutiTest" classname="Tests.Feature.PengajuanCutiTest" assertions="1" time="0.169487"/>
+        <testcase name="test_user_can_only_see_their_own_leave_requests" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php" line="263" class="Tests\Feature\PengajuanCutiTest" classname="Tests.Feature.PengajuanCutiTest" assertions="0" time="0.147796">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\PengajuanCutiTest::test_user_can_only_see_their_own_leave_requests&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1 table users has no column named name (Connection: sqlite, Database: :memory:, SQL: insert into "users" ("name", "email", "email_verified_at", "password", "remember_token", "updated_at", "created_at") values (Ronaldo Leuschke, cdavis@example.org, 2026-07-01 03:02:35, $2y$04$Pk2l4ojKNRuoklC/sPecueEQ0KdlAtCLraX7PpfXmvFi/yvxxlswC, n1Y4DCIBjP, 2026-07-01 03:02:35, 2026-07-01 03:02:35))
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:857
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:813
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:590
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:554
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\Processor.php:32
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4257
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2271
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1662
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1578
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1382
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:379
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:275
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:374
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:330
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PengajuanCutiTest.php:266</error>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Feature\PerformanceTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PerformanceTest.php" tests="5" assertions="6" errors="1" failures="1" skipped="0" time="1.620597">
+        <testcase name="test_homepage_loads_within_acceptable_time" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PerformanceTest.php" line="18" class="Tests\Feature\PerformanceTest" classname="Tests.Feature.PerformanceTest" assertions="2" time="0.238199"/>
+        <testcase name="test_database_seeding_performance" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PerformanceTest.php" line="31" class="Tests\Feature\PerformanceTest" classname="Tests.Feature.PerformanceTest" assertions="0" time="0.169183">
+          <error type="Illuminate\Database\UniqueConstraintViolationException">Tests\Feature\PerformanceTest::test_database_seeding_performance&#13;
+Illuminate\Database\UniqueConstraintViolationException: SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: users.nip (Connection: sqlite, Database: :memory:, SQL: insert into "users" ("nip", "nama", "password", "unit_kerja_id", "is_profile_completed", "updated_at", "created_at") values (199001012020121002, Super Admin, $2y$04$bFQp94SWsb5OTet5qIvKQ.Csm6.eA.UN1OJgAvMwUxg4KY4LijOji, 1, 1, 2026-07-01 03:02:36, 2026-07-01 03:02:36))
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:857
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:813
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:590
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:554
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\Processor.php:32
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4257
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2271
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1662
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1578
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1382
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:1225
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Support\helpers.php:393
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:1224
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Support\Traits\ForwardsCalls.php:23
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:2809
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:2825
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\database\seeders\DatabaseSeeder.php:70
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Container\Container.php:799
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Seeder.php:184
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Seeder.php:191
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:71
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Concerns\GuardsAttributes.php:185
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Console\Seeds\SeedCommand.php:70
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Container\Util.php:43
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:96
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:35
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Container\Container.php:799
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Console\Command.php:280
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\symfony\console\Command\Command.php:284
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Console\Command.php:249
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\symfony\console\Application.php:1121
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\symfony\console\Application.php:379
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\symfony\console\Application.php:218
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Console\Application.php:165
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Console\Kernel.php:447
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:451
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Testing\PendingCommand.php:675
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Foundation\Testing\Concerns\InteractsWithConsole.php:87
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PerformanceTest.php:35</error>
+        </testcase>
+        <testcase name="test_leave_calculation_performance" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PerformanceTest.php" line="43" class="Tests\Feature\PerformanceTest" classname="Tests.Feature.PerformanceTest" assertions="1" time="0.240872"/>
+        <testcase name="test_concurrent_user_sessions" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PerformanceTest.php" line="65" class="Tests\Feature\PerformanceTest" classname="Tests.Feature.PerformanceTest" assertions="2" time="0.305738">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\PerformanceTest::test_concurrent_user_sessions&#13;
+Expected response status code [200] but received 302.
+Failed asserting that 302 is identical to 200.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Testing\TestResponseAssert.php:45
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Testing\TestResponse.php:176
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PerformanceTest.php:71</failure>
+        </testcase>
+        <testcase name="test_bulk_leave_request_creation" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\PerformanceTest.php" line="77" class="Tests\Feature\PerformanceTest" classname="Tests.Feature.PerformanceTest" assertions="1" time="0.666605"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\RoleAndPermissionTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\RoleAndPermissionTest.php" tests="8" assertions="13" errors="1" failures="0" skipped="0" time="1.091556">
+        <testcase name="test_super_admin_role_exists" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\RoleAndPermissionTest.php" line="21" class="Tests\Feature\RoleAndPermissionTest" classname="Tests.Feature.RoleAndPermissionTest" assertions="1" time="0.137181"/>
+        <testcase name="test_all_required_roles_exist" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\RoleAndPermissionTest.php" line="27" class="Tests\Feature\RoleAndPermissionTest" classname="Tests.Feature.RoleAndPermissionTest" assertions="6" time="0.134938"/>
+        <testcase name="test_user_can_be_assigned_pegawai_role" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\RoleAndPermissionTest.php" line="37" class="Tests\Feature\RoleAndPermissionTest" classname="Tests.Feature.RoleAndPermissionTest" assertions="1" time="0.138733"/>
+        <testcase name="test_user_can_be_assigned_kanit_role" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\RoleAndPermissionTest.php" line="45" class="Tests\Feature\RoleAndPermissionTest" classname="Tests.Feature.RoleAndPermissionTest" assertions="1" time="0.132448"/>
+        <testcase name="test_user_can_be_assigned_kasubag_role" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\RoleAndPermissionTest.php" line="53" class="Tests\Feature\RoleAndPermissionTest" classname="Tests.Feature.RoleAndPermissionTest" assertions="1" time="0.124418"/>
+        <testcase name="test_user_can_be_assigned_pejabat_role" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\RoleAndPermissionTest.php" line="61" class="Tests\Feature\RoleAndPermissionTest" classname="Tests.Feature.RoleAndPermissionTest" assertions="1" time="0.136234"/>
+        <testcase name="test_user_can_have_multiple_roles" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\RoleAndPermissionTest.php" line="69" class="Tests\Feature\RoleAndPermissionTest" classname="Tests.Feature.RoleAndPermissionTest" assertions="2" time="0.146868"/>
+        <testcase name="test_user_without_role_is_guest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\RoleAndPermissionTest.php" line="78" class="Tests\Feature\RoleAndPermissionTest" classname="Tests.Feature.RoleAndPermissionTest" assertions="0" time="0.140735">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\RoleAndPermissionTest::test_user_without_role_is_guest&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1 table users has no column named name (Connection: sqlite, Database: :memory:, SQL: insert into "users" ("name", "email", "email_verified_at", "password", "remember_token", "updated_at", "created_at") values (Diamond Champlin, price.elva@example.com, 2026-07-01 03:02:38, $2y$04$Pk2l4ojKNRuoklC/sPecueEQ0KdlAtCLraX7PpfXmvFi/yvxxlswC, MPxgluAdT4, 2026-07-01 03:02:38, 2026-07-01 03:02:38))
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:857
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:813
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:590
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:554
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\Processor.php:32
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4257
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2271
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1662
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1578
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1382
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:379
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:275
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:374
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:330
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\RoleAndPermissionTest.php:80</error>
+        </testcase>
+      </testsuite>
+      <testsuite name="Tests\Feature\SaldoCutiTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php" tests="7" assertions="11" errors="0" failures="4" skipped="0" time="0.967377">
+        <testcase name="test_user_has_leave_balance" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php" line="21" class="Tests\Feature\SaldoCutiTest" classname="Tests.Feature.SaldoCutiTest" assertions="1" time="0.154915"/>
+        <testcase name="test_leave_balance_has_correct_structure" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php" line="40" class="Tests\Feature\SaldoCutiTest" classname="Tests.Feature.SaldoCutiTest" assertions="4" time="0.138432"/>
+        <testcase name="test_leave_balance_deduction_priority_n2_first" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php" line="64" class="Tests\Feature\SaldoCutiTest" classname="Tests.Feature.SaldoCutiTest" assertions="2" time="0.137774">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\SaldoCutiTest::test_leave_balance_deduction_priority_n2_first&#13;
+Failed asserting that 0 matches expected 4.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php:110</failure>
+        </testcase>
+        <testcase name="test_sick_leave_balance_is_separate" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php" line="114" class="Tests\Feature\SaldoCutiTest" classname="Tests.Feature.SaldoCutiTest" assertions="1" time="0.135757">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\SaldoCutiTest::test_sick_leave_balance_is_separate&#13;
+Failed asserting that 0 matches expected 30.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php:127</failure>
+        </testcase>
+        <testcase name="test_maternity_leave_balance_is_separate" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php" line="131" class="Tests\Feature\SaldoCutiTest" classname="Tests.Feature.SaldoCutiTest" assertions="1" time="0.133358">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\SaldoCutiTest::test_maternity_leave_balance_is_separate&#13;
+Failed asserting that 0 matches expected 90.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php:144</failure>
+        </testcase>
+        <testcase name="test_leave_balance_cannot_be_negative" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php" line="147" class="Tests\Feature\SaldoCutiTest" classname="Tests.Feature.SaldoCutiTest" assertions="1" time="0.134679">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\SaldoCutiTest::test_leave_balance_cannot_be_negative&#13;
+Failed asserting that 2 matches expected 0.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php:165</failure>
+        </testcase>
+        <testcase name="test_leave_balance_year_tracking" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SaldoCutiTest.php" line="169" class="Tests\Feature\SaldoCutiTest" classname="Tests.Feature.SaldoCutiTest" assertions="1" time="0.132462"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\SecurityTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php" tests="9" assertions="13" errors="1" failures="1" skipped="0" time="7.419895">
+        <testcase name="test_password_is_hashed" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php" line="21" class="Tests\Feature\SecurityTest" classname="Tests.Feature.SecurityTest" assertions="2" time="0.159604">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\SecurityTest::test_password_is_hashed&#13;
+Failed asserting that false is true.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php:26</failure>
+        </testcase>
+        <testcase name="test_unauthenticated_user_cannot_access_admin_panel" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php" line="29" class="Tests\Feature\SecurityTest" classname="Tests.Feature.SecurityTest" assertions="2" time="0.154137"/>
+        <testcase name="test_user_cannot_access_other_users_leave_requests" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php" line="36" class="Tests\Feature\SecurityTest" classname="Tests.Feature.SecurityTest" assertions="0" time="0.160632">
+          <error type="Illuminate\Database\QueryException">Tests\Feature\SecurityTest::test_user_cannot_access_other_users_leave_requests&#13;
+Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1 table users has no column named name (Connection: sqlite, Database: :memory:, SQL: insert into "users" ("name", "email", "email_verified_at", "password", "remember_token", "updated_at", "created_at") values (Julio Hammes DDS, rbernhard@example.com, 2026-07-01 03:02:40, $2y$04$Pk2l4ojKNRuoklC/sPecueEQ0KdlAtCLraX7PpfXmvFi/yvxxlswC, e6djsgRtKc, 2026-07-01 03:02:40, 2026-07-01 03:02:40))
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:857
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:813
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:590
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Connection.php:554
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Processors\Processor.php:32
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Query\Builder.php:4257
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Builder.php:2271
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1662
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1578
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Model.php:1382
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:379
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Collections\Traits\EnumeratesValues.php:275
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:374
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\vendor\laravel\framework\src\Illuminate\Database\Eloquent\Factories\Factory.php:330
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php:39</error>
+        </testcase>
+        <testcase name="test_sql_injection_prevention_in_nip" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php" line="55" class="Tests\Feature\SecurityTest" classname="Tests.Feature.SecurityTest" assertions="1" time="0.142919"/>
+        <testcase name="test_xss_prevention_in_leave_reason" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php" line="64" class="Tests\Feature\SecurityTest" classname="Tests.Feature.SecurityTest" assertions="1" time="0.147090"/>
+        <testcase name="test_csrf_token_required_for_post_requests" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php" line="82" class="Tests\Feature\SecurityTest" classname="Tests.Feature.SecurityTest" assertions="1" time="6.236641"/>
+        <testcase name="test_session_expires_after_logout" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php" line="92" class="Tests\Feature\SecurityTest" classname="Tests.Feature.SecurityTest" assertions="1" time="0.137763"/>
+        <testcase name="test_nip_must_be_unique" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php" line="101" class="Tests\Feature\SecurityTest" classname="Tests.Feature.SecurityTest" assertions="2" time="0.133702"/>
+        <testcase name="test_role_based_access_control" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\SecurityTest.php" line="115" class="Tests\Feature\SecurityTest" classname="Tests.Feature.SecurityTest" assertions="3" time="0.147405"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\UserManagementTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\UserManagementTest.php" tests="9" assertions="12" errors="0" failures="0" skipped="0" time="1.192313">
+        <testcase name="test_user_nip_is_unique" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\UserManagementTest.php" line="19" class="Tests\Feature\UserManagementTest" classname="Tests.Feature.UserManagementTest" assertions="2" time="0.145881"/>
+        <testcase name="test_user_nip_is_18_digits" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\UserManagementTest.php" line="33" class="Tests\Feature\UserManagementTest" classname="Tests.Feature.UserManagementTest" assertions="1" time="0.129023"/>
+        <testcase name="test_user_has_required_fields" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\UserManagementTest.php" line="39" class="Tests\Feature\UserManagementTest" classname="Tests.Feature.UserManagementTest" assertions="3" time="0.125904"/>
+        <testcase name="test_user_belongs_to_unit_kerja" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\UserManagementTest.php" line="48" class="Tests\Feature\UserManagementTest" classname="Tests.Feature.UserManagementTest" assertions="1" time="0.132795"/>
+        <testcase name="test_user_profile_completion_status" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\UserManagementTest.php" line="59" class="Tests\Feature\UserManagementTest" classname="Tests.Feature.UserManagementTest" assertions="1" time="0.137712"/>
+        <testcase name="test_user_can_update_profile" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\UserManagementTest.php" line="66" class="Tests\Feature\UserManagementTest" classname="Tests.Feature.UserManagementTest" assertions="1" time="0.126039"/>
+        <testcase name="test_user_has_saldo_cuti_relationship" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\UserManagementTest.php" line="84" class="Tests\Feature\UserManagementTest" classname="Tests.Feature.UserManagementTest" assertions="1" time="0.125689"/>
+        <testcase name="test_user_has_pengajuan_cutis_relationship" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\UserManagementTest.php" line="91" class="Tests\Feature\UserManagementTest" classname="Tests.Feature.UserManagementTest" assertions="1" time="0.136296"/>
+        <testcase name="test_user_can_have_signature" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\UserManagementTest.php" line="98" class="Tests\Feature\UserManagementTest" classname="Tests.Feature.UserManagementTest" assertions="1" time="0.132974"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\ValidationTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ValidationTest.php" tests="10" assertions="11" errors="0" failures="3" skipped="0" time="1.388654">
+        <testcase name="test_leave_start_date_must_be_in_future" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ValidationTest.php" line="22" class="Tests\Feature\ValidationTest" classname="Tests.Feature.ValidationTest" assertions="1" time="0.152016">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\ValidationTest::test_leave_start_date_must_be_in_future&#13;
+Failed asserting that exception of type "Exception" is thrown.</failure>
+        </testcase>
+        <testcase name="test_leave_end_date_must_be_after_start_date" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ValidationTest.php" line="38" class="Tests\Feature\ValidationTest" classname="Tests.Feature.ValidationTest" assertions="1" time="0.139376">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\ValidationTest::test_leave_end_date_must_be_after_start_date&#13;
+Failed asserting that exception of type "Exception" is thrown.</failure>
+        </testcase>
+        <testcase name="test_leave_reason_is_required" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ValidationTest.php" line="57" class="Tests\Feature\ValidationTest" classname="Tests.Feature.ValidationTest" assertions="1" time="0.135903"/>
+        <testcase name="test_address_during_leave_is_required" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ValidationTest.php" line="73" class="Tests\Feature\ValidationTest" classname="Tests.Feature.ValidationTest" assertions="1" time="0.128563"/>
+        <testcase name="test_leave_type_must_be_valid" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ValidationTest.php" line="89" class="Tests\Feature\ValidationTest" classname="Tests.Feature.ValidationTest" assertions="1" time="0.151220"/>
+        <testcase name="test_nip_must_be_18_digits" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ValidationTest.php" line="107" class="Tests\Feature\ValidationTest" classname="Tests.Feature.ValidationTest" assertions="1" time="0.135472">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\ValidationTest::test_nip_must_be_18_digits&#13;
+Failed asserting that exception of type "Exception" is thrown.</failure>
+        </testcase>
+        <testcase name="test_sufficient_leave_balance_required" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ValidationTest.php" line="118" class="Tests\Feature\ValidationTest" classname="Tests.Feature.ValidationTest" assertions="0" time="0.150819"/>
+        <testcase name="test_user_profile_fields_validation" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ValidationTest.php" line="149" class="Tests\Feature\ValidationTest" classname="Tests.Feature.ValidationTest" assertions="3" time="0.123792"/>
+        <testcase name="test_phone_number_format" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ValidationTest.php" line="164" class="Tests\Feature\ValidationTest" classname="Tests.Feature.ValidationTest" assertions="1" time="0.127868"/>
+        <testcase name="test_leave_duration_must_be_positive" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\ValidationTest.php" line="175" class="Tests\Feature\ValidationTest" classname="Tests.Feature.ValidationTest" assertions="1" time="0.143625"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\WorkflowIntegrationTest" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\WorkflowIntegrationTest.php" tests="6" assertions="12" errors="0" failures="2" skipped="0" time="0.937815">
+        <testcase name="test_complete_approval_workflow" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\WorkflowIntegrationTest.php" line="22" class="Tests\Feature\WorkflowIntegrationTest" classname="Tests.Feature.WorkflowIntegrationTest" assertions="5" time="0.181824">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\WorkflowIntegrationTest::test_complete_approval_workflow&#13;
+Failed asserting that 11 matches expected 9.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\WorkflowIntegrationTest.php:70</failure>
+        </testcase>
+        <testcase name="test_rejection_by_kanit_stops_workflow" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\WorkflowIntegrationTest.php" line="73" class="Tests\Feature\WorkflowIntegrationTest" classname="Tests.Feature.WorkflowIntegrationTest" assertions="1" time="0.144154"/>
+        <testcase name="test_rejection_by_pejabat_after_supervisor_approval" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\WorkflowIntegrationTest.php" line="96" class="Tests\Feature\WorkflowIntegrationTest" classname="Tests.Feature.WorkflowIntegrationTest" assertions="2" time="0.152730"/>
+        <testcase name="test_request_for_changes_allows_resubmission" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\WorkflowIntegrationTest.php" line="126" class="Tests\Feature\WorkflowIntegrationTest" classname="Tests.Feature.WorkflowIntegrationTest" assertions="2" time="0.159424">
+          <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\WorkflowIntegrationTest::test_request_for_changes_allows_resubmission&#13;
+Failed asserting that 'disetujui' is null.
+&#13;
+C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\WorkflowIntegrationTest.php:156</failure>
+        </testcase>
+        <testcase name="test_postponement_status" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\WorkflowIntegrationTest.php" line="161" class="Tests\Feature\WorkflowIntegrationTest" classname="Tests.Feature.WorkflowIntegrationTest" assertions="1" time="0.141555"/>
+        <testcase name="test_multiple_leave_requests_by_same_user" file="C:\Users\muali\Documents\Documents\Magang_bandara\Sistem_Informasi_Approval\tests\Feature\WorkflowIntegrationTest.php" line="186" class="Tests\Feature\WorkflowIntegrationTest" classname="Tests.Feature.WorkflowIntegrationTest" assertions="1" time="0.158127"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

@@ -18,12 +18,12 @@ class LengkapiProfil extends Page
 {
     protected string $view = 'filament.pages.lengkapi-profil';
 
-    public static function getNavigationIcon(): string | \BackedEnum | null
+    public static function getNavigationIcon(): string|\BackedEnum|null
     {
         return 'heroicon-o-document-text';
     }
 
-    public function getTitle(): string | \Illuminate\Contracts\Support\Htmlable
+    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
     {
         return 'Lengkapi Profil Anda';
     }
@@ -61,7 +61,7 @@ class LengkapiProfil extends Page
                             ->tel()
                             ->required(),
                     ])->columns(2),
-                
+
                 Section::make('Informasi Pekerjaan')
                     ->schema([
                         DatePicker::make('tanggal_masuk')
@@ -75,7 +75,7 @@ class LengkapiProfil extends Page
                             ->options(\App\Models\UnitKerja::pluck('nama_unit', 'id'))
                             ->required(),
                     ])->columns(2),
-                
+
                 Section::make('Tanda Tangan & Password')
                     ->schema([
                         SignaturePad::make('signature_path')
@@ -84,10 +84,10 @@ class LengkapiProfil extends Page
                         TextInput::make('password')
                             ->password()
                             ->label('Password Baru')
-                            ->required(fn () => !auth()->user()->is_profile_completed)
+                            ->required(fn() => !auth()->user()->is_profile_completed)
                             ->minLength(8)
-                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                            ->dehydrated(fn ($state) => filled($state)),
+                            ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                            ->dehydrated(fn($state) => filled($state)),
                         TextInput::make('password_confirmation')
                             ->password()
                             ->label('Konfirmasi Password')
@@ -125,7 +125,7 @@ class LengkapiProfil extends Page
         ]);
 
         if (!empty($data['password'])) {
-            auth()->user()->update(['password' => Hash::make($data['password'])]);
+            auth()->user()->update(['password' => $data['password']]);
         }
 
         Notification::make()

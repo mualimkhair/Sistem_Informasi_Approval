@@ -29,8 +29,8 @@ class UserForm
                             ->maxLength(255),
                         TextInput::make('password')
                             ->password()
-                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                            ->dehydrated(fn ($state) => filled($state))
+                            ->dehydrateStateUsing(fn($state) => Hash::make($state))
+                            ->dehydrated(fn($state) => filled($state))
                             ->hiddenOn('create'),
                         TextInput::make('jabatan')
                             ->label('Jabatan')
@@ -59,6 +59,8 @@ class UserForm
                     ->schema([
                         \Filament\Schemas\Components\Section::make('Saldo Cuti')
                             ->schema([
+                                \Filament\Forms\Components\Hidden::make('tahun_berjalan')
+                                    ->default(date('Y')),
                                 TextInput::make('saldo_n')
                                     ->label('Saldo N (Tahun Berjalan)')
                                     ->numeric()
@@ -104,11 +106,11 @@ class UserForm
                     ->schema([
                         Select::make('roles')
                             ->label('Role')
-                            ->relationship('roles', 'name', fn ($query) => $query->where('name', '!=', 'super_admin'))
+                            ->relationship('roles', 'name', fn($query) => $query->where('name', '!=', 'super_admin'))
                             ->multiple()
                             ->preload()
                             ->searchable()
-                            ->default(fn () => [\Spatie\Permission\Models\Role::where('name', 'pegawai')->value('id')])
+                            ->default(fn() => [\Spatie\Permission\Models\Role::where('name', 'pegawai')->value('id')])
                             ->required(),
                     ])
                     ->visible($isSuperAdmin)
