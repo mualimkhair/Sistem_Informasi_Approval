@@ -54,6 +54,7 @@ class EditProfile extends BaseEditProfile
                     ->schema([
                         SignaturePad::make('signature_path')
                             ->label('Tanda Tangan Digital')
+                            ->columnSpanFull()
                             ->required(),
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),

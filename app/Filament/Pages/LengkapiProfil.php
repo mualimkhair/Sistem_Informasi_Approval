@@ -81,6 +81,9 @@ class LengkapiProfil extends Page
                         SignaturePad::make('signature_path')
                             ->label('Tanda Tangan Digital')
                             ->required(),
+                    ])->columns(1),
+                Section::make('Ubah Password')
+                    ->schema([
                         TextInput::make('password')
                             ->password()
                             ->label('Password Baru')
@@ -92,6 +95,7 @@ class LengkapiProfil extends Page
                             ->password()
                             ->label('Konfirmasi Password')
                             ->requiredWith('password')
+                            ->required()
                             ->same('password'),
                     ])->columns(2),
             ])
