@@ -12,4 +12,9 @@ class UnitKerja extends Model
     {
         return $this->hasMany(KelompokKerja::class);
     }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

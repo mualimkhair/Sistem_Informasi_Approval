@@ -23,6 +23,11 @@ class PengajuanCutiResource extends Resource
         return 'heroicon-o-rectangle-stack';
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return true;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return PengajuanCutiForm::configure($schema);
@@ -59,19 +64,42 @@ class PengajuanCutiResource extends Resource
         }
 
         if ($user->hasRole('pejabat_berwenang')) {
-            return $query->where('user_id', $user->id)
-                ->orWhere(function($q) {
-                    $q->where('keputusan_kanit', 'disetujui')
-                      ->where('keputusan_kasubag', 'disetujui');
-                });
+            return $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQ) {
+                      $subQ->where('status', 'menunggu_pejabat')
+                           ->where('keputusan_kanit', 'disetujui')
+                           ->where('keputusan_kasubag', 'disetujui');
+                  });
+            });
         }
 
-        if ($user->hasRole(['kanit', 'kasubag'])) {
-            return $query->where('user_id', $user->id)
-                ->orWhereHas('user', function($q) use ($user) {
-                    $q->where('unit_kerja_id', $user->unit_kerja_id)
-                      ->where('id', '!=', $user->id);
-                });
+        if ($user->hasRole('kanit')) {
+            return $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQ) use ($user) {
+                      $subQ->whereHas('user', function($userQ) use ($user) {
+                          $userQ->where('unit_kerja_id', $user->unit_kerja_id)
+                                ->where('id', '!=', $user->id);
+                      })
+                      ->where('status', 'menunggu_atasan')
+                      ->whereNull('keputusan_kanit');
+                  });
+            });
+        }
+
+        if ($user->hasRole('kasubag')) {
+            return $query->where(function($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($subQ) use ($user) {
+                      $subQ->whereHas('user', function($userQ) use ($user) {
+                          $userQ->where('unit_kerja_id', $user->unit_kerja_id)
+                                ->where('id', '!=', $user->id);
+                      })
+                      ->where('status', 'menunggu_atasan')
+                      ->whereNull('keputusan_kasubag');
+                  });
+            });
         }
 
         return $query->where('user_id', $user->id);

@@ -26,6 +26,63 @@ class DatabaseSeeder extends Seeder
             Role::firstOrCreate(['name' => $role]);
         }
 
+        $permissions = [
+            'view_pengajuan_cuti',
+            'create_pengajuan_cuti',
+            'edit_pengajuan_cuti',
+            'delete_pengajuan_cuti',
+            'approve_level_1_kanit',
+            'approve_level_1_kasubag',
+            'approve_level_2',
+            'view_all_pegawai',
+            'manage_pegawai',
+            'import_pegawai',
+            'export_pengajuan',
+            'manage_hari_libur',
+            'manage_kelompok_kerja',
+            'view_laporan',
+            'edit_saldo_cuti',
+            'reset_saldo_cuti',
+            'view_pegawai_cuti',
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
+
+        $superAdminRole = Role::findByName('super_admin');
+        $superAdminRole->givePermissionTo(Permission::all());
+
+        $adminRole = Role::findByName('admin');
+        $adminRole->givePermissionTo([
+            'view_pengajuan_cuti', 'create_pengajuan_cuti', 'edit_pengajuan_cuti', 'delete_pengajuan_cuti',
+            'view_all_pegawai', 'manage_pegawai', 'import_pegawai', 'export_pengajuan',
+            'manage_hari_libur', 'manage_kelompok_kerja', 'view_laporan'
+        ]);
+
+        $pegawaiRole = Role::findByName('pegawai');
+        $pegawaiRole->givePermissionTo([
+            'view_pengajuan_cuti', 'create_pengajuan_cuti', 'edit_pengajuan_cuti', 'delete_pengajuan_cuti'
+        ]);
+
+        $kanitRole = Role::findByName('kanit');
+        $kanitRole->givePermissionTo([
+            'view_pengajuan_cuti', 'create_pengajuan_cuti', 'edit_pengajuan_cuti', 'delete_pengajuan_cuti',
+            'approve_level_1_kanit'
+        ]);
+
+        $kasubagRole = Role::findByName('kasubag');
+        $kasubagRole->givePermissionTo([
+            'view_pengajuan_cuti', 'create_pengajuan_cuti', 'edit_pengajuan_cuti', 'delete_pengajuan_cuti',
+            'approve_level_1_kasubag'
+        ]);
+
+        $pejabatRole = Role::findByName('pejabat_berwenang');
+        $pejabatRole->givePermissionTo([
+            'view_pengajuan_cuti', 'create_pengajuan_cuti', 'edit_pengajuan_cuti', 'delete_pengajuan_cuti',
+            'approve_level_2', 'view_pegawai_cuti'
+        ]);
+
         $adminUnits = [
             'KSTU', 'Unit Pelayanan (PAS)', 'Unit Perencanaan', 'Unit Keuangan', 
             'Bendahara Penerima', 'SPI', 'Unit BMN', 'Unit Kepegawaian', 'Unit Humas', 
@@ -71,6 +128,10 @@ class DatabaseSeeder extends Seeder
             'nip' => '199001012020121001',
             'nama' => 'Super Admin',
             'password' => Hash::make('199001012020121001'),
+            'alamat' => 'Alamat Super Admin',
+            'tanggal_masuk' => '2020-01-01',
+            'jabatan' => 'Super Administrator',
+            'nomor_telp' => '081234567890',
             'unit_kerja_id' => 1,
             'is_profile_completed' => true,
         ]);
@@ -87,6 +148,10 @@ class DatabaseSeeder extends Seeder
             'nip' => '199202022020121002',
             'nama' => 'Pegawai Operasional',
             'password' => Hash::make('199202022020121002'),
+            'alamat' => 'Alamat Pegawai',
+            'tanggal_masuk' => '2020-01-02',
+            'jabatan' => 'Staff Operasional',
+            'nomor_telp' => '082345678901',
             'unit_kerja_id' => $opsUnitId,
             'is_profile_completed' => true,
         ]);
@@ -103,6 +168,10 @@ class DatabaseSeeder extends Seeder
             'nip' => '198003032010121003',
             'nama' => 'Bapak Kanit',
             'password' => Hash::make('198003032010121003'),
+            'alamat' => 'Alamat Kanit',
+            'tanggal_masuk' => '2010-01-03',
+            'jabatan' => 'Koordinator Unit',
+            'nomor_telp' => '083456789012',
             'unit_kerja_id' => $opsUnitId,
             'is_profile_completed' => true,
         ]);
@@ -120,6 +189,10 @@ class DatabaseSeeder extends Seeder
             'nip' => '197004042000121004',
             'nama' => 'Ibu Kasubag',
             'password' => Hash::make('197004042000121004'),
+            'alamat' => 'Alamat Kasubag',
+            'tanggal_masuk' => '2000-01-04',
+            'jabatan' => 'Kepala Sub Bagian',
+            'nomor_telp' => '084567890123',
             'unit_kerja_id' => $opsUnitId,
             'is_profile_completed' => true,
         ]);
@@ -137,6 +210,10 @@ class DatabaseSeeder extends Seeder
             'nip' => '196005051990121005',
             'nama' => 'Bapak Pejabat',
             'password' => Hash::make('196005051990121005'),
+            'alamat' => 'Alamat Pejabat',
+            'tanggal_masuk' => '1990-01-05',
+            'jabatan' => 'Kepala Bandara',
+            'nomor_telp' => '085678901234',
             'unit_kerja_id' => 1,
             'is_profile_completed' => true,
         ]);
