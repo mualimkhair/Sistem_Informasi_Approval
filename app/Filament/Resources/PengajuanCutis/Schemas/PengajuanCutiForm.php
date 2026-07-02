@@ -164,7 +164,7 @@ class PengajuanCutiForm
                                     ->label('Alasan Penting')
                                     ->content(fn ($get) => self::getSimulasiSaldo($get)['penting']),
                             ])
-                            ->columns(4),
+                            ->gridContainer(),
 
                         Textarea::make('alamat_selama_cuti')
                             ->label('Alamat Selama Cuti')
