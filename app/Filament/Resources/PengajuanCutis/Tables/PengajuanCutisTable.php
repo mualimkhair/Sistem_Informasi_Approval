@@ -105,6 +105,13 @@ class PengajuanCutisTable
                             ->rows(3),
                     ])
                     ->action(function (PengajuanCuti $record, array $data) {
+                        $user = auth()->user();
+                        if ($record->user_id === $user->id) {
+                            abort(403, 'Anda tidak dapat menyetujui pengajuan cuti Anda sendiri.');
+                        }
+                        if ($record->unitKerja?->kepala_unit_id !== $user->id && !$user->hasRole(['super_admin', 'admin'])) {
+                            abort(403, 'Anda bukan supervisor Kanit untuk unit pegawai ini.');
+                        }
                         $record->update([
                             'keputusan_kanit' => $data['keputusan_kanit'],
                             'alasan_kanit' => $data['alasan_kanit'] ?? null,
@@ -150,6 +157,13 @@ class PengajuanCutisTable
                             ->rows(3),
                     ])
                     ->action(function (PengajuanCuti $record, array $data) {
+                        $user = auth()->user();
+                        if ($record->user_id === $user->id) {
+                            abort(403, 'Anda tidak dapat menyetujui pengajuan cuti Anda sendiri.');
+                        }
+                        if ($record->seksi?->kepala_seksi_id !== $user->id && !$user->hasRole(['super_admin', 'admin'])) {
+                            abort(403, 'Anda bukan supervisor Kasubag untuk unit pegawai ini.');
+                        }
                         $record->update([
                             'keputusan_kasubag' => $data['keputusan_kasubag'],
                             'alasan_kasubag' => $data['alasan_kasubag'] ?? null,

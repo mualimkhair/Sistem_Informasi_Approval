@@ -54,24 +54,36 @@ class PengajuanCutiResource extends Resource
         $query = parent::getEloquentQuery();
         $user = auth()->user();
 
-        if ($user->hasRole(['super_admin', 'admin', 'kasubag'])) {
+        if ($user->hasRole(['super_admin', 'admin'])) {
             return $query;
         }
 
+        if ($user->hasRole('kasubag')) {
+            return $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhereHas('seksi', function($q2) use ($user) {
+                      $q2->where('kepala_seksi_id', $user->id);
+                  });
+            });
+        }
+
         if ($user->hasRole('pejabat_berwenang')) {
-            return $query->where('user_id', $user->id)
-                ->orWhere(function($q) {
-                    $q->where('keputusan_kanit', 'disetujui')
-                      ->where('keputusan_kasubag', 'disetujui');
-                });
+            return $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function($q2) {
+                      $q2->where('keputusan_kanit', 'disetujui')
+                         ->where('keputusan_kasubag', 'disetujui');
+                  });
+            });
         }
 
         if ($user->hasRole('kanit')) {
-            return $query->where('user_id', $user->id)
-                ->orWhereHas('user', function($q) use ($user) {
-                    $q->where('unit_kerja_id', $user->unit_kerja_id)
-                      ->where('id', '!=', $user->id);
-                });
+            return $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhereHas('unitKerja', function($q2) use ($user) {
+                      $q2->where('kepala_unit_id', $user->id);
+                  });
+            });
         }
 
         return $query->where('user_id', $user->id);

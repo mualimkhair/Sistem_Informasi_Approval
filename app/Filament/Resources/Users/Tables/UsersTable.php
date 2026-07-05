@@ -59,6 +59,10 @@ class UsersTable
                     ->label('Jabatan')
                     ->searchable()
                     ->toggleable(),
+                TextColumn::make('seksi.nama_seksi')
+                    ->label('Seksi')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('unitKerja.nama_unit')
                     ->label('Unit Kerja')
                     ->searchable()
@@ -85,6 +89,9 @@ class UsersTable
                     ->visible($isSuperAdmin),
             ])
             ->filters([
+                \Filament\Tables\Filters\SelectFilter::make('seksi_id')
+                    ->label('Seksi')
+                    ->relationship('seksi', 'nama_seksi'),
                 \Filament\Tables\Filters\SelectFilter::make('unit_kerja_id')
                     ->label('Unit Kerja')
                     ->relationship('unitKerja', 'nama_unit'),

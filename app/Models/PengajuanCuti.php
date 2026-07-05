@@ -28,4 +28,14 @@ class PengajuanCuti extends Model
     {
         return $this->belongsTo(KelompokKerja::class);
     }
+
+    public function seksi()
+    {
+        return $this->belongsTo(Seksi::class);
+    }
+
+    public function unitKerja()
+    {
+        return $this->belongsTo(UnitKerja::class);
+    }
 }

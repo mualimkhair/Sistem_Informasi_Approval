@@ -12,6 +12,15 @@ class PengajuanCutiObserver
 {
     public function creating(PengajuanCuti $pengajuanCuti)
     {
+        if ($pengajuanCuti->kelompok_kerja_id) {
+            $unitKerja = $pengajuanCuti->kelompokKerja?->unitKerja;
+            $pengajuanCuti->unit_kerja_id = $unitKerja?->id;
+            $pengajuanCuti->seksi_id = $unitKerja?->seksi_id;
+        } else {
+            $pengajuanCuti->unit_kerja_id = $pengajuanCuti->user?->unit_kerja_id;
+            $pengajuanCuti->seksi_id = $pengajuanCuti->user?->seksi_id ?? $pengajuanCuti->user?->unitKerja?->seksi_id;
+        }
+
         if ($pengajuanCuti->tanggal_mulai && $pengajuanCuti->tanggal_selesai) {
             $pengajuanCuti->lama_cuti = CutiService::hitungLamaCuti(
                 Carbon::parse($pengajuanCuti->tanggal_mulai), 

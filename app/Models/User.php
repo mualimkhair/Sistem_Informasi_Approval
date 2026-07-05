@@ -51,4 +51,9 @@ class User extends Authenticatable implements FilamentUser, HasName
     {
         return $this->hasMany(PengajuanCuti::class);
     }
+
+    public function seksi()
+    {
+        return $this->belongsTo(Seksi::class);
+    }
 }
