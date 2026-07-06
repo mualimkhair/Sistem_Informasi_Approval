@@ -16,4 +16,9 @@ class EditUser extends EditRecord
             DeleteAction::make(),
         ];
     }
+
+    protected function afterSave(): void
+    {
+        \App\Services\RoleSyncService::syncUserRoleAndHead($this->record);
+    }
 }

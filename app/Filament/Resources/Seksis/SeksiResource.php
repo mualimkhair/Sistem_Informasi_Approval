@@ -18,7 +18,10 @@ class SeksiResource extends Resource
 {
     protected static ?string $model = Seksi::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    public static function getNavigationIcon(): string | \BackedEnum | null
+    {
+        return 'heroicon-o-rectangle-stack';
+    }
 
     protected static ?string $recordTitleAttribute = 'nama_seksi';
 

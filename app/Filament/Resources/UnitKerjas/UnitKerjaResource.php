@@ -23,7 +23,10 @@ class UnitKerjaResource extends Resource
 {
     protected static ?string $model = UnitKerja::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    public static function getNavigationIcon(): string | \BackedEnum | null
+    {
+        return 'heroicon-o-rectangle-stack';
+    }
 
     public static function canAccess(): bool
     {
@@ -51,7 +54,8 @@ class UnitKerjaResource extends Resource
                     ->relationship('kepalaUnit', 'nama')
                     ->searchable()
                     ->preload()
-                    ->nullable(),
+                    ->nullable()
+                    ->unique(ignoreRecord: true),
                 \Filament\Forms\Components\Toggle::make('is_active')
                     ->label('Aktif')
                     ->default(true)

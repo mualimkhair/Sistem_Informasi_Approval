@@ -18,7 +18,8 @@ class SeksiForm
                     ->relationship('kepalaSeksi', 'nama')
                     ->searchable()
                     ->preload()
-                    ->nullable(),
+                    ->nullable()
+                    ->unique(ignoreRecord: true),
             ]);
     }
 }
