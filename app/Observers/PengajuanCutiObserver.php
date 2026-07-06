@@ -12,14 +12,27 @@ class PengajuanCutiObserver
 {
     public function creating(PengajuanCuti $pengajuanCuti)
     {
+        if ($pengajuanCuti->kelompok_kerja_id) {
+            $unitKerja = $pengajuanCuti->kelompokKerja?->unitKerja;
+            $pengajuanCuti->unit_kerja_id = $unitKerja?->id;
+            $pengajuanCuti->seksi_id = $unitKerja?->seksi_id;
+        } else {
+            $pengajuanCuti->unit_kerja_id = $pengajuanCuti->user?->unit_kerja_id;
+            $pengajuanCuti->seksi_id = $pengajuanCuti->user?->seksi_id ?? $pengajuanCuti->user?->unitKerja?->seksi_id;
+        }
+
         if ($pengajuanCuti->tanggal_mulai && $pengajuanCuti->tanggal_selesai) {
             $pengajuanCuti->lama_cuti = CutiService::hitungLamaCuti(
+                Carbon::parse($pengajuanCuti->tanggal_mulai),
+                Carbon::parse($pengajuanCuti->tanggal_selesai),
+                $pengajuanCuti->user->unitKerja ?? null,
                 Carbon::parse($pengajuanCuti->tanggal_mulai),
                 Carbon::parse($pengajuanCuti->tanggal_selesai),
                 $pengajuanCuti->user->unitKerja ?? null,
                 $pengajuanCuti->kelompokKerja ?? null
             );
         }
+        
         // Validasi server-side
         if ($pengajuanCuti->jenis_cuti === 'diluar_tanggungan_negara') {
             return;
@@ -42,6 +55,7 @@ class PengajuanCutiObserver
         }
     }
 
+
     public function created(PengajuanCuti $pengajuanCuti)
     {
         $kanitKasubags = User::role(['kanit', 'kasubag'])
@@ -57,11 +71,15 @@ class PengajuanCutiObserver
         }
     }
 
+
     public function updating(PengajuanCuti $pengajuanCuti)
     {
         $oldStatus = $pengajuanCuti->getOriginal('status');
-
-        if (auth()->check() && auth()->id() === $pengajuanCuti->user_id && $oldStatus === 'perubahan' && !$pengajuanCuti->isDirty(['keputusan_kanit', 'keputusan_kasubag', 'keputusan_pejabat'])) {
+        
+        $isOwner = auth()->check() && auth()->id() === $pengajuanCuti->user_id;
+        $isAdmin = auth()->check() && auth()->user()->hasRole(['super_admin', 'admin']);
+        
+        if (($isOwner || $isAdmin) && in_array($oldStatus, ['perubahan', 'ditangguhkan']) && !$pengajuanCuti->isDirty(['keputusan_kanit', 'keputusan_kasubag', 'keputusan_pejabat'])) {
             $pengajuanCuti->status = 'menunggu_atasan';
             $pengajuanCuti->keputusan_kanit = null;
             $pengajuanCuti->keputusan_kasubag = null;

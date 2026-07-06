@@ -35,12 +35,18 @@ class UserForm
                         TextInput::make('jabatan')
                             ->label('Jabatan')
                             ->maxLength(255),
+                        Select::make('seksi_id')
+                            ->label('Seksi (Khusus Level Kasi/Kasubag)')
+                            ->relationship('seksi', 'nama_seksi')
+                            ->searchable()
+                            ->preload()
+                            ->nullable(),
                         Select::make('unit_kerja_id')
                             ->label('Unit Kerja')
                             ->relationship('unitKerja', 'nama_unit')
                             ->searchable()
                             ->preload()
-                            ->required(false),
+                            ->nullable(),
                         TextInput::make('nomor_telp')
                             ->label('Nomor Telepon')
                             ->tel(),

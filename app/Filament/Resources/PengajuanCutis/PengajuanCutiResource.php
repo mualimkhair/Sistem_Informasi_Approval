@@ -54,24 +54,8 @@ class PengajuanCutiResource extends Resource
         $query = parent::getEloquentQuery();
         $user = auth()->user();
 
-        if ($user->hasRole(['super_admin', 'admin', 'kasubag'])) {
+        if ($user->hasRole(['super_admin', 'admin'])) {
             return $query;
-        }
-
-        if ($user->hasRole('pejabat_berwenang')) {
-            return $query->where('user_id', $user->id)
-                ->orWhere(function($q) {
-                    $q->where('keputusan_kanit', 'disetujui')
-                      ->where('keputusan_kasubag', 'disetujui');
-                });
-        }
-
-        if ($user->hasRole('kanit')) {
-            return $query->where('user_id', $user->id)
-                ->orWhereHas('user', function($q) use ($user) {
-                    $q->where('unit_kerja_id', $user->unit_kerja_id)
-                      ->where('id', '!=', $user->id);
-                });
         }
 
         return $query->where('user_id', $user->id);

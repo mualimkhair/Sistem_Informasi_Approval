@@ -14,4 +14,9 @@ class CreateUser extends CreateRecord
         $data['password'] = \Illuminate\Support\Facades\Hash::make($data['nip']);
         return $data;
     }
+
+    protected function afterCreate(): void
+    {
+        \App\Services\RoleSyncService::syncUserRoleAndHead($this->record);
+    }
 }
