@@ -23,14 +23,35 @@ class PengajuanCutiObserver
 
         if ($pengajuanCuti->tanggal_mulai && $pengajuanCuti->tanggal_selesai) {
             $pengajuanCuti->lama_cuti = CutiService::hitungLamaCuti(
-                Carbon::parse($pengajuanCuti->tanggal_mulai), 
-                Carbon::parse($pengajuanCuti->tanggal_selesai), 
-                $pengajuanCuti->user->unitKerja ?? null, 
+                Carbon::parse($pengajuanCuti->tanggal_mulai),
+                Carbon::parse($pengajuanCuti->tanggal_selesai),
+                $pengajuanCuti->user->unitKerja ?? null,
                 $pengajuanCuti->kelompokKerja ?? null
             );
         }
+        
+        // Validasi server-side
+        if ($pengajuanCuti->jenis_cuti === 'diluar_tanggungan_negara') {
+            return;
+        }
+
+        $saldo = $pengajuanCuti->user->saldoCuti;
+        if (!$saldo)
+            return;
+
+        $lama = $pengajuanCuti->lama_cuti;
+        if ($lama <= 0)
+            return;
+
+        $totalSaldo = 0;
+        if ($pengajuanCuti->jenis_cuti === 'tahunan') {
+            $totalSaldo = $saldo->saldo_n2 + $saldo->saldo_n1 + $saldo->saldo_n;
+        } elseif (in_array($pengajuanCuti->jenis_cuti, ['besar', 'sakit', 'melahirkan', 'alasan_penting'])) {
+            $field = 'saldo_cuti_' . $pengajuanCuti->jenis_cuti;
+            $totalSaldo = $saldo->{$field} ?? 0;
+        }
     }
-    
+
     public function created(PengajuanCuti $pengajuanCuti)
     {
         $kanitKasubags = User::role(['kanit', 'kasubag'])
@@ -45,7 +66,7 @@ class PengajuanCutiObserver
                 ->sendToDatabase($user);
         }
     }
-    
+
     public function updating(PengajuanCuti $pengajuanCuti)
     {
         $oldStatus = $pengajuanCuti->getOriginal('status');
@@ -78,7 +99,7 @@ class PengajuanCutiObserver
         if ($pengajuanCuti->isDirty(['keputusan_kanit', 'keputusan_kasubag', 'keputusan_pejabat'])) {
             CutiService::handleApprovalStatus($pengajuanCuti);
         }
-        
+
         if ($pengajuanCuti->status !== $oldStatus) {
             if ($pengajuanCuti->status === 'menunggu_pejabat') {
                 $pejabats = User::role('pejabat_berwenang')->get();
@@ -97,12 +118,12 @@ class PengajuanCutiObserver
                     ->sendToDatabase($pengajuanCuti->user);
             }
         }
-        
+
         if ($pengajuanCuti->isDirty(['tanggal_mulai', 'tanggal_selesai', 'kelompok_kerja_id'])) {
-             $pengajuanCuti->lama_cuti = CutiService::hitungLamaCuti(
-                Carbon::parse($pengajuanCuti->tanggal_mulai), 
-                Carbon::parse($pengajuanCuti->tanggal_selesai), 
-                $pengajuanCuti->user->unitKerja ?? null, 
+            $pengajuanCuti->lama_cuti = CutiService::hitungLamaCuti(
+                Carbon::parse($pengajuanCuti->tanggal_mulai),
+                Carbon::parse($pengajuanCuti->tanggal_selesai),
+                $pengajuanCuti->user->unitKerja ?? null,
                 $pengajuanCuti->kelompokKerja ?? null
             );
         }
