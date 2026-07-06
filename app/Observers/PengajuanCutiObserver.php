@@ -26,6 +26,9 @@ class PengajuanCutiObserver
                 Carbon::parse($pengajuanCuti->tanggal_mulai),
                 Carbon::parse($pengajuanCuti->tanggal_selesai),
                 $pengajuanCuti->user->unitKerja ?? null,
+                Carbon::parse($pengajuanCuti->tanggal_mulai),
+                Carbon::parse($pengajuanCuti->tanggal_selesai),
+                $pengajuanCuti->user->unitKerja ?? null,
                 $pengajuanCuti->kelompokKerja ?? null
             );
         }
@@ -52,6 +55,7 @@ class PengajuanCutiObserver
         }
     }
 
+
     public function created(PengajuanCuti $pengajuanCuti)
     {
         $kanitKasubags = User::role(['kanit', 'kasubag'])
@@ -66,6 +70,7 @@ class PengajuanCutiObserver
                 ->sendToDatabase($user);
         }
     }
+
 
     public function updating(PengajuanCuti $pengajuanCuti)
     {
