@@ -38,4 +38,10 @@ class PengajuanCuti extends Model
     {
         return $this->belongsTo(UnitKerja::class);
     }
+
+    public function ledgers() 
+    {
+        return $this->hasMany(SaldoCutiLedger::class, 'pengajuan_cuti_id', 'id');
+    }
+    
 }
