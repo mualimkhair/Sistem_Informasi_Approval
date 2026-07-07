@@ -47,7 +47,8 @@ class EditProfile extends BaseEditProfile
                             ->label('Unit Kerja')
                             ->options(\App\Models\UnitKerja::pluck('nama_unit', 'id'))
                             ->searchable()
-                            ->required(),
+                            ->visible(fn () => !auth()->user()->hasRole(['kasubag', 'pejabat_berwenang', 'super_admin', 'admin']))
+                            ->required(fn () => !auth()->user()->hasRole(['kasubag', 'pejabat_berwenang', 'super_admin', 'admin'])),
                     ])->columns(2),
                 
                 Section::make('Tanda Tangan & Password')

@@ -117,6 +117,7 @@ class UserForm
                             ->preload()
                             ->searchable()
                             ->default(fn() => [\Spatie\Permission\Models\Role::where('name', 'pegawai')->value('id')])
+                            ->live()
                             ->required(),
                     ])
                     ->visible($isSuperAdmin)

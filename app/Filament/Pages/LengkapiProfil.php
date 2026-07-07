@@ -73,6 +73,7 @@ class LengkapiProfil extends Page
                         Select::make('unit_kerja_id')
                             ->label('Unit Kerja')
                             ->options(\App\Models\UnitKerja::pluck('nama_unit', 'id'))
+                            ->visible(fn () => !auth()->user()->hasRole(['kasubag', 'pejabat_berwenang', 'super_admin', 'admin']))
                             ->required(),
                     ])->columns(2),
                 
@@ -122,7 +123,7 @@ class LengkapiProfil extends Page
             'alamat' => $data['alamat'],
             'tanggal_masuk' => $data['tanggal_masuk'],
             'jabatan' => $data['jabatan'],
-            'unit_kerja_id' => $data['unit_kerja_id'],
+            'unit_kerja_id' => $data['unit_kerja_id'] ?? auth()->user()->unit_kerja_id,
             'nomor_telp' => $data['nomor_telp'],
             'signature_path' => $signaturePath,
             'is_profile_completed' => true,

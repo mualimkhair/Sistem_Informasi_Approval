@@ -43,5 +43,54 @@ class PengajuanCuti extends Model
     {
         return $this->hasMany(SaldoCutiLedger::class, 'pengajuan_cuti_id', 'id');
     }
-    
+
+    public function scopeForApprover($query, $user)
+    {
+        if ($user->hasRole(['super_admin', 'admin'])) {
+            return $query;
+        }
+
+        return $query->where(function (\Illuminate\Database\Eloquent\Builder $q) use ($user) {
+            $q->where('user_id', $user->id);
+
+            if ($user->hasRole('pejabat_berwenang')) {
+                $q->orWhere(function(\Illuminate\Database\Eloquent\Builder $q2) {
+                    $q2->where('keputusan_kanit', 'disetujui')
+                       ->where('keputusan_kasubag', 'disetujui');
+                });
+            }
+
+            if ($user->hasRole('kasubag')) {
+                // By snapshot
+                $q->orWhereHas('seksi', fn(\Illuminate\Database\Eloquent\Builder $q2) => $q2->where('kepala_seksi_id', $user->id));
+                $q->orWhereHas('unitKerja', fn(\Illuminate\Database\Eloquent\Builder $q2) =>
+                    $q2->whereHas('seksi', fn(\Illuminate\Database\Eloquent\Builder $q3) => $q3->where('kepala_seksi_id', $user->id))
+                );
+                
+                // Fallback by current profile (if snapshot is null)
+                $q->orWhere(function(\Illuminate\Database\Eloquent\Builder $q2) use ($user) {
+                    $q2->whereNull('seksi_id')
+                       ->whereHas('user', function(\Illuminate\Database\Eloquent\Builder $q3) use ($user) {
+                           $q3->whereHas('seksi', fn(\Illuminate\Database\Eloquent\Builder $q4) => $q4->where('kepala_seksi_id', $user->id))
+                              ->orWhereHas('unitKerja', fn(\Illuminate\Database\Eloquent\Builder $q4) =>
+                                  $q4->whereHas('seksi', fn(\Illuminate\Database\Eloquent\Builder $q5) => $q5->where('kepala_seksi_id', $user->id))
+                              );
+                       });
+                });
+            }
+
+            if ($user->hasRole('kanit')) {
+                // By snapshot
+                $q->orWhereHas('unitKerja', fn(\Illuminate\Database\Eloquent\Builder $q2) => $q2->where('kepala_unit_id', $user->id));
+                
+                // Fallback by current profile (if snapshot is null)
+                $q->orWhere(function(\Illuminate\Database\Eloquent\Builder $q2) use ($user) {
+                    $q2->whereNull('unit_kerja_id')
+                       ->whereHas('user', function(\Illuminate\Database\Eloquent\Builder $q3) use ($user) {
+                           $q3->whereHas('unitKerja', fn(\Illuminate\Database\Eloquent\Builder $q4) => $q4->where('kepala_unit_id', $user->id));
+                       });
+                });
+            }
+        });
+    }
 }
