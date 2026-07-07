@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SaldoCuti extends Model
+class SaldoCutiLedger extends Model
 {
     protected $guarded = ['id'];
 
@@ -13,8 +13,8 @@ class SaldoCuti extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function ledgers()
+    public function pengajuanCuti()
     {
-        return $this->hasMany(SaldoCutiLedger::class, 'user_id', 'user_id');
+        return $this->belongsTo(PengajuanCuti::class);
     }
 }

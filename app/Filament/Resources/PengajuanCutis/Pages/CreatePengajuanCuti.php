@@ -23,13 +23,7 @@ class CreatePengajuanCuti extends CreateRecord
 
         if ($lama <= 0 || $jenis === 'diluar_tanggungan_negara') return;
 
-        $totalSaldo = 0;
-        if ($jenis === 'tahunan') {
-            $totalSaldo = $saldo->saldo_n2 + $saldo->saldo_n1 + $saldo->saldo_n;
-        } elseif (in_array($jenis, ['besar', 'sakit', 'melahirkan', 'alasan_penting'])) {
-            $field = 'saldo_cuti_' . $jenis;
-            $totalSaldo = $saldo->{$field} ?? 0;
-        }
+        $totalSaldo = \App\Services\CutiService::hitungSaldoTersedia(Auth::user(), $jenis);
 
         if ($totalSaldo < $lama) {
             Notification::make()
@@ -40,6 +34,11 @@ class CreatePengajuanCuti extends CreateRecord
 
             $this->halt();
         }
+    }
+
+    protected function afterCreate(): void
+    {
+        \App\Services\CutiService::holdSaldo($this->record);
     }
 }
 

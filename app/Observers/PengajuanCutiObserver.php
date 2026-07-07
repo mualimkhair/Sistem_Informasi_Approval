@@ -26,9 +26,6 @@ class PengajuanCutiObserver
                 Carbon::parse($pengajuanCuti->tanggal_mulai),
                 Carbon::parse($pengajuanCuti->tanggal_selesai),
                 $pengajuanCuti->user->unitKerja ?? null,
-                Carbon::parse($pengajuanCuti->tanggal_mulai),
-                Carbon::parse($pengajuanCuti->tanggal_selesai),
-                $pengajuanCuti->user->unitKerja ?? null,
                 $pengajuanCuti->kelompokKerja ?? null
             );
         }
@@ -49,9 +46,14 @@ class PengajuanCutiObserver
         $totalSaldo = 0;
         if ($pengajuanCuti->jenis_cuti === 'tahunan') {
             $totalSaldo = $saldo->saldo_n2 + $saldo->saldo_n1 + $saldo->saldo_n;
-        } elseif (in_array($pengajuanCuti->jenis_cuti, ['besar', 'sakit', 'melahirkan', 'alasan_penting'])) {
-            $field = 'saldo_cuti_' . $pengajuanCuti->jenis_cuti;
-            $totalSaldo = $saldo->{$field} ?? 0;
+        } 
+        // elseif (in_array($pengajuanCuti->jenis_cuti, ['besar', 'sakit', 'melahirkan', 'alasan_penting'])) {
+        //     $field = 'saldo_cuti_' . $pengajuanCuti->jenis_cuti;
+        //     $totalSaldo = $saldo->{$field} ?? 0;
+        // }
+        $totalSaldo = CutiService::hitungSaldoTersedia($pengajuanCuti->user, $pengajuanCuti->jenis_cuti);
+        if ($totalSaldo < $lama) {
+            return false;
         }
     }
 
@@ -103,6 +105,9 @@ class PengajuanCutiObserver
 
         if ($pengajuanCuti->isDirty(['keputusan_kanit', 'keputusan_kasubag', 'keputusan_pejabat'])) {
             CutiService::handleApprovalStatus($pengajuanCuti);
+            if (in_array($pengajuanCuti->status, ['ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat', 'perubahan'])) {
+                CutiService::releaseSaldo($pengajuanCuti);
+            }
         }
 
         if ($pengajuanCuti->status !== $oldStatus) {
