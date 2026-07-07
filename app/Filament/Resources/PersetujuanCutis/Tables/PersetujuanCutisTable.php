@@ -58,11 +58,11 @@ class PersetujuanCutisTable
                         return $query
                             ->when(
                                 $data['dari'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal_mulai', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('tanggal_mulai', '>=', $date),
                             )
                             ->when(
                                 $data['sampai'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('tanggal_selesai', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('tanggal_selesai', '<=', $date),
                             );
                     })
             ])
@@ -73,16 +73,17 @@ class PersetujuanCutisTable
                     ->label('Keputusan Kanit')
                     ->icon('heroicon-o-clipboard-document-check')
                     ->color('warning')
-                    ->visible(fn ($record) => 
-                        auth()->user()->hasRole('kanit') 
-                        && $record->status === 'menunggu_atasan' 
+                    ->visible(
+                        fn($record) =>
+                        auth()->user()->hasRole('kanit')
+                        && $record->status === 'menunggu_atasan'
                         && is_null($record->keputusan_kanit)
                         && $record->user_id !== auth()->id()
                     )
                     ->form([
                         \Filament\Forms\Components\Placeholder::make('detail_pengajuan')
                             ->label('Detail Pengajuan')
-                            ->content(fn ($record) => new \Illuminate\Support\HtmlString(
+                            ->content(fn($record) => new \Illuminate\Support\HtmlString(
                                 "<strong>Pegawai:</strong> {$record->user->nama}<br>
                                 <strong>Jenis Cuti:</strong> {$record->jenis_cuti}<br>
                                 <strong>Tanggal:</strong> {$record->tanggal_mulai} s/d {$record->tanggal_selesai} ({$record->lama_cuti} hari)<br>
@@ -101,8 +102,8 @@ class PersetujuanCutisTable
                             ->live(),
                         Textarea::make('alasan_kanit')
                             ->label('Alasan / Catatan')
-                            ->required(fn ($get) => $get('keputusan_kanit') !== 'disetujui')
-                            ->visible(fn ($get) => !empty($get('keputusan_kanit')))
+                            ->required(fn($get) => $get('keputusan_kanit') !== 'disetujui')
+                            ->visible(fn($get) => !empty($get('keputusan_kanit')))
                             ->rows(3),
                     ])
                     ->action(function (PengajuanCuti $record, array $data) {
@@ -113,7 +114,7 @@ class PersetujuanCutisTable
                         if ($record->unitKerja?->kepala_unit_id !== $user->id && !$user->hasRole(['super_admin', 'admin'])) {
                             abort(403, 'Anda bukan supervisor Kanit untuk unit pegawai ini.');
                         }
-                        
+
                         \Illuminate\Support\Facades\DB::transaction(function () use ($record, $data) {
                             $pengajuan = PengajuanCuti::lockForUpdate()->findOrFail($record->id);
                             $pengajuan->update([
@@ -121,7 +122,7 @@ class PersetujuanCutisTable
                                 'alasan_kanit' => $data['alasan_kanit'] ?? null,
                             ]);
                         });
-                        
+
                         \Filament\Notifications\Notification::make()->title('Keputusan Kanit berhasil disimpan.')->success()->send();
                     }),
 
@@ -129,16 +130,17 @@ class PersetujuanCutisTable
                     ->label('Keputusan Kasubag')
                     ->icon('heroicon-o-clipboard-document-check')
                     ->color('info')
-                    ->visible(fn ($record) => 
-                        auth()->user()->hasRole('kasubag') 
-                        && $record->status === 'menunggu_atasan' 
+                    ->visible(
+                        fn($record) =>
+                        auth()->user()->hasRole('kasubag')
+                        && $record->status === 'menunggu_atasan'
                         && is_null($record->keputusan_kasubag)
                         && $record->user_id !== auth()->id()
                     )
                     ->form([
                         \Filament\Forms\Components\Placeholder::make('detail_pengajuan')
                             ->label('Detail Pengajuan')
-                            ->content(fn ($record) => new \Illuminate\Support\HtmlString(
+                            ->content(fn($record) => new \Illuminate\Support\HtmlString(
                                 "<strong>Pegawai:</strong> {$record->user->nama}<br>
                                 <strong>Jenis Cuti:</strong> {$record->jenis_cuti}<br>
                                 <strong>Tanggal:</strong> {$record->tanggal_mulai} s/d {$record->tanggal_selesai} ({$record->lama_cuti} hari)<br>
@@ -158,8 +160,8 @@ class PersetujuanCutisTable
                             ->live(),
                         Textarea::make('alasan_kasubag')
                             ->label('Alasan / Catatan')
-                            ->required(fn ($get) => $get('keputusan_kasubag') !== 'disetujui')
-                            ->visible(fn ($get) => !empty($get('keputusan_kasubag')))
+                            ->required(fn($get) => $get('keputusan_kasubag') !== 'disetujui')
+                            ->visible(fn($get) => !empty($get('keputusan_kasubag')))
                             ->rows(3),
                     ])
                     ->action(function (PengajuanCuti $record, array $data) {
@@ -170,7 +172,7 @@ class PersetujuanCutisTable
                         if ($record->seksi?->kepala_seksi_id !== $user->id && !$user->hasRole(['super_admin', 'admin'])) {
                             abort(403, 'Anda bukan supervisor Kasubag untuk unit pegawai ini.');
                         }
-                        
+
                         \Illuminate\Support\Facades\DB::transaction(function () use ($record, $data) {
                             $pengajuan = PengajuanCuti::lockForUpdate()->findOrFail($record->id);
                             $pengajuan->update([
@@ -186,15 +188,16 @@ class PersetujuanCutisTable
                     ->label('Keputusan Final')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
-                    ->visible(fn ($record) => 
-                        auth()->user()->hasRole('pejabat_berwenang') 
+                    ->visible(
+                        fn($record) =>
+                        auth()->user()->hasRole('pejabat_berwenang')
                         && $record->status === 'menunggu_pejabat'
                         && $record->user_id !== auth()->id()
                     )
                     ->form([
                         \Filament\Forms\Components\Placeholder::make('detail_pengajuan')
                             ->label('Detail Pengajuan')
-                            ->content(fn ($record) => new \Illuminate\Support\HtmlString(
+                            ->content(fn($record) => new \Illuminate\Support\HtmlString(
                                 "<strong>Pegawai:</strong> {$record->user->nama}<br>
                                 <strong>Jenis Cuti:</strong> {$record->jenis_cuti}<br>
                                 <strong>Tanggal:</strong> {$record->tanggal_mulai} s/d {$record->tanggal_selesai} ({$record->lama_cuti} hari)<br>
@@ -215,8 +218,8 @@ class PersetujuanCutisTable
                             ->live(),
                         Textarea::make('alasan_pejabat')
                             ->label('Alasan / Catatan')
-                            ->required(fn ($get) => $get('keputusan_pejabat') !== 'disetujui')
-                            ->visible(fn ($get) => !empty($get('keputusan_pejabat')))
+                            ->required(fn($get) => $get('keputusan_pejabat') !== 'disetujui')
+                            ->visible(fn($get) => !empty($get('keputusan_pejabat')))
                             ->rows(3),
                     ])
                     ->action(function (PengajuanCuti $record, array $data) {
@@ -229,13 +232,16 @@ class PersetujuanCutisTable
                         });
                         \Filament\Notifications\Notification::make()->title('Keputusan final berhasil disimpan.')->success()->send();
                     }),
-                
+
                 \Filament\Actions\Action::make('cetak_pdf')
                     ->label('Cetak PDF')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->url(fn ($record) => route('pengajuan-cuti.pdf', $record))
+                    ->url(fn($record) => route('pengajuan-cuti.pdf', $record))
                     ->openUrlInNewTab()
-                    ->visible(fn ($record) => $record->status === 'disetujui' || auth()->user()->hasRole(['super_admin', 'admin'])),
+                    ->visible(fn($record) => $record->status === 'disetujui' || auth()->user()->hasRole(['super_admin', 'admin'])),
+
+                \Filament\Actions\DeleteAction::make()
+                    ->visible(fn() => auth()->user()->hasRole(['super_admin', 'admin']))
             ])
             ->defaultSort('created_at', 'desc');
     }

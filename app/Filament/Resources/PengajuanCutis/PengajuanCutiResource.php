@@ -13,12 +13,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Auth\Access\Response;
 
 class PengajuanCutiResource extends Resource
 {
     protected static ?string $model = PengajuanCuti::class;
 
-    public static function getNavigationIcon(): string | \BackedEnum | null
+    public static function getNavigationIcon(): string|\BackedEnum|null
     {
         return 'heroicon-o-rectangle-stack';
     }
@@ -60,4 +62,12 @@ class PengajuanCutiResource extends Resource
 
         return $query->where('user_id', $user->id);
     }
+
+
+    public static function getDeleteAuthorizationResponse(Model $record): Response
+{
+    return auth()->user()->hasRole(['super_admin', 'admin'])
+        ? Response::allow()
+        : Response::deny('Hanya admin yang dapat menghapus pengajuan cuti.');
+}
 }
