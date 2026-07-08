@@ -44,6 +44,21 @@ class PengajuanCuti extends Model
         return $this->hasMany(SaldoCutiLedger::class, 'pengajuan_cuti_id', 'id');
     }
 
+    public function getKanitAttribute()
+    {
+        return $this->unitKerja?->kepalaUnit;
+    }
+
+    public function getKasubagAttribute()
+    {
+        return $this->seksi?->kepalaSeksi;
+    }
+
+    public function getPejabatAttribute()
+    {
+        return \App\Models\User::role('pejabat_berwenang')->first();
+    }
+
     public function scopeForApprover($query, $user)
     {
         if ($user->hasRole(['super_admin', 'admin'])) {

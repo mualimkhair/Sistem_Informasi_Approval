@@ -109,13 +109,29 @@ class LengkapiProfil extends Page
 
         $signaturePath = $data['signature_path'];
         if (str_starts_with($signaturePath, 'data:image')) {
+            $oldPath = auth()->user()->signature_path;
+            
             $imageParts = explode(";base64,", $signaturePath);
             $imageTypeAux = explode("image/", $imageParts[0]);
             $imageType = $imageTypeAux[1];
             $imageBase64 = base64_decode($imageParts[1]);
             $fileName = 'signatures/' . uniqid() . '.' . $imageType;
-            \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $imageBase64);
-            $signaturePath = $fileName;
+            
+            if (\Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $imageBase64)) {
+                $signaturePath = $fileName;
+                
+                if ($oldPath && $oldPath !== $fileName && \Illuminate\Support\Facades\Storage::disk('public')->exists($oldPath)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+                }
+            } else {
+                $signaturePath = $oldPath;
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('Gagal menyimpan tanda tangan')
+                    ->body('Terjadi kesalahan saat menyimpan file tanda tangan baru ke server.')
+                    ->danger()
+                    ->send();
+            }
         }
 
         auth()->user()->update([
