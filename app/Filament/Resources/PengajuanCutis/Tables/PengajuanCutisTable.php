@@ -40,7 +40,17 @@ class PengajuanCutisTable
                 TextColumn::make('tanggal_selesai')->date()->sortable(),
                 TextColumn::make('lama_cuti')->label('Lama (Hari)')->sortable(),
                 TextColumn::make('status')
-                    ->formatStateUsing(fn (string $state): string => ucwords(str_replace('_', ' ', $state)))
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'menunggu_atasan' => 'Menunggu Atasan',
+                        'menunggu_pejabat' => 'Menunggu Pejabat',
+                        'disetujui' => 'Disetujui',
+                        'ditolak_kanit' => 'Ditolak Kanit',
+                        'ditolak_kasubag' => 'Ditolak Kasubag',
+                        'ditolak_pejabat' => 'Ditolak Pejabat',
+                        'perubahan' => 'Perlu Perubahan',
+                        'ditangguhkan' => 'Ditangguhkan',
+                        default => ucwords(str_replace('_', ' ', $state)),
+                    })
                     ->badge()
                     ->sortable()
                     ->color(fn (string $state): string => match ($state) {

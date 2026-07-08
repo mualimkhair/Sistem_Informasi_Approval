@@ -21,6 +21,16 @@ class PengajuanCutiObserver
             $pengajuanCuti->seksi_id = $pengajuanCuti->user?->seksi_id ?? $pengajuanCuti->user?->unitKerja?->seksi_id;
         }
 
+        $submitter = $pengajuanCuti->user;
+        if ($submitter?->hasRole('kasubag')) {
+            $pengajuanCuti->keputusan_kanit = 'dilewati';
+            $pengajuanCuti->keputusan_kasubag = 'dilewati';
+            $pengajuanCuti->status = 'menunggu_atasan';
+            CutiService::handleApprovalStatus($pengajuanCuti);
+        } elseif ($submitter?->hasRole('kanit')) {
+            $pengajuanCuti->keputusan_kanit = 'dilewati';
+        }
+
         if ($pengajuanCuti->tanggal_mulai && $pengajuanCuti->tanggal_selesai) {
             $pengajuanCuti->lama_cuti = CutiService::hitungLamaCuti(
                 Carbon::parse($pengajuanCuti->tanggal_mulai),
@@ -82,24 +92,35 @@ class PengajuanCutiObserver
         $isAdmin = auth()->check() && auth()->user()->hasRole(['super_admin', 'admin']);
         
         if (($isOwner || $isAdmin) && in_array($oldStatus, ['perubahan', 'ditangguhkan']) && !$pengajuanCuti->isDirty(['keputusan_kanit', 'keputusan_kasubag', 'keputusan_pejabat'])) {
-            $pengajuanCuti->status = 'menunggu_atasan';
-            $pengajuanCuti->keputusan_kanit = null;
-            $pengajuanCuti->keputusan_kasubag = null;
+            $submitter = $pengajuanCuti->user;
+            $kanitValue = $submitter->hasRole(['kanit', 'kasubag']) ? 'dilewati' : null;
+            $kasubagValue = $submitter->hasRole('kasubag') ? 'dilewati' : null;
+
+            if ($submitter->hasRole('kasubag')) {
+                $pengajuanCuti->status = 'menunggu_pejabat';
+            } else {
+                $pengajuanCuti->status = 'menunggu_atasan';
+            }
+
+            $pengajuanCuti->keputusan_kanit = $kanitValue;
+            $pengajuanCuti->keputusan_kasubag = $kasubagValue;
             $pengajuanCuti->keputusan_pejabat = null;
             $pengajuanCuti->alasan_kanit = null;
             $pengajuanCuti->alasan_kasubag = null;
             $pengajuanCuti->alasan_pejabat = null;
 
-            $kanitKasubags = User::role(['kanit', 'kasubag'])
-                ->where('unit_kerja_id', $pengajuanCuti->user->unit_kerja_id)
-                ->where('id', '!=', $pengajuanCuti->user_id)
-                ->get();
-            foreach ($kanitKasubags as $user) {
-                Notification::make()
-                    ->title('Pengajuan Cuti Diperbarui')
-                    ->body('Pengajuan cuti dari ' . $pengajuanCuti->user->nama . ' telah diperbarui dan menunggu persetujuan Anda.')
-                    ->info()
-                    ->sendToDatabase($user);
+            if (!$submitter->hasRole('kasubag')) {
+                $kanitKasubags = User::role(['kanit', 'kasubag'])
+                    ->where('unit_kerja_id', $pengajuanCuti->user->unit_kerja_id)
+                    ->where('id', '!=', $pengajuanCuti->user_id)
+                    ->get();
+                foreach ($kanitKasubags as $user) {
+                    Notification::make()
+                        ->title('Pengajuan Cuti Diperbarui')
+                        ->body('Pengajuan cuti dari ' . $pengajuanCuti->user->nama . ' telah diperbarui dan menunggu persetujuan Anda.')
+                        ->info()
+                        ->sendToDatabase($user);
+                }
             }
         }
 
