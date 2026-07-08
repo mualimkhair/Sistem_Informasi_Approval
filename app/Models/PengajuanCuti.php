@@ -70,8 +70,8 @@ class PengajuanCuti extends Model
 
             if ($user->hasRole('pejabat_berwenang')) {
                 $q->orWhere(function(\Illuminate\Database\Eloquent\Builder $q2) {
-                    $q2->where('keputusan_kanit', 'disetujui')
-                       ->where('keputusan_kasubag', 'disetujui');
+                    $q2->whereIn('keputusan_kanit', ['disetujui', 'dilewati'])
+                       ->whereIn('keputusan_kasubag', ['disetujui', 'dilewati']);
                 });
             }
 

@@ -121,13 +121,13 @@
 
     // --- Keputusan atasan langsung & pejabat ---
     $kanitApproved = strtolower($pengajuanCuti->keputusan_kanit ?? '') === 'disetujui';
-    $kanitRejected = !empty($pengajuanCuti->keputusan_kanit) && !$kanitApproved;
+    $kanitRejected = !empty($pengajuanCuti->keputusan_kanit) && !in_array(strtolower($pengajuanCuti->keputusan_kanit), ['disetujui', 'dilewati']);
 
     $kasubagApproved = strtolower($pengajuanCuti->keputusan_kasubag ?? '') === 'disetujui';
-    $kasubagRejected = !empty($pengajuanCuti->keputusan_kasubag) && !$kasubagApproved;
+    $kasubagRejected = !empty($pengajuanCuti->keputusan_kasubag) && !in_array(strtolower($pengajuanCuti->keputusan_kasubag), ['disetujui', 'dilewati']);
 
     $pejabatApproved = strtolower($pengajuanCuti->keputusan_pejabat ?? '') === 'disetujui';
-    $pejabatRejected = !empty($pengajuanCuti->keputusan_pejabat) && !$pejabatApproved;
+    $pejabatRejected = !empty($pengajuanCuti->keputusan_pejabat) && !in_array(strtolower($pengajuanCuti->keputusan_pejabat), ['disetujui', 'dilewati']);
 @endphp
 
 {{-- ===================== KOP SURAT ===================== --}}

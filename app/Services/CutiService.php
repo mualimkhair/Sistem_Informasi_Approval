@@ -100,7 +100,10 @@ class CutiService
                 $pengajuan->status = 'ditangguhkan';
             else
                 $pengajuan->status = 'perubahan';
-        } elseif ($pengajuan->keputusan_kanit === 'disetujui' && $pengajuan->keputusan_kasubag === 'disetujui') {
+        } elseif (
+            in_array($pengajuan->keputusan_kanit, ['disetujui', 'dilewati']) &&
+            in_array($pengajuan->keputusan_kasubag, ['disetujui', 'dilewati'])
+        ) {
             if ($pengajuan->status === 'menunggu_atasan') {
                 $pengajuan->status = 'menunggu_pejabat';
             }
