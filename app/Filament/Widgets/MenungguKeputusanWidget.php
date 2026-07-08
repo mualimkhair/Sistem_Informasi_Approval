@@ -15,28 +15,31 @@ class MenungguKeputusanWidget extends BaseWidget
         $user = Auth::user();
 
         if ($user->hasRole(['kanit', 'kasubag', 'pejabat_berwenang'])) {
-            $menungguLevel1 = 0;
-            if ($user->hasRole('kanit')) {
-                $menungguLevel1 += PengajuanCuti::whereNull('keputusan_kanit')
-                    ->where('status', 'menunggu_atasan')
-                    ->whereHas('user', fn($q) => $q->where('unit_kerja_id', $user->unit_kerja_id))
-                    ->count();
-            }
-            if ($user->hasRole('kasubag')) {
-                $menungguLevel1 += PengajuanCuti::whereNull('keputusan_kasubag')
-                    ->where('status', 'menunggu_atasan')
-                    ->whereHas('user', fn($q) => $q->where('unit_kerja_id', $user->unit_kerja_id))
-                    ->count();
-            }
-
             if ($user->hasRole(['kanit', 'kasubag'])) {
+                $query = PengajuanCuti::forApprover($user)
+                    ->where('status', 'menunggu_atasan');
+                
+                $query->where(function($q) use ($user) {
+                    if ($user->hasRole('kanit')) {
+                        $q->orWhereNull('keputusan_kanit');
+                    }
+                    if ($user->hasRole('kasubag')) {
+                        $q->orWhereNull('keputusan_kasubag');
+                    }
+                });
+
+                $menungguLevel1 = $query->count();
+
                 $stats[] = Stat::make('Menunggu Keputusan Anda', $menungguLevel1)
                     ->icon('heroicon-o-clock')
                     ->color('warning');
             }
 
             if ($user->hasRole('pejabat_berwenang')) {
-                $menungguFinal = PengajuanCuti::where('status', 'menunggu_pejabat')->count();
+                $menungguFinal = PengajuanCuti::forApprover($user)
+                    ->where('status', 'menunggu_pejabat')
+                    ->where('user_id', '!=', $user->id)
+                    ->count();
                 $stats[] = Stat::make('Menunggu Keputusan Final', $menungguFinal)
                     ->icon('heroicon-o-clipboard-document-check')
                     ->color('warning');

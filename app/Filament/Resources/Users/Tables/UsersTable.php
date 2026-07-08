@@ -98,8 +98,8 @@ class UsersTable
                 \Filament\Tables\Filters\SelectFilter::make('jenis_unit')
                     ->label('Jenis Unit')
                     ->options(['administrasi' => 'Administrasi', 'operasional' => 'Operasional'])
-                    ->query(fn (Builder $q, $data) =>
-                        $q->when($data['value'] ?? null, fn ($q, $v) =>
+                    ->query(fn (Builder $query, array $data) =>
+                        $query->when($data['value'] ?? null, fn ($q, $v) =>
                             $q->whereHas('unitKerja', fn ($q2) => $q2->where('jenis', $v))
                         )
                     ),
