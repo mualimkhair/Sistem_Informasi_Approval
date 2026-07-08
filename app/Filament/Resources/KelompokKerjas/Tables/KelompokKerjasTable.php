@@ -15,10 +15,10 @@ class KelompokKerjasTable
     {
         return $table
             ->columns([
-                TextColumn::make('unitKerja.nama_unit')->label('Unit Kerja')->sortable(),
-                TextColumn::make('nama_kelompok')->searchable(),
-                TextColumn::make('hari_libur_1'),
-                TextColumn::make('hari_libur_2'),
+                TextColumn::make('unitKerja.nama_unit')->label('Unit Kerja')->searchable()->sortable(),
+                TextColumn::make('nama_kelompok')->searchable()->sortable(),
+                TextColumn::make('hari_libur_1')->sortable(),
+                TextColumn::make('hari_libur_2')->sortable(),
             ])
             ->filters([
                 SelectFilter::make('unit_kerja_id')
