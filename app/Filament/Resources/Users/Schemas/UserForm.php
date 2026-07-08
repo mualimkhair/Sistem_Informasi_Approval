@@ -35,6 +35,12 @@ class UserForm
                         TextInput::make('jabatan')
                             ->label('Jabatan')
                             ->maxLength(255),
+                        Select::make('pangkat_gol')
+                            ->label('Pangkat/Golongan')
+                            ->options(\App\Models\User::PANGKAT_GOLONGAN)
+                            ->searchable()
+                            ->nullable()
+                            ->rule(\Illuminate\Validation\Rule::in(array_keys(\App\Models\User::PANGKAT_GOLONGAN))),
                         Select::make('seksi_id')
                             ->label('Seksi (Khusus Level Kasi/Kasubag)')
                             ->relationship('seksi', 'nama_seksi')

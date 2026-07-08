@@ -43,6 +43,12 @@ class EditProfile extends BaseEditProfile
                         TextInput::make('jabatan')
                             ->label('Jabatan')
                             ->required(),
+                        Select::make('pangkat_gol')
+                            ->label('Pangkat/Golongan')
+                            ->options(\App\Models\User::PANGKAT_GOLONGAN)
+                            ->searchable()
+                            ->nullable()
+                            ->rule(\Illuminate\Validation\Rule::in(array_keys(\App\Models\User::PANGKAT_GOLONGAN))),
                         Select::make('unit_kerja_id')
                             ->label('Unit Kerja')
                             ->options(\App\Models\UnitKerja::pluck('nama_unit', 'id'))

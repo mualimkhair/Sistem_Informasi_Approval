@@ -268,7 +268,8 @@
                 <br><br><br>
             @endif
             {{ $pengajuanCuti->user->nama }}<br>
-            NIP. {{ $pengajuanCuti->user->nip }}
+            NIP. {{ $pengajuanCuti->user->nip }}<br>
+            Pangkat/Gol. {{ $pengajuanCuti->user->pangkat_gol ?? '-' }}
         </td>
     </tr>
     <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
@@ -294,7 +295,8 @@
                         <br><br><br>
                     @endif
                     <u>{{ $pengajuanCuti->kanit->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kanit->nip }}
+                    NIP. {{ $pengajuanCuti->kanit->nip }}<br>
+                    Pangkat/Gol. {{ $pengajuanCuti->kanit->pangkat_gol ?? '-' }}
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kanit }}
                 @endif
@@ -309,7 +311,8 @@
                         <br><br><br>
                     @endif
                     <u>{{ $pengajuanCuti->kasubag->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kasubag->nip }}
+                    NIP. {{ $pengajuanCuti->kasubag->nip }}<br>
+                    Pangkat/Gol. {{ $pengajuanCuti->kasubag->pangkat_gol ?? '-' }}
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kasubag }}
                 @endif
@@ -325,6 +328,7 @@
                     @endif
                     <u>{{ $pengajuanCuti->kanit->nama }}</u><br>
                     NIP. {{ $pengajuanCuti->kanit->nip }}<br>
+                    Pangkat/Gol. {{ $pengajuanCuti->kanit->pangkat_gol ?? '-' }}<br>
                     <i>({{ $pengajuanCuti->alasan_kanit }})</i>
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kanit }}
@@ -341,6 +345,7 @@
                     @endif
                     <u>{{ $pengajuanCuti->kasubag->nama }}</u><br>
                     NIP. {{ $pengajuanCuti->kasubag->nip }}<br>
+                    Pangkat/Gol. {{ $pengajuanCuti->kasubag->pangkat_gol ?? '-' }}<br>
                     <i>({{ $pengajuanCuti->alasan_kasubag }})</i>
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kasubag }}
@@ -365,7 +370,8 @@
                         <br><br><br>
                     @endif
                     <u>{{ $pengajuanCuti->pejabat->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->pejabat->nip }}
+                    NIP. {{ $pengajuanCuti->pejabat->nip }}<br>
+                    Pangkat/Gol. {{ $pengajuanCuti->pejabat->pangkat_gol ?? '-' }}
                 @else
                     V<br>{{ $pengajuanCuti->alasan_pejabat }}
                 @endif
@@ -381,6 +387,7 @@
                     @endif
                     <u>{{ $pengajuanCuti->pejabat->nama }}</u><br>
                     NIP. {{ $pengajuanCuti->pejabat->nip }}<br>
+                    Pangkat/Gol. {{ $pengajuanCuti->pejabat->pangkat_gol ?? '-' }}<br>
                     <i>({{ $pengajuanCuti->alasan_pejabat }})</i>
                 @else
                     V<br>{{ $pengajuanCuti->alasan_pejabat }}
