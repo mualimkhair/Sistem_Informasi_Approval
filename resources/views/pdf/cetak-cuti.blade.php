@@ -3,22 +3,9 @@
 <head>
     <title>Formulir Cuti</title>
     <style>
-        {{--
-            CATATAN UNTUK DEVELOPER (asumsi yang dipakai saat konversi dari Excel):
-            1. $pengajuanCuti->user->pangkat_golongan  -> kolom "Pangkat/Gol." belum ada di blade lama,
-               sesuaikan nama kolom di tabel users jika berbeda.
-            2. $pengajuanCuti->user->no_hp             -> kolom "TELP / HP" belum ada di blade lama,
-               sesuaikan nama kolom jika berbeda (mis. no_telepon, phone, dst).
-            4. Perhitungan "Sisa Cuti" di bagian V memakai asumsi sederhana: saldo N-1 dipotong dulu,
-               sisanya baru memotong saldo N. Sesuaikan dengan service/kalkulasi saldo cuti yang
-               sudah ada di sistem Anda jika logikanya berbeda.
-            5. Kotak tanda tangan Kanit/Kasubag (bag. VII) & Pejabat (bag. VIII) ditampilkan berdasarkan
-               keputusan_kanit / keputusan_kasubag / keputusan_pejabat: nilai 'disetujui' dianggap
-               approved, nilai lain (tidak null) dianggap ditangguhkan/tidak disetujui, null = kosong
-               (belum ada keputusan).
-        --}}
         @page {
-            margin: 1in 0.45in 1in 0.7in;
+            /* margin: 1in 0.45in 1in 0.7in; */
+            margin: 0.7in 0.3in 0.7in 0.3in;
         }
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -28,7 +15,7 @@
         .surat-header {
             width: 46%;
             margin-left: 54%;
-            margin-bottom: 12px;
+            margin-bottom: 2px;
         }
         .surat-header table { width: 100%; }
         .surat-header td {
@@ -47,7 +34,6 @@
             text-align: center;
             font-weight: bold;
             font-size: 13pt;
-            margin: 6px 0 14px 0;
         }
 
         table.form-table {
@@ -76,6 +62,21 @@
 @php
     \Carbon\Carbon::setLocale('id');
 
+    if (!function_exists('getSignatureBase64')) {
+        function getSignatureBase64($path) {
+            if ($path && \Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+                try {
+                    $content = \Illuminate\Support\Facades\Storage::disk('public')->get($path);
+                    $mime = \Illuminate\Support\Facades\Storage::disk('public')->mimeType($path);
+                    return 'data:'.$mime.';base64,'.base64_encode($content);
+                } catch (\Exception $e) {
+                    return null;
+                }
+            }
+            return null;
+        }
+    }
+
     // --- Bagian tujuan surat (Kepada Yth.) ---
     $pemohonAdalahPejabat = method_exists($pengajuanCuti->user, 'hasRole')
         && $pengajuanCuti->user->hasRole('pejabat_berwenang');
@@ -97,7 +98,7 @@
     }
 
     // --- Tanda jenis cuti ---
-    $tandaJenis = fn ($tipe) => $pengajuanCuti->jenis_cuti === $tipe ? '√' : '-';
+    $tandaJenis = fn ($tipe) => $pengajuanCuti->jenis_cuti === $tipe ? 'V' : '-';
 
     // --- Saldo cuti (N-2, N-1, N) ---
     $tahunN  = now()->year;
@@ -143,6 +144,7 @@
     </table>
 </div>
 
+
 <div class="judul-formulir">FORMULIR PERMINTAAN DAN PEMBERIAN CUTI</div>
 
 <table class="form-table">
@@ -152,7 +154,6 @@
         <col style="width:20.0%">
     </colgroup>
     <tbody>
-
     {{-- ===================== I. DATA PEGAWAI ===================== --}}
     <tr><td colspan="7" class="section-title">I. DATA PEGAWAI</td></tr>
     <tr>
@@ -173,15 +174,7 @@
         <td>Masa Kerja</td>
         <td colspan="2">{{ $masaKerja }}</td>
     </tr>
-</table>
-<br>
-<table class="form-table">
-    <colgroup>
-        <col style="width:14.4%"><col style="width:12.4%"><col style="width:13.9%">
-        <col style="width:13.3%"><col style="width:16.1%"><col style="width:9.9%">
-        <col style="width:20.0%">
-    </colgroup>
-    <tbody>
+    <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== II. JENIS CUTI YANG DIAMBIL ===================== --}}
     <tr><td colspan="7" class="section-title">II. JENIS CUTI YANG DIAMBIL</td></tr>
     <tr>
@@ -202,27 +195,11 @@
         <td colspan="3">6. Cuti di luar Tanggungan Negara</td>
         <td class="tc">{{ $tandaJenis('diluar_tanggungan_negara') }}</td>
     </tr>
-</table>
-<br>
-<table class="form-table">
-    <colgroup>
-        <col style="width:14.4%"><col style="width:12.4%"><col style="width:13.9%">
-        <col style="width:13.3%"><col style="width:16.1%"><col style="width:9.9%">
-        <col style="width:20.0%">
-    </colgroup>
-    <tbody>
+    <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== III. ALASAN CUTI ===================== --}}
     <tr><td colspan="7" class="section-title">III. ALASAN CUTI</td></tr>
     <tr><td colspan="7">{{ $pengajuanCuti->alasan_cuti }}</td></tr>
-</table>
-<br>
-<table class="form-table">
-    <colgroup>
-        <col style="width:14.4%"><col style="width:12.4%"><col style="width:13.9%">
-        <col style="width:13.3%"><col style="width:16.1%"><col style="width:9.9%">
-        <col style="width:20.0%">
-    </colgroup>
-    <tbody>
+    <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== IV. LAMANYA CUTI ===================== --}}
     <tr><td colspan="7" class="section-title">IV. LAMANYA CUTI</td></tr>
     <tr>
@@ -233,15 +210,7 @@
         <td class="tc">s/d</td>
         <td>{{ $pengajuanCuti->tanggal_selesai?->translatedFormat('d F Y') }}</td>
     </tr>
-</table>
-<br>
-<table class="form-table">
-    <colgroup>
-        <col style="width:14.4%"><col style="width:12.4%"><col style="width:13.9%">
-        <col style="width:13.3%"><col style="width:16.1%"><col style="width:9.9%">
-        <col style="width:20.0%">
-    </colgroup>
-    <tbody>
+    <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== V. CATATAN CUTI ===================== --}}
     <tr><td colspan="7" class="section-title">V. CATATAN CUTI</td></tr>
     <!-- <tr>
@@ -281,15 +250,7 @@
     <tr>
         <td colspan="7">Sisa Cuti : Tahun {{ $tahunN1 }} {{ $sisaN1 }} Hari, {{ $tahunN }} {{ $sisaN }} Hari</td>
     </tr>
-</table>
-<br>
-<table class="form-table">
-    <colgroup>
-        <col style="width:14.4%"><col style="width:12.4%"><col style="width:13.9%">
-        <col style="width:13.3%"><col style="width:16.1%"><col style="width:9.9%">
-        <col style="width:20.0%">
-    </colgroup>
-    <tbody>
+    <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== VI. ALAMAT SELAMA MENJALANKAN CUTI ===================== --}}
     <tr><td colspan="7" class="section-title">VI. ALAMAT SELAMA MENJALANKAN CUTI</td></tr>
     <tr>
@@ -301,8 +262,8 @@
         <td colspan="4" class="top tall-box-lg">{{ $pengajuanCuti->alamat_selama_cuti }}</td>
         <td colspan="3" class="top">
             Hormat Saya,<br><br>
-            @if($pengajuanCuti->user->signature_path)
-                <img src="{{ public_path('storage/' . $pengajuanCuti->user->signature_path) }}" class="signature-img"><br>
+            @if($sig = getSignatureBase64($pengajuanCuti->user->signature_path))
+                <img src="{{ $sig }}" class="signature-img"><br>
             @else
                 <br><br><br>
             @endif
@@ -310,15 +271,7 @@
             NIP. {{ $pengajuanCuti->user->nip }}
         </td>
     </tr>
-</table>
-<br>
-<table class="form-table">
-    <colgroup>
-        <col style="width:14.4%"><col style="width:12.4%"><col style="width:13.9%">
-        <col style="width:13.3%"><col style="width:16.1%"><col style="width:9.9%">
-        <col style="width:20.0%">
-    </colgroup>
-    <tbody>
+    <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== VII. PERTIMBANGAN ATASAN LANGSUNG ===================== --}}
     <tr><td colspan="7" class="section-title">VII. PERTIMBANGAN ATASAN LANGSUNG</td></tr>
     <tr>
@@ -335,38 +288,38 @@
         <td colspan="2" class="tc tall-box">
             @if($kanitApproved)
                 @if($pengajuanCuti->kanit)
-                    @if($pengajuanCuti->kanit->signature_path)
-                        <img src="{{ public_path('storage/' . $pengajuanCuti->kanit->signature_path) }}" class="signature-img"><br>
+                    @if($sig = getSignatureBase64($pengajuanCuti->kanit->signature_path))
+                        <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
                     <u>{{ $pengajuanCuti->kanit->nama }}</u><br>
                     NIP. {{ $pengajuanCuti->kanit->nip }}
                 @else
-                    √<br>{{ $pengajuanCuti->alasan_kanit }}
+                    V<br>{{ $pengajuanCuti->alasan_kanit }}
                 @endif
             @endif
         </td>
         <td colspan="2" class="tc tall-box">
             @if($kasubagApproved)
                 @if($pengajuanCuti->kasubag)
-                    @if($pengajuanCuti->kasubag->signature_path)
-                        <img src="{{ public_path('storage/' . $pengajuanCuti->kasubag->signature_path) }}" class="signature-img"><br>
+                    @if($sig = getSignatureBase64($pengajuanCuti->kasubag->signature_path))
+                        <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
                     <u>{{ $pengajuanCuti->kasubag->nama }}</u><br>
                     NIP. {{ $pengajuanCuti->kasubag->nip }}
                 @else
-                    √<br>{{ $pengajuanCuti->alasan_kasubag }}
+                    V<br>{{ $pengajuanCuti->alasan_kasubag }}
                 @endif
             @endif
         </td>
         <td colspan="2" class="tc tall-box">
             @if($kanitRejected)
                 @if($pengajuanCuti->kanit)
-                    @if($pengajuanCuti->kanit->signature_path)
-                        <img src="{{ public_path('storage/' . $pengajuanCuti->kanit->signature_path) }}" class="signature-img"><br>
+                    @if($sig = getSignatureBase64($pengajuanCuti->kanit->signature_path))
+                        <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
@@ -374,15 +327,15 @@
                     NIP. {{ $pengajuanCuti->kanit->nip }}<br>
                     <i>({{ $pengajuanCuti->alasan_kanit }})</i>
                 @else
-                    √<br>{{ $pengajuanCuti->alasan_kanit }}
+                    V<br>{{ $pengajuanCuti->alasan_kanit }}
                 @endif
             @endif
         </td>
         <td class="tc tall-box">
             @if($kasubagRejected)
                 @if($pengajuanCuti->kasubag)
-                    @if($pengajuanCuti->kasubag->signature_path)
-                        <img src="{{ public_path('storage/' . $pengajuanCuti->kasubag->signature_path) }}" class="signature-img"><br>
+                    @if($sig = getSignatureBase64($pengajuanCuti->kasubag->signature_path))
+                        <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
@@ -390,20 +343,12 @@
                     NIP. {{ $pengajuanCuti->kasubag->nip }}<br>
                     <i>({{ $pengajuanCuti->alasan_kasubag }})</i>
                 @else
-                    √<br>{{ $pengajuanCuti->alasan_kasubag }}
+                    V<br>{{ $pengajuanCuti->alasan_kasubag }}
                 @endif
             @endif
         </td>
     </tr>
-</table>
-<br>
-<table class="form-table">
-    <colgroup>
-        <col style="width:14.4%"><col style="width:12.4%"><col style="width:13.9%">
-        <col style="width:13.3%"><col style="width:16.1%"><col style="width:9.9%">
-        <col style="width:20.0%">
-    </colgroup>
-    <tbody>
+    <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== VIII. KEPUTUSAN PEJABAT YANG BERWENANG ===================== --}}
     <tr><td colspan="7" class="section-title">VIII. KEPUTUSAN PEJABAT YANG BERWENANG MEMBERIKAN CUTI</td></tr>
     <tr>
@@ -414,23 +359,23 @@
         <td colspan="4" class="tc tall-box">
             @if($pejabatApproved)
                 @if($pengajuanCuti->pejabat)
-                    @if($pengajuanCuti->pejabat->signature_path)
-                        <img src="{{ public_path('storage/' . $pengajuanCuti->pejabat->signature_path) }}" class="signature-img"><br>
+                    @if($sig = getSignatureBase64($pengajuanCuti->pejabat->signature_path))
+                        <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
                     <u>{{ $pengajuanCuti->pejabat->nama }}</u><br>
                     NIP. {{ $pengajuanCuti->pejabat->nip }}
                 @else
-                    √<br>{{ $pengajuanCuti->alasan_pejabat }}
+                    V<br>{{ $pengajuanCuti->alasan_pejabat }}
                 @endif
             @endif
         </td>
         <td colspan="3" class="tc tall-box">
             @if($pejabatRejected)
                 @if($pengajuanCuti->pejabat)
-                    @if($pengajuanCuti->pejabat->signature_path)
-                        <img src="{{ public_path('storage/' . $pengajuanCuti->pejabat->signature_path) }}" class="signature-img"><br>
+                    @if($sig = getSignatureBase64($pengajuanCuti->pejabat->signature_path))
+                        <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
@@ -438,7 +383,7 @@
                     NIP. {{ $pengajuanCuti->pejabat->nip }}<br>
                     <i>({{ $pengajuanCuti->alasan_pejabat }})</i>
                 @else
-                    √<br>{{ $pengajuanCuti->alasan_pejabat }}
+                    V<br>{{ $pengajuanCuti->alasan_pejabat }}
                 @endif
             @endif
         </td>

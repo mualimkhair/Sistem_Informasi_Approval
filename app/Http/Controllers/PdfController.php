@@ -11,7 +11,7 @@ class PdfController extends Controller
     {
         $pengajuanCuti->load(['user.unitKerja', 'kelompokKerja']);
         
-        $pdf = Pdf::loadView('pdf.cetak-cuti', compact('pengajuanCuti'))->setPaper('A4', 'portrait');
+        $pdf = Pdf::loadView('pdf.cetak-cuti', compact('pengajuanCuti'))->setPaper('legal', 'portrait');
         return $pdf->stream('Form-Cuti-'.$pengajuanCuti->user->nip.'.pdf');
     }
 }
