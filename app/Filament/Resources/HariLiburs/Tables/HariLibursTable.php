@@ -20,8 +20,8 @@ class HariLibursTable
         return $table
             ->columns([
                 TextColumn::make('tanggal')->date()->sortable(),
-                TextColumn::make('keterangan')->searchable(),
-                TextColumn::make('jenis')->badge()->color(fn (string $state): string => match ($state) {
+                TextColumn::make('keterangan')->searchable()->sortable(),
+                TextColumn::make('jenis')->badge()->searchable()->color(fn (string $state): string => match ($state) {
                     'libur_nasional' => 'danger',
                     'cuti_bersama' => 'warning',
                 }),

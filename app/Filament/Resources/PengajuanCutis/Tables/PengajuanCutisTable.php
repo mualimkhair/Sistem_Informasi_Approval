@@ -33,15 +33,16 @@ class PengajuanCutisTable
                     ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin'])),
             ])
             ->columns([
-                TextColumn::make('user.nama')->label('Pegawai')->searchable(),
-                TextColumn::make('user.unitKerja.nama_unit')->label('Unit Kerja')->sortable(),
-                TextColumn::make('jenis_cuti')->badge(),
-                TextColumn::make('tanggal_mulai')->date(),
-                TextColumn::make('tanggal_selesai')->date(),
-                TextColumn::make('lama_cuti')->label('Lama (Hari)'),
+                TextColumn::make('user.nama')->label('Pegawai')->searchable()->sortable(),
+                TextColumn::make('user.unitKerja.nama_unit')->label('Unit Kerja')->searchable()->sortable(),
+                TextColumn::make('jenis_cuti')->badge()->sortable()->searchable(),
+                TextColumn::make('tanggal_mulai')->date()->sortable(),
+                TextColumn::make('tanggal_selesai')->date()->sortable(),
+                TextColumn::make('lama_cuti')->label('Lama (Hari)')->sortable(),
                 TextColumn::make('status')
                     ->formatStateUsing(fn (string $state): string => ucwords(str_replace('_', ' ', $state)))
                     ->badge()
+                    ->sortable()
                     ->color(fn (string $state): string => match ($state) {
                         'menunggu_atasan', 'menunggu_pejabat' => 'warning',
                         'disetujui' => 'success',

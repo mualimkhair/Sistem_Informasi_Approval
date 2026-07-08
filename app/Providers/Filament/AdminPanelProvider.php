@@ -62,6 +62,7 @@ class AdminPanelProvider extends PanelProvider
                 \App\Http\Middleware\EnforceProfileCompletion::class,
             ])
             ->databaseNotifications()
-            ->databaseNotificationsPolling('30s');
+            ->databaseNotificationsPolling('30s')
+            ->globalSearch(false);
     }
 }

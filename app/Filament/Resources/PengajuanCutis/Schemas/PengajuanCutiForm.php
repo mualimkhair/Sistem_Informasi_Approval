@@ -92,7 +92,7 @@ class PengajuanCutiForm
                             ->label('Tanggal Mulai')
                             ->required()
                             ->native(false)
-                            ->minDate(now())
+                            ->minDate(today())
                             ->live()
                             ->rules([
                                 fn($get) => function (string $attribute, $value, \Closure $fail) use ($get) {
@@ -112,7 +112,7 @@ class PengajuanCutiForm
                             ->label('Tanggal Selesai')
                             ->required()
                             ->native(false)
-                            ->minDate(now())
+                            ->minDate(today())
                             ->afterOrEqual('tanggal_mulai')
                             ->live()
                             ->rules([
