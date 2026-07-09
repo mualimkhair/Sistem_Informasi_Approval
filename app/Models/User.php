@@ -22,6 +22,26 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     protected $guarded = ['id'];
 
+    public const PANGKAT_GOLONGAN = [
+        'Juru Muda (I/a)' => 'Juru Muda (I/a)',
+        'Juru Muda Tk.I (I/b)' => 'Juru Muda Tk.I (I/b)',
+        'Juru (I/c)' => 'Juru (I/c)',
+        'Juru Tk.I (I/d)' => 'Juru Tk.I (I/d)',
+        'Pengatur Muda (II/a)' => 'Pengatur Muda (II/a)',
+        'Pengatur Muda Tk.I (II/b)' => 'Pengatur Muda Tk.I (II/b)',
+        'Pengatur (II/c)' => 'Pengatur (II/c)',
+        'Pengatur Tk.I (II/d)' => 'Pengatur Tk.I (II/d)',
+        'Penata Muda (III/a)' => 'Penata Muda (III/a)',
+        'Penata Muda Tk.I (III/b)' => 'Penata Muda Tk.I (III/b)',
+        'Penata (III/c)' => 'Penata (III/c)',
+        'Penata Tk.I (III/d)' => 'Penata Tk.I (III/d)',
+        'Pembina (IV/a)' => 'Pembina (IV/a)',
+        'Pembina Tk.I (IV/b)' => 'Pembina Tk.I (IV/b)',
+        'Pembina Utama Muda (IV/c)' => 'Pembina Utama Muda (IV/c)',
+        'Pembina Utama Madya (IV/d)' => 'Pembina Utama Madya (IV/d)',
+        'Pembina Utama (IV/e)' => 'Pembina Utama (IV/e)',
+    ];
+
     protected $hidden = [
         'password',
         'remember_token',

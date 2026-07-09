@@ -70,6 +70,12 @@ class LengkapiProfil extends Page
                         TextInput::make('jabatan')
                             ->label('Jabatan')
                             ->required(),
+                        Select::make('pangkat_gol')
+                            ->label('Pangkat/Golongan')
+                            ->options(\App\Models\User::PANGKAT_GOLONGAN)
+                            ->searchable()
+                            ->nullable()
+                            ->rule(\Illuminate\Validation\Rule::in(array_keys(\App\Models\User::PANGKAT_GOLONGAN))),
                         Select::make('unit_kerja_id')
                             ->label('Unit Kerja')
                             ->options(\App\Models\UnitKerja::pluck('nama_unit', 'id'))
@@ -139,6 +145,7 @@ class LengkapiProfil extends Page
             'alamat' => $data['alamat'],
             'tanggal_masuk' => $data['tanggal_masuk'],
             'jabatan' => $data['jabatan'],
+            'pangkat_gol' => $data['pangkat_gol'] ?? auth()->user()->pangkat_gol,
             'unit_kerja_id' => $data['unit_kerja_id'] ?? auth()->user()->unit_kerja_id,
             'nomor_telp' => $data['nomor_telp'],
             'signature_path' => $signaturePath,
