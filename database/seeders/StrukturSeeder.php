@@ -135,7 +135,6 @@ class StrukturSeeder extends Seeder
                         'pangkat_gol' => $unitData['kanit']['gol'],
                         'is_profile_completed' => false,
                         'unit_kerja_id' => $unit->id,
-                        'seksi_id' => $seksi->id,
                     ]);
                     $kanitUser->assignRole('kanit');
                     $kanitUser->assignRole('pegawai');
