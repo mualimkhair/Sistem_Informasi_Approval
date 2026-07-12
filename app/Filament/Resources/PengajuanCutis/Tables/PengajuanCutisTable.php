@@ -84,20 +84,8 @@ class PengajuanCutisTable
             ->actions([
 
 
-                EditAction::make()
-                    ->visible(function ($record) {
-                        $user = auth()->user();
-                        if ($user->hasRole(['super_admin', 'admin'])) return true;
-                        if ($record->user_id === $user->id) return in_array($record->status, ['perubahan', 'ditangguhkan']);
-                        return false;
-                    }),
-                DeleteAction::make()
-                    ->visible(function ($record) {
-                        $user = auth()->user();
-                        if ($user->hasRole(['super_admin', 'admin'])) return true;
-                        if ($record->user_id === $user->id) return $record->status !== 'disetujui';
-                        return false;
-                    }),
+                EditAction::make(),
+                DeleteAction::make(),
                 Action::make('cetak_pdf')
                     ->label('Cetak PDF')
                     ->icon('heroicon-o-document-arrow-down')

@@ -163,6 +163,19 @@ class CutiService
         }
 
         $saldo->save();
+
+        // Create potong ledger to close the hold
+        if (!\App\Models\SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
+            ->where('aksi', 'potong')->exists()) {
+            \App\Models\SaldoCutiLedger::create([
+                'user_id' => $pengajuan->user_id,
+                'pengajuan_cuti_id' => $pengajuan->id,
+                'jenis_cuti' => $pengajuan->jenis_cuti,
+                'aksi' => 'potong',
+                'jumlah' => $pengajuan->lama_cuti,
+                'keterangan' => 'Potong final otomatis saat disetujui (lama: ' . $pengajuan->lama_cuti . ' hari)',
+            ]);
+        }
     }
 
     public static function hitungSaldoTersedia(User $user, string $jenisCuti): int
@@ -297,8 +310,6 @@ class CutiService
             'jumlah' => $pengajuan->lama_cuti,
             'keterangan' => 'Release hold saat pengajuan (lama: ' . $pengajuan->lama_cuti . ' hari)',
         ]);
-
-        $hold->delete();
     }
 
 }

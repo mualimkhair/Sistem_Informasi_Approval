@@ -64,10 +64,4 @@ class PengajuanCutiResource extends Resource
     }
 
 
-    public static function getDeleteAuthorizationResponse(Model $record): Response
-{
-    return auth()->user()->hasRole(['super_admin', 'admin'])
-        ? Response::allow()
-        : Response::deny('Hanya admin yang dapat menghapus pengajuan cuti.');
-}
 }
