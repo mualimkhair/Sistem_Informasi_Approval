@@ -8,6 +8,10 @@ class Seksi extends Model
 {
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'kepala_seksi_id' => 'integer',
+    ];
+
     public function kepalaSeksi()
     {
         return $this->belongsTo(User::class, 'kepala_seksi_id');
