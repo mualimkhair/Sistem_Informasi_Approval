@@ -14,6 +14,10 @@ class UnitKerjaObserver
             $oldKepalaId = $unitKerja->getOriginal('kepala_unit_id');
             $newKepalaId = $unitKerja->kepala_unit_id;
 
+            if ($oldKepalaId === $newKepalaId) {
+                return;
+            }
+
             DB::transaction(function () use ($unitKerja, $oldKepalaId, $newKepalaId) {
                 if ($oldKepalaId) {
                     $oldUser = User::find($oldKepalaId);
@@ -21,7 +25,7 @@ class UnitKerjaObserver
                         $isHeadOfOther = UnitKerja::where('kepala_unit_id', $oldKepalaId)
                             ->where('id', '!=', $unitKerja->id)
                             ->exists();
-                            
+
                         if (!$isHeadOfOther) {
                             $oldUser->removeRole('kanit');
                         }
@@ -32,7 +36,7 @@ class UnitKerjaObserver
                     $newUser = User::find($newKepalaId);
                     if ($newUser) {
                         $newUser->assignRole('kanit');
-                        
+
                         if ($newUser->unit_kerja_id !== $unitKerja->id) {
                             $newUser->unit_kerja_id = $unitKerja->id;
                             $newUser->saveQuietly();
@@ -40,6 +44,8 @@ class UnitKerjaObserver
                     }
                 }
             });
+
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
         }
     }
 }

@@ -14,6 +14,10 @@ class SeksiObserver
             $oldKepalaId = $seksi->getOriginal('kepala_seksi_id');
             $newKepalaId = $seksi->kepala_seksi_id;
 
+            if ($oldKepalaId === $newKepalaId) {
+                return;
+            }
+
             DB::transaction(function () use ($seksi, $oldKepalaId, $newKepalaId) {
                 if ($oldKepalaId) {
                     $oldUser = User::find($oldKepalaId);
@@ -21,7 +25,7 @@ class SeksiObserver
                         $isHeadOfOther = Seksi::where('kepala_seksi_id', $oldKepalaId)
                             ->where('id', '!=', $seksi->id)
                             ->exists();
-                            
+
                         if (!$isHeadOfOther) {
                             $oldUser->removeRole('kasubag');
                         }
@@ -32,7 +36,7 @@ class SeksiObserver
                     $newUser = User::find($newKepalaId);
                     if ($newUser) {
                         $newUser->assignRole('kasubag');
-                        
+
                         if ($newUser->seksi_id !== $seksi->id) {
                             $newUser->seksi_id = $seksi->id;
                             $newUser->saveQuietly();
@@ -40,6 +44,8 @@ class SeksiObserver
                     }
                 }
             });
+
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
         }
     }
 }
