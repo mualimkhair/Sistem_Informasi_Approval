@@ -11,6 +11,10 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Enums\FiltersLayout;
+use App\Services\CutiService;
+use Filament\Notifications\Notification;
+use Filament\Actions\Action;
+use Illuminate\Support\Facades\DB;
 
 class UsersTable
 {
@@ -23,8 +27,8 @@ class UsersTable
                 \Filament\Actions\Action::make('download_template')
                     ->label('Unduh Template Excel')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn () => route('users.template'))
-                    ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin'])),
+                    ->url(fn() => route('users.template'))
+                    ->visible(fn() => auth()->user()->hasRole(['super_admin', 'admin'])),
                 \Filament\Actions\Action::make('import')
                     ->label('Import Pegawai')
                     ->icon('heroicon-o-arrow-up-tray')
@@ -43,7 +47,7 @@ class UsersTable
                             ->success()
                             ->send();
                     })
-                    ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin'])),
+                    ->visible(fn() => auth()->user()->hasRole(['super_admin', 'admin'])),
             ])
             ->columns([
                 TextColumn::make('nip')
@@ -70,7 +74,7 @@ class UsersTable
                 TextColumn::make('unitKerja.jenis')
                     ->label('Jenis Unit')
                     ->badge()
-                    ->color(fn ($state) => $state === 'operasional' ? 'warning' : 'info'),
+                    ->color(fn($state) => $state === 'operasional' ? 'warning' : 'info'),
                 IconColumn::make('is_profile_completed')
                     ->label('Profil')
                     ->boolean()
@@ -98,9 +102,12 @@ class UsersTable
                 \Filament\Tables\Filters\SelectFilter::make('jenis_unit')
                     ->label('Jenis Unit')
                     ->options(['administrasi' => 'Administrasi', 'operasional' => 'Operasional'])
-                    ->query(fn (Builder $query, array $data) =>
-                        $query->when($data['value'] ?? null, fn ($q, $v) =>
-                            $q->whereHas('unitKerja', fn ($q2) => $q2->where('jenis', $v))
+                    ->query(
+                        fn(Builder $query, array $data) =>
+                        $query->when(
+                            $data['value'] ?? null,
+                            fn($q, $v) =>
+                            $q->whereHas('unitKerja', fn($q2) => $q2->where('jenis', $v))
                         )
                     ),
                 \Filament\Tables\Filters\TernaryFilter::make('is_profile_completed')
@@ -114,40 +121,50 @@ class UsersTable
                     ->icon('heroicon-o-arrow-path')
                     ->color('warning')
                     ->requiresConfirmation()
-                    ->visible(fn () => auth()->user()->hasRole('super_admin'))
-                    ->action(function ($record) {
-                        $saldo = $record->saldoCuti;
-                        if ($saldo) {
-                            $saldo->update([
-                                'saldo_n2' => min($saldo->saldo_n1, 6),
-                                'saldo_n1' => min($saldo->saldo_n, 6),
-                                'saldo_n' => 12,
-                                'saldo_cuti_besar' => 90,
-                                'saldo_cuti_sakit' => 365,
-                                'saldo_cuti_melahirkan' => 90,
-                                'saldo_cuti_alasan_penting' => 30,
-                                'tahun_berjalan' => date('Y')
-                            ]);
+                    ->visible(fn() => auth()->user()->hasRole('super_admin'))
+                    ->action(function (User $record) {
+                        if ($record->saldoCuti) {
+                            CutiService::resetSaldoToDefault($record->saldoCuti);
                         } else {
-                            SaldoCuti::create([
-                                'user_id'                     => $record->id,
-                                'saldo_n'                     => 12,
-                                'saldo_n1'                    => 0,
-                                'saldo_n2'                    => 0,
-                                'saldo_cuti_besar'            => 90,
-                                'saldo_cuti_sakit'            => 365,
-                                'saldo_cuti_melahirkan'       => 90,
-                                'saldo_cuti_alasan_penting'   => 30,
-                                'tahun_berjalan'              => date('Y'),
-                            ]);
+                            $saldo = new SaldoCuti(['user_id' => $record->id]);
+                            CutiService::resetSaldoToDefault($saldo);
                         }
-                        \Filament\Notifications\Notification::make()
-                            ->title('Saldo Berhasil Direset')
-                            ->success()
-                            ->send();
+                        Notification::make()->title('Saldo cuti berhasil di-reset ke default.')->success()->send();
                     }),
                 EditAction::make(),
                 DeleteAction::make(),
+                \Filament\Actions\Action::make('reset_all_saldo')
+                    ->label('Reset All Saldo (Rollover)')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Jalankan Rollover Saldo Tahunan?')
+                    ->modalDescription(function () {
+                        $sudahDijalankan = SaldoCuti::where('last_rollover_year', now()->year)->exists();
+                        if ($sudahDijalankan) {
+                            return 'PERHATIAN: Rollover sudah pernah dijalankan untuk tahun ini. Jalankan lagi akan melewatkan user yang sudah dirollover.';
+                        }
+                        return 'Ini akan menjalankan rollover saldo tahunan untuk SELURUH pegawai. N2 akan hangus, N1 → N2, N → N1, N baru = 12.';
+                    })
+                    ->visible(fn() => auth()->user()->hasRole('super_admin'))
+                    ->action(function () {
+                        $count = 0;
+                        DB::transaction(function () use (&$count) {
+                            $saldos = SaldoCuti::all();
+                            foreach ($saldos as $saldo) {
+                                if ($saldo->user && !$saldo->user->hasRole('super_admin')) {
+                                    CutiService::rolloverSaldoTahunan($saldo);
+                                    $count++;
+                                }
+                            }
+                        });
+                        Notification::make()
+                            ->title("Rollover selesai untuk {$count} pegawai.")
+                            ->success()
+                            ->send();
+                    }),
+
+
             ]);
     }
 }

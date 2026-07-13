@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use App\Models\SaldoCutiLedger;
 use App\Models\User;
+use App\Models\SaldoCuti;
 
 class CutiService
 {
@@ -165,8 +166,10 @@ class CutiService
         $saldo->save();
 
         // Create potong ledger to close the hold
-        if (!\App\Models\SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
-            ->where('aksi', 'potong')->exists()) {
+        if (
+            !\App\Models\SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
+                ->where('aksi', 'potong')->exists()
+        ) {
             \App\Models\SaldoCutiLedger::create([
                 'user_id' => $pengajuan->user_id,
                 'pengajuan_cuti_id' => $pengajuan->id,
@@ -268,6 +271,56 @@ class CutiService
             'aksi' => 'release',
             'jumlah' => $pengajuan->lama_cuti,
             'keterangan' => 'Release hold saat pengajuan (lama: ' . $pengajuan->lama_cuti . ' hari)',
+        ]);
+    }
+
+    public static function rolloverSaldoTahunan(SaldoCuti $saldo): void
+    {
+        $tahunSekarang = now()->year;
+        if ($saldo->last_rollover_year == $tahunSekarang) {
+            return; // idempotent, sudah dijalankan tahun ini
+        }
+
+        $saldo->saldo_n2 = min($saldo->saldo_n1, 6);
+        $saldo->saldo_n1 = min($saldo->saldo_n, 6);
+        $saldo->saldo_n = 12;
+
+        $saldo->saldo_cuti_besar = 90;
+        $saldo->saldo_cuti_sakit = 365;
+        $saldo->saldo_cuti_melahirkan = 90;
+        $saldo->saldo_cuti_alasan_penting = 30;
+
+        $saldo->tahun_berjalan = $tahunSekarang;
+        $saldo->last_rollover_year = $tahunSekarang;
+        $saldo->save();
+
+        SaldoCutiLedger::create([
+            'user_id' => $saldo->user_id,
+            'jenis_cuti' => 'tahunan',
+            'aksi' => 'rollover',
+            'jumlah' => 0,
+            'keterangan' => "Rollover tahunan {$tahunSekarang}: N2={$saldo->saldo_n2}, N1={$saldo->saldo_n1}, N={$saldo->saldo_n}",
+        ]);
+    }
+
+    public static function resetSaldoToDefault(SaldoCuti $saldo): void
+    {
+        $saldo->saldo_n = 12;
+        $saldo->saldo_n1 = 0;
+        $saldo->saldo_n2 = 0;
+        $saldo->saldo_cuti_besar = 0;
+        $saldo->saldo_cuti_sakit = 0;
+        $saldo->saldo_cuti_melahirkan = 0;
+        $saldo->saldo_cuti_alasan_penting = 0;
+        $saldo->tahun_berjalan = now()->year;
+        $saldo->save();
+
+        SaldoCutiLedger::create([
+            'user_id' => $saldo->user_id,
+            'jenis_cuti' => 'tahunan',
+            'aksi' => 'factory_reset',
+            'jumlah' => 0,
+            'keterangan' => 'Factory reset saldo by admin',
         ]);
     }
 
