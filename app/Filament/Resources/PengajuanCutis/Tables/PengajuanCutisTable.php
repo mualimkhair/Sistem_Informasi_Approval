@@ -82,8 +82,7 @@ class PengajuanCutisTable
             ->filtersLayout(FiltersLayout::AboveContent)
             ->filtersFormColumns(2)
             ->actions([
-
-
+                \Filament\Actions\ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
                 Action::make('cetak_pdf')

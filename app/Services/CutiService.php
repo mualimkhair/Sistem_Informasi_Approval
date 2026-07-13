@@ -188,36 +188,8 @@ class CutiService
         if ($baseSaldo < 0)
             return 0;
 
-        // Calculate active holds (holds that haven't been released or potong'd)
-        $activeHoldPengajuanIds = SaldoCutiLedger::where('user_id', $user->id)
-            ->where('jenis_cuti', $jenisCuti)
-            ->where('aksi', 'hold')
-            ->pluck('pengajuan_cuti_id')
-            ->unique()
-            ->filter();
-
-        if ($activeHoldPengajuanIds->isNotEmpty()) {
-            $releasedOrPotongIds = SaldoCutiLedger::where('user_id', $user->id)
-                ->where('jenis_cuti', $jenisCuti)
-                ->whereIn('aksi', ['release', 'potong'])
-                ->whereIn('pengajuan_cuti_id', $activeHoldPengajuanIds)
-                ->pluck('pengajuan_cuti_id')
-                ->unique();
-
-            $stillActiveIds = $activeHoldPengajuanIds->diff($releasedOrPotongIds);
-
-            if ($stillActiveIds->isNotEmpty()) {
-                $activeHolds = SaldoCutiLedger::where('user_id', $user->id)
-                    ->where('jenis_cuti', $jenisCuti)
-                    ->where('aksi', 'hold')
-                    ->whereIn('pengajuan_cuti_id', $stillActiveIds)
-                    ->sum('jumlah');
-
-                $baseSaldo = max(0, $baseSaldo - $activeHolds);
-            }
-        }
-
-        return $baseSaldo;
+        $activeHolds = self::getActiveHoldsByJenis($user, $jenisCuti);
+        return max(0, $baseSaldo - $activeHolds);
     }
 
     private static function getBaseSaldo($saldo, string $jenisCuti): int
@@ -241,12 +213,15 @@ class CutiService
         if ($pengajuan->lama_cuti <= 0)
             return;
 
-        // Check if there's already an active hold for this pengajuan
-        $existingHold = SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
+        $activeHoldCount = SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
             ->where('aksi', 'hold')
-            ->first();
+            ->count();
+            
+        $releaseCount = SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
+            ->whereIn('aksi', ['release', 'potong'])
+            ->count();
 
-        if ($existingHold)
+        if ($activeHoldCount > $releaseCount)
             return; // Don't double-hold
 
         SaldoCutiLedger::create([
@@ -260,48 +235,30 @@ class CutiService
     }
     public static function getActiveHoldsByJenis(User $user, string $jenisCuti): int
     {
-        $activeHoldPengajuanIds = SaldoCutiLedger::where('user_id', $user->id)
+        $totalHold = SaldoCutiLedger::where('user_id', $user->id)
             ->where('jenis_cuti', $jenisCuti)
             ->where('aksi', 'hold')
-            ->pluck('pengajuan_cuti_id')
-            ->unique()
-            ->filter();
+            ->sum('jumlah');
 
-        if ($activeHoldPengajuanIds->isEmpty())
-            return 0;
-
-        $releasedOrPotongIds = SaldoCutiLedger::where('user_id', $user->id)
+        $totalRelease = SaldoCutiLedger::where('user_id', $user->id)
             ->where('jenis_cuti', $jenisCuti)
             ->whereIn('aksi', ['release', 'potong'])
-            ->whereIn('pengajuan_cuti_id', $activeHoldPengajuanIds)
-            ->pluck('pengajuan_cuti_id')
-            ->unique();
-
-        $stillActiveIds = $activeHoldPengajuanIds->diff($releasedOrPotongIds);
-
-        if ($stillActiveIds->isEmpty())
-            return 0;
-
-        return SaldoCutiLedger::where('user_id', $user->id)
-            ->where('jenis_cuti', $jenisCuti)
-            ->where('aksi', 'hold')
-            ->whereIn('pengajuan_cuti_id', $stillActiveIds)
             ->sum('jumlah');
+
+        return max(0, $totalHold - $totalRelease);
     }
 
     public static function releaseSaldo(PengajuanCuti $pengajuan): void
     {
-        $hold = SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
+        $activeHoldCount = SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
             ->where('aksi', 'hold')
-            ->first();
+            ->count();
+            
+        $releaseCount = SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
+            ->whereIn('aksi', ['release', 'potong'])
+            ->count();
 
-        if (!$hold)
-            return;
-
-        if (
-            SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
-                ->where('aksi', 'release')->exists()
-        )
+        if ($activeHoldCount <= $releaseCount)
             return;
 
         SaldoCutiLedger::create([
