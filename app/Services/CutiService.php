@@ -298,8 +298,10 @@ class CutiService
         if (!$hold)
             return;
 
-        if (SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
-            ->where('aksi', 'release')->exists())
+        if (
+            SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
+                ->where('aksi', 'release')->exists()
+        )
             return;
 
         SaldoCutiLedger::create([
