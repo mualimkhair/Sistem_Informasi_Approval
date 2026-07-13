@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\SaldoCuti;
 use Illuminate\Support\Facades\DB;
+use App\Services\CutiService;
 
 class ResetCutiCommand extends Command
 {
@@ -16,20 +17,9 @@ class ResetCutiCommand extends Command
         DB::transaction(function () {
             $saldos = SaldoCuti::all();
             foreach ($saldos as $saldo) {
-                $saldo->saldo_n2 = min($saldo->saldo_n1, 6);
-                $saldo->saldo_n1 = min($saldo->saldo_n, 6);
-                $saldo->saldo_n = 12;
-                
-                $saldo->saldo_cuti_besar = 90;
-                $saldo->saldo_cuti_sakit = 365;
-                $saldo->saldo_cuti_melahirkan = 90;
-                $saldo->saldo_cuti_alasan_penting = 30;
-                
-                $saldo->tahun_berjalan = date('Y');
-                $saldo->save();
+                CutiService::rolloverSaldoTahunan($saldo);
             }
         });
-
-        $this->info('Saldo cuti seluruh pegawai berhasil di-reset.');
+        $this->info('Rollover saldo cuti tahunan selesai.');
     }
 }
