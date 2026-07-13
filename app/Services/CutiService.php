@@ -163,6 +163,15 @@ class CutiService
         }
 
         $saldo->save();
+
+        SaldoCutiLedger::create([
+            'user_id' => $pengajuan->user_id,
+            'pengajuan_cuti_id' => $pengajuan->id,
+            'jenis_cuti' => $pengajuan->jenis_cuti,
+            'aksi' => 'potong',
+            'jumlah' => $pengajuan->lama_cuti,
+            'keterangan' => 'Pemotongan saldo final saat disetujui',
+        ]);
     }
 
     public static function hitungSaldoTersedia(User $user, string $jenisCuti): int
@@ -285,8 +294,10 @@ class CutiService
         if (!$hold)
             return;
 
-        if (SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
-            ->where('aksi', 'release')->exists())
+        if (
+            SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
+                ->where('aksi', 'release')->exists()
+        )
             return;
 
         SaldoCutiLedger::create([
