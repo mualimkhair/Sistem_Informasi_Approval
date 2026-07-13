@@ -12,16 +12,46 @@ class SaldoCutiWidget extends BaseWidget
     {
         $saldo = Auth::user()->saldoCuti;
         $user = Auth::user();
+        
+        if (!$saldo) return [];
+
         $tersediaTahunan = \App\Services\CutiService::hitungSaldoTersedia($user, 'tahunan');
         $tersediaBesar = \App\Services\CutiService::hitungSaldoTersedia($user, 'besar');
         $tersediaSakit = \App\Services\CutiService::hitungSaldoTersedia($user, 'sakit');
         $tersediaMelahirkan = \App\Services\CutiService::hitungSaldoTersedia($user, 'melahirkan');
         $tersediaAlasanPenting = \App\Services\CutiService::hitungSaldoTersedia($user, 'alasan_penting');
-        if (!$saldo) return [];
+
+        // Simulasi bucket tahunan yang sudah dikurangi hold
+        $n2 = $saldo->saldo_n2;
+        $n1 = $saldo->saldo_n1;
+        $n = $saldo->saldo_n;
+
+        $activeHoldsTahunan = \App\Services\CutiService::getActiveHoldsByJenis($user, 'tahunan');
+        if ($activeHoldsTahunan > 0) {
+            if ($n2 >= $activeHoldsTahunan) {
+                $n2 -= $activeHoldsTahunan;
+                $activeHoldsTahunan = 0;
+            } else {
+                $activeHoldsTahunan -= $n2;
+                $n2 = 0;
+            }
+            if ($activeHoldsTahunan > 0) {
+                if ($n1 >= $activeHoldsTahunan) {
+                    $n1 -= $activeHoldsTahunan;
+                    $activeHoldsTahunan = 0;
+                } else {
+                    $activeHoldsTahunan -= $n1;
+                    $n1 = 0;
+                }
+            }
+            if ($activeHoldsTahunan > 0) {
+                $n = max(0, $n - $activeHoldsTahunan);
+            }
+        }
 
         return [
             Stat::make('Sisa Cuti Tahunan', $tersediaTahunan . ' Hari')
-                ->description("N: {$saldo->saldo_n} | N-1: {$saldo->saldo_n1} | N-2: {$saldo->saldo_n2}")
+                ->description("N: {$n} | N-1: {$n1} | N-2: {$n2}")
                 ->icon('heroicon-o-calendar-days'),
             Stat::make('Cuti Besar', $tersediaBesar . ' / ' . '90' . ' Hari')
                 ->icon('heroicon-o-calendar-days'),
@@ -31,8 +61,6 @@ class SaldoCutiWidget extends BaseWidget
                 ->icon('heroicon-m-user'),
             Stat::make('Cuti Alasan Penting', $tersediaAlasanPenting . ' / ' . '30' . ' Hari')
                 ->icon('heroicon-o-exclamation-circle'),
-            // Stat::make('Cuti Diluar Tanggungan Negara', $saldo->saldo_cuti_diluar_tanggungan_negara . ' / ' . '1095' . ' Hari')
-            //     ->icon('heroicon-o-exclamation-circle'),
         ];
     }
 }

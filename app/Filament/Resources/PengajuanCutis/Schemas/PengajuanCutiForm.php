@@ -169,6 +169,27 @@ class PengajuanCutiForm
                         Textarea::make('alamat_selama_cuti')
                             ->label('Alamat Selama Cuti')
                             ->required(),
+                            
+                        \Filament\Schemas\Components\Fieldset::make('Catatan / Alasan dari Atasan')
+                            ->schema([
+                                Textarea::make('alasan_kanit')
+                                    ->label('Catatan Kanit')
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->visible(fn ($record) => $record && $record->alasan_kanit !== null),
+                                Textarea::make('alasan_kasubag')
+                                    ->label('Catatan Kasubag')
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->visible(fn ($record) => $record && $record->alasan_kasubag !== null),
+                                Textarea::make('alasan_pejabat')
+                                    ->label('Catatan Pejabat')
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->visible(fn ($record) => $record && $record->alasan_pejabat !== null),
+                            ])
+                            ->visible(fn ($record) => $record && ($record->alasan_kanit !== null || $record->alasan_kasubag !== null || $record->alasan_pejabat !== null))
+                            ->columnSpanFull(),
                     ])->columns(2),
 
             ]);
