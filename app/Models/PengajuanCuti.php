@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 #[ObservedBy(\App\Observers\PengajuanCutiObserver::class)]
 class PengajuanCuti extends Model
 {
-    use HasUlids;
+    use HasUlids, SoftDeletes;
 
     protected $guarded = ['id'];
 

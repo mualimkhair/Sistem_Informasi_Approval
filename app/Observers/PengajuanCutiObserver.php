@@ -159,4 +159,9 @@ class PengajuanCutiObserver
             );
         }
     }
+
+    public function deleting(PengajuanCuti $pengajuanCuti)
+    {
+        CutiService::releaseSaldo($pengajuanCuti);
+    }
 }
