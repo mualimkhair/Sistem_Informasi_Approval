@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\PengajuanCutiStatusLog;
 
 #[ObservedBy(\App\Observers\PengajuanCutiObserver::class)]
 class PengajuanCuti extends Model
@@ -25,7 +26,7 @@ class PengajuanCuti extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public function kelompokKerja()
     {
         return $this->belongsTo(KelompokKerja::class);
@@ -41,7 +42,7 @@ class PengajuanCuti extends Model
         return $this->belongsTo(UnitKerja::class);
     }
 
-    public function ledgers() 
+    public function ledgers()
     {
         return $this->hasMany(SaldoCutiLedger::class, 'pengajuan_cuti_id', 'id');
     }
@@ -71,43 +72,52 @@ class PengajuanCuti extends Model
             $q->where('user_id', $user->id);
 
             if ($user->hasRole('pejabat_berwenang')) {
-                $q->orWhere(function(\Illuminate\Database\Eloquent\Builder $q2) {
+                $q->orWhere(function (\Illuminate\Database\Eloquent\Builder $q2) {
                     $q2->whereIn('keputusan_kanit', ['disetujui', 'dilewati'])
-                       ->whereIn('keputusan_kasubag', ['disetujui', 'dilewati']);
+                        ->whereIn('keputusan_kasubag', ['disetujui', 'dilewati']);
                 });
             }
 
             if ($user->hasRole('kasubag')) {
                 // By snapshot
                 $q->orWhereHas('seksi', fn(\Illuminate\Database\Eloquent\Builder $q2) => $q2->where('kepala_seksi_id', $user->id));
-                $q->orWhereHas('unitKerja', fn(\Illuminate\Database\Eloquent\Builder $q2) =>
+                $q->orWhereHas(
+                    'unitKerja',
+                    fn(\Illuminate\Database\Eloquent\Builder $q2) =>
                     $q2->whereHas('seksi', fn(\Illuminate\Database\Eloquent\Builder $q3) => $q3->where('kepala_seksi_id', $user->id))
                 );
-                
+
                 // Fallback by current profile (if snapshot is null)
-                $q->orWhere(function(\Illuminate\Database\Eloquent\Builder $q2) use ($user) {
+                $q->orWhere(function (\Illuminate\Database\Eloquent\Builder $q2) use ($user) {
                     $q2->whereNull('seksi_id')
-                       ->whereHas('user', function(\Illuminate\Database\Eloquent\Builder $q3) use ($user) {
-                           $q3->whereHas('seksi', fn(\Illuminate\Database\Eloquent\Builder $q4) => $q4->where('kepala_seksi_id', $user->id))
-                              ->orWhereHas('unitKerja', fn(\Illuminate\Database\Eloquent\Builder $q4) =>
-                                  $q4->whereHas('seksi', fn(\Illuminate\Database\Eloquent\Builder $q5) => $q5->where('kepala_seksi_id', $user->id))
-                              );
-                       });
+                        ->whereHas('user', function (\Illuminate\Database\Eloquent\Builder $q3) use ($user) {
+                            $q3->whereHas('seksi', fn(\Illuminate\Database\Eloquent\Builder $q4) => $q4->where('kepala_seksi_id', $user->id))
+                                ->orWhereHas(
+                                    'unitKerja',
+                                    fn(\Illuminate\Database\Eloquent\Builder $q4) =>
+                                    $q4->whereHas('seksi', fn(\Illuminate\Database\Eloquent\Builder $q5) => $q5->where('kepala_seksi_id', $user->id))
+                                );
+                        });
                 });
             }
 
             if ($user->hasRole('kanit')) {
                 // By snapshot
                 $q->orWhereHas('unitKerja', fn(\Illuminate\Database\Eloquent\Builder $q2) => $q2->where('kepala_unit_id', $user->id));
-                
+
                 // Fallback by current profile (if snapshot is null)
-                $q->orWhere(function(\Illuminate\Database\Eloquent\Builder $q2) use ($user) {
+                $q->orWhere(function (\Illuminate\Database\Eloquent\Builder $q2) use ($user) {
                     $q2->whereNull('unit_kerja_id')
-                       ->whereHas('user', function(\Illuminate\Database\Eloquent\Builder $q3) use ($user) {
-                           $q3->whereHas('unitKerja', fn(\Illuminate\Database\Eloquent\Builder $q4) => $q4->where('kepala_unit_id', $user->id));
-                       });
+                        ->whereHas('user', function (\Illuminate\Database\Eloquent\Builder $q3) use ($user) {
+                            $q3->whereHas('unitKerja', fn(\Illuminate\Database\Eloquent\Builder $q4) => $q4->where('kepala_unit_id', $user->id));
+                        });
                 });
             }
         });
+    }
+
+    public function statusLogs()
+    {
+        return $this->hasMany(PengajuanCutiStatusLog::class);
     }
 }
