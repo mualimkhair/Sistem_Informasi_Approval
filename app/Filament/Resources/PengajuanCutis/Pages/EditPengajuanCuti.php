@@ -23,7 +23,8 @@ class EditPengajuanCuti extends EditRecord
     protected function beforeSave(): void
     {
         $data = $this->form->getState();
-        $saldo = Auth::user()->saldoCuti;
+        $user = $this->record->user;
+        $saldo = $user->saldoCuti;
 
         if (!$saldo) return;
 
@@ -32,16 +33,21 @@ class EditPengajuanCuti extends EditRecord
 
         if ($lama <= 0 || $jenis === 'diluar_tanggungan_negara') return;
 
-        $totalSaldo = \App\Services\CutiService::hitungSaldoTersedia(Auth::user(), $jenis);
+        $lamaLama = $this->record->lama_cuti;
+        if ($lama > $lamaLama) {
+            $totalSaldo = \App\Services\CutiService::hitungSaldoTersedia($user, $jenis);
+            
+            $tambahan = $lama - $lamaLama;
 
-        if ($totalSaldo < $lama) {
-            Notification::make()
-                ->title('Saldo Cuti Tidak Mencukupi')
-                ->body('Sisa saldo ' . str_replace('_', ' ', $jenis) . ' Anda (' . $totalSaldo . ' hari) tidak mencukupi untuk mengajukan ' . $lama . ' hari cuti.')
-                ->danger()
-                ->send();
+            if ($totalSaldo < $tambahan) {
+                Notification::make()
+                    ->title('Saldo Cuti Tidak Mencukupi')
+                    ->body('Sisa saldo ' . str_replace('_', ' ', $jenis) . ' (' . $totalSaldo . ' hari) tidak mencukupi untuk tambahan ' . $tambahan . ' hari cuti.')
+                    ->danger()
+                    ->send();
 
-            $this->halt();
+                $this->halt();
+            }
         }
     }
 

@@ -127,7 +127,7 @@ class CutiService
 
     public static function potongSaldo(PengajuanCuti $pengajuan)
     {
-        $saldo = $pengajuan->user->saldoCuti;
+        $saldo = $pengajuan->user->fresh()->saldoCuti;
         if (!$saldo)
             return;
 
@@ -183,7 +183,7 @@ class CutiService
 
     public static function hitungSaldoTersedia(User $user, string $jenisCuti): int
     {
-        $saldo = $user->saldoCuti;
+        $saldo = $user->fresh()->saldoCuti;
         if (!$saldo)
             return 0;
 
@@ -218,11 +218,11 @@ class CutiService
 
         $activeHoldCount = SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
             ->where('aksi', 'hold')
-            ->count();
+            ->sum('jumlah');
             
         $releaseCount = SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
             ->whereIn('aksi', ['release', 'potong'])
-            ->count();
+            ->sum('jumlah');
 
         if ($activeHoldCount > $releaseCount)
             return; // Don't double-hold
@@ -255,14 +255,14 @@ class CutiService
     {
         $activeHoldCount = SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
             ->where('aksi', 'hold')
-            ->count();
+            ->sum('jumlah');
             
         $releaseCount = SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
             ->whereIn('aksi', ['release', 'potong'])
-            ->count();
+            ->sum('jumlah');
 
         if ($activeHoldCount <= $releaseCount)
-            return;
+            return; 
 
         SaldoCutiLedger::create([
             'user_id' => $pengajuan->user_id,
@@ -272,6 +272,124 @@ class CutiService
             'jumlah' => $pengajuan->lama_cuti,
             'keterangan' => 'Release hold saat pengajuan (lama: ' . $pengajuan->lama_cuti . ' hari)',
         ]);
+    }
+
+    public static function koreksiSaldo(PengajuanCuti $pengajuan, int $lamaLama, int $lamaBaru): void
+    {
+        $selisih = $lamaBaru - $lamaLama;
+        if ($selisih === 0) return;
+
+        if ($pengajuan->status === 'disetujui') {
+            $saldo = $pengajuan->user->fresh()->saldoCuti;
+            if (!$saldo) return;
+
+            if ($selisih > 0) {
+                $tersedia = self::hitungSaldoTersedia($pengajuan->user, $pengajuan->jenis_cuti);
+                if ($tersedia < $selisih) {
+                    throw new \Exception("Saldo cuti tidak mencukupi untuk penambahan hari.");
+                }
+
+                $sisaPotong = $selisih;
+                if ($pengajuan->jenis_cuti === 'tahunan') {
+                    if ($saldo->saldo_n2 >= $sisaPotong) {
+                        $saldo->saldo_n2 -= $sisaPotong;
+                        $sisaPotong = 0;
+                    } else {
+                        $sisaPotong -= $saldo->saldo_n2;
+                        $saldo->saldo_n2 = 0;
+                    }
+
+                    if ($sisaPotong > 0) {
+                        if ($saldo->saldo_n1 >= $sisaPotong) {
+                            $saldo->saldo_n1 -= $sisaPotong;
+                            $sisaPotong = 0;
+                        } else {
+                            $sisaPotong -= $saldo->saldo_n1;
+                            $saldo->saldo_n1 = 0;
+                        }
+                    }
+
+                    if ($sisaPotong > 0) {
+                        $saldo->saldo_n -= $sisaPotong;
+                    }
+                } else {
+                    $field = 'saldo_cuti_' . $pengajuan->jenis_cuti;
+                    if (in_array($pengajuan->jenis_cuti, ['besar', 'sakit', 'melahirkan', 'alasan_penting'])) {
+                        $saldo->{$field} -= $sisaPotong;
+                    }
+                }
+                $saldo->save();
+            } else {
+                $refund = abs($selisih);
+                if ($pengajuan->jenis_cuti === 'tahunan') {
+                    if ($saldo->saldo_n < 12) {
+                        $kurang = 12 - $saldo->saldo_n;
+                        $tambah = min($kurang, $refund);
+                        $saldo->saldo_n += $tambah;
+                        $refund -= $tambah;
+                    }
+                    if ($refund > 0 && $saldo->saldo_n1 < 6) {
+                        $kurang = 6 - $saldo->saldo_n1;
+                        $tambah = min($kurang, $refund);
+                        $saldo->saldo_n1 += $tambah;
+                        $refund -= $tambah;
+                    }
+                    if ($refund > 0 && $saldo->saldo_n2 < 6) {
+                        $kurang = 6 - $saldo->saldo_n2;
+                        $tambah = min($kurang, $refund);
+                        $saldo->saldo_n2 += $tambah;
+                        $refund -= $tambah;
+                    }
+                    if ($refund > 0) {
+                        $saldo->saldo_n2 += $refund;
+                    }
+                } else {
+                    $field = 'saldo_cuti_' . $pengajuan->jenis_cuti;
+                    if (in_array($pengajuan->jenis_cuti, ['besar', 'sakit', 'melahirkan', 'alasan_penting'])) {
+                        $saldo->{$field} += $refund;
+                    }
+                }
+                $saldo->save();
+            }
+
+            SaldoCutiLedger::create([
+                'user_id' => $pengajuan->user_id,
+                'pengajuan_cuti_id' => $pengajuan->id,
+                'jenis_cuti' => $pengajuan->jenis_cuti,
+                'aksi' => 'koreksi',
+                'jumlah' => $selisih,
+                'keterangan' => 'Koreksi Admin (Disetujui): ' . $lamaLama . ' menjadi ' . $lamaBaru . ' hari',
+            ]);
+
+        } else {
+            if (in_array($pengajuan->status, ['ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat', 'ditangguhkan', 'perubahan'])) {
+                return; 
+            }
+
+            if ($selisih > 0) {
+                $tersedia = self::hitungSaldoTersedia($pengajuan->user, $pengajuan->jenis_cuti);
+                if ($tersedia < $selisih) {
+                    throw new \Exception("Saldo cuti tidak mencukupi untuk penambahan hari.");
+                }
+                SaldoCutiLedger::create([
+                    'user_id' => $pengajuan->user_id,
+                    'pengajuan_cuti_id' => $pengajuan->id,
+                    'jenis_cuti' => $pengajuan->jenis_cuti,
+                    'aksi' => 'hold',
+                    'jumlah' => $selisih,
+                    'keterangan' => 'Koreksi Admin (Hold Tambahan): ' . $lamaLama . ' menjadi ' . $lamaBaru . ' hari',
+                ]);
+            } else {
+                SaldoCutiLedger::create([
+                    'user_id' => $pengajuan->user_id,
+                    'pengajuan_cuti_id' => $pengajuan->id,
+                    'jenis_cuti' => $pengajuan->jenis_cuti,
+                    'aksi' => 'release',
+                    'jumlah' => abs($selisih),
+                    'keterangan' => 'Koreksi Admin (Release Parsial): ' . $lamaLama . ' menjadi ' . $lamaBaru . ' hari',
+                ]);
+            }
+        }
     }
 
     public static function rolloverSaldoTahunan(SaldoCuti $saldo): void

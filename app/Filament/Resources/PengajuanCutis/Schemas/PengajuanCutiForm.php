@@ -255,7 +255,7 @@ class PengajuanCutiForm
 
     public static function getSimulasiSaldo($get): array
     {
-        $saldo = Auth::user()->saldoCuti;
+        $saldo = Auth::user()->fresh()->saldoCuti;
         $default = ['n2' => '-', 'n1' => '-', 'n' => '-', 'besar' => '-', 'sakit' => '-', 'melahirkan' => '-', 'penting' => '-'];
 
         $lama = (int) $get('lama_cuti');
