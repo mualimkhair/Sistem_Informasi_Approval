@@ -259,7 +259,7 @@ class CutiService
             ->count();
 
         if ($activeHoldCount <= $releaseCount)
-            return; 
+            return;
 
         SaldoCutiLedger::create([
             'user_id' => $pengajuan->user_id,
