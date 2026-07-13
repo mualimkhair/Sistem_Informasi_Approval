@@ -14,7 +14,7 @@ class CreatePengajuanCuti extends CreateRecord
     protected function beforeCreate(): void
     {
         $data = $this->form->getState();
-        $saldo = Auth::user()->saldoCuti;
+        $saldo = Auth::user()->fresh()->saldoCuti;
 
         if (!$saldo) return;
 

@@ -45,7 +45,7 @@ class PengajuanCutiObserver
             return;
         }
 
-        $saldo = $pengajuanCuti->user->saldoCuti;
+        $saldo = $pengajuanCuti->user->fresh()->saldoCuti;
         if (!$saldo)
             return;
 
@@ -151,12 +151,20 @@ class PengajuanCutiObserver
         }
 
         if ($pengajuanCuti->isDirty(['tanggal_mulai', 'tanggal_selesai', 'kelompok_kerja_id'])) {
-            $pengajuanCuti->lama_cuti = CutiService::hitungLamaCuti(
+            $lamaLama = $pengajuanCuti->getOriginal('lama_cuti');
+            $lamaBaru = CutiService::hitungLamaCuti(
                 Carbon::parse($pengajuanCuti->tanggal_mulai),
                 Carbon::parse($pengajuanCuti->tanggal_selesai),
                 $pengajuanCuti->user->unitKerja ?? null,
                 $pengajuanCuti->kelompokKerja ?? null
             );
+            $pengajuanCuti->lama_cuti = $lamaBaru;
+
+            $isResubmit = in_array($oldStatus, ['perubahan', 'ditangguhkan']) && $pengajuanCuti->status === 'menunggu_atasan';
+            
+            if (!$isResubmit && $lamaLama !== null && $lamaLama !== $lamaBaru) {
+                CutiService::koreksiSaldo($pengajuanCuti, $lamaLama, $lamaBaru);
+            }
         }
     }
 
