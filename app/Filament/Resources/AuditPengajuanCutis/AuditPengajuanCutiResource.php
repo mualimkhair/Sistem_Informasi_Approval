@@ -28,7 +28,7 @@ class AuditPengajuanCutiResource extends Resource
     protected static ?string $recordTitleAttribute = 'AuditPengajuanCutiResource';
 
     protected static ?string $navigationIcons = 'heroicon-o-clipboard-document-list';
-    protected static ?string $navigationLabel = 'Audit Cuti';
+    protected static ?string $navigationLabel = 'Log Cuti';
     protected static ?int $navigationSort = 5;
 
     public static function form(Schema $schema): Schema
