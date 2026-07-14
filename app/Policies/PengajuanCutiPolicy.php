@@ -26,14 +26,14 @@ class PengajuanCutiPolicy
         if ($user->hasRole(['super_admin', 'admin'])) return true;
         
         // Owner
-        if ($pengajuanCuti->user_id === $user->id) return true;
+        if ($pengajuanCuti->user_id == $user->id) return true;
 
         // Approvers can view it if it's from their unit (Kanit/Kasubag) or they are Pejabat
         if ($user->hasRole('pejabat_berwenang')) return true;
 
-        if ($user->hasRole('kasubag') && $pengajuanCuti->seksi_id === $user->seksi_id) return true;
+        if ($user->hasRole('kasubag') && $pengajuanCuti->seksi_id == $user->seksi_id) return true;
         
-        if ($user->hasRole('kanit') && $pengajuanCuti->unit_kerja_id === $user->unit_kerja_id) return true;
+        if ($user->hasRole('kanit') && $pengajuanCuti->unit_kerja_id == $user->unit_kerja_id) return true;
 
         return false;
     }
@@ -54,7 +54,7 @@ class PengajuanCutiPolicy
         if ($user->hasRole(['super_admin', 'admin'])) return true;
 
         // Owner can edit only if status is perubahan or ditangguhkan
-        if ($pengajuanCuti->user_id === $user->id) {
+        if ($pengajuanCuti->user_id == $user->id) {
             return in_array($pengajuanCuti->status, ['perubahan', 'ditangguhkan']);
         }
 
@@ -69,7 +69,7 @@ class PengajuanCutiPolicy
         if ($user->hasRole(['super_admin', 'admin'])) return true;
 
         // Owner can delete ONLY if it's not approved yet (disetujui).
-        if ($pengajuanCuti->user_id === $user->id) {
+        if ($pengajuanCuti->user_id == $user->id) {
             return $pengajuanCuti->status !== 'disetujui';
         }
 

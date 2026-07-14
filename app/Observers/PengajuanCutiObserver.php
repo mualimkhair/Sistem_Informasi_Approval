@@ -80,16 +80,22 @@ class PengajuanCutiObserver
                     ->sendToDatabase($pejabat);
             }
         } else {
-            $kanitKasubags = User::role(['kanit', 'kasubag'])
+            $kanits = User::role('kanit')
                 ->where('unit_kerja_id', $pengajuanCuti->user->unit_kerja_id)
                 ->where('id', '!=', $pengajuanCuti->user_id)
                 ->get();
-            foreach ($kanitKasubags as $user) {
+            $seksiId = $pengajuanCuti->seksi_id ?? $pengajuanCuti->user->seksi_id;
+            $kasubags = User::role('kasubag')
+                ->where('seksi_id', $seksiId)
+                ->where('id', '!=', $pengajuanCuti->user_id)
+                ->get();
+
+            foreach ($kanits->merge($kasubags) as $approver) {
                 Notification::make()
                     ->title('Pengajuan Cuti Baru')
                     ->body('Pengajuan cuti dari ' . $pengajuanCuti->user->nama . ' menunggu persetujuan Anda.')
                     ->info()
-                    ->sendToDatabase($user);
+                    ->sendToDatabase($approver);
             }
         }
         if ($pengajuanCuti->status) {

@@ -28,6 +28,8 @@ class UnitKerjaObserver
 
                         if (!$isHeadOfOther) {
                             $oldUser->removeRole('kanit');
+                            $oldUser->unit_kerja_id = null;
+                            $oldUser->saveQuietly();
                         }
                     }
                 }

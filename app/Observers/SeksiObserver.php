@@ -28,6 +28,8 @@ class SeksiObserver
 
                         if (!$isHeadOfOther) {
                             $oldUser->removeRole('kasubag');
+                            $oldUser->seksi_id = null;
+                            $oldUser->saveQuietly();
                         }
                     }
                 }
