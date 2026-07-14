@@ -21,7 +21,7 @@ class ListAuditPengajuanCutis extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            // CreateAction::make(),
         ];
     }
     public function table(Table $table): Table
