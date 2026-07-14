@@ -15,19 +15,23 @@ class RoleSyncService
         $messages = [];
 
         DB::transaction(function () use ($user, &$messages) {
-            // --- KANIT / UNIT KERJA ---
-            if ($user->hasRole('kanit') && $user->unit_kerja_id) {
-                $unit = UnitKerja::find($user->unit_kerja_id);
-                if ($unit && $unit->kepala_unit_id !== $user->id) {
-                    $otherUnits = UnitKerja::where('kepala_unit_id', $user->id)
-                        ->where('id', '!=', $unit->id)
-                        ->get();
-                    foreach ($otherUnits as $ou) {
-                        $ou->kepala_unit_id = null;
-                        $ou->saveQuietly();
-                        $messages[] = "• {$user->nama} dilepas dari Kepala Unit '{$ou->nama_unit}'";
-                    }
+            $validUnitId = ($user->hasRole('kanit') && $user->unit_kerja_id) ? $user->unit_kerja_id : null;
+            
+            $otherUnits = UnitKerja::where('kepala_unit_id', $user->id)
+                ->when($validUnitId, function ($q, $validUnitId) {
+                    return $q->where('id', '!=', $validUnitId);
+                })
+                ->get();
+                
+            foreach ($otherUnits as $ou) {
+                $ou->kepala_unit_id = null;
+                $ou->saveQuietly();
+                $messages[] = "• Posisi Kepala Unit pada '{$ou->nama_unit}' dikosongkan karena dilepas dari '{$user->nama}'";
+            }
 
+            if ($validUnitId) {
+                $unit = UnitKerja::find($validUnitId);
+                if ($unit && $unit->kepala_unit_id !== $user->id) {
                     $oldKepalaId = $unit->kepala_unit_id;
                     $unit->kepala_unit_id = $user->id;
                     $unit->saveQuietly();
@@ -48,19 +52,28 @@ class RoleSyncService
                 }
             }
 
-            // --- KASUBAG / SEKSI ---
-            if ($user->hasRole('kasubag') && $user->seksi_id) {
-                $seksi = Seksi::find($user->seksi_id);
-                if ($seksi && $seksi->kepala_seksi_id !== $user->id) {
-                    $otherSeksis = Seksi::where('kepala_seksi_id', $user->id)
-                        ->where('id', '!=', $seksi->id)
-                        ->get();
-                    foreach ($otherSeksis as $os) {
-                        $os->kepala_seksi_id = null;
-                        $os->saveQuietly();
-                        $messages[] = "• {$user->nama} dilepas dari Kasubag '{$os->nama_seksi}'";
-                    }
+            $validSeksiId = ($user->hasRole('kasubag') && $user->seksi_id) ? $user->seksi_id : null;
 
+            $otherSeksis = Seksi::where('kepala_seksi_id', $user->id)
+                ->when($validSeksiId, function ($q, $validSeksiId) {
+                    return $q->where('id', '!=', $validSeksiId);
+                })
+                ->get();
+
+            foreach ($otherSeksis as $os) {
+                $os->kepala_seksi_id = null;
+                $os->saveQuietly();
+                $messages[] = "• Posisi Kasubag pada '{$os->nama_seksi}' dikosongkan karena dilepas dari '{$user->nama}'";
+            }
+
+            if (!$validSeksiId && $user->seksi_id) {
+                $user->seksi_id = null;
+                $user->saveQuietly();
+            }
+
+            if ($validSeksiId) {
+                $seksi = Seksi::find($validSeksiId);
+                if ($seksi && $seksi->kepala_seksi_id !== $user->id) {
                     $oldKepalaId = $seksi->kepala_seksi_id;
                     $seksi->kepala_seksi_id = $user->id;
                     $seksi->saveQuietly();
