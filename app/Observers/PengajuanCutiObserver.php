@@ -39,7 +39,7 @@ class PengajuanCutiObserver
                 $pengajuanCuti->kelompokKerja ?? null
             );
         }
-        
+
         // Validasi server-side
         if ($pengajuanCuti->jenis_cuti === 'diluar_tanggungan_negara') {
             return;
@@ -56,7 +56,7 @@ class PengajuanCutiObserver
         $totalSaldo = 0;
         if ($pengajuanCuti->jenis_cuti === 'tahunan') {
             $totalSaldo = $saldo->saldo_n2 + $saldo->saldo_n1 + $saldo->saldo_n;
-        } 
+        }
         // elseif (in_array($pengajuanCuti->jenis_cuti, ['besar', 'sakit', 'melahirkan', 'alasan_penting'])) {
         //     $field = 'saldo_cuti_' . $pengajuanCuti->jenis_cuti;
         //     $totalSaldo = $saldo->{$field} ?? 0;
@@ -94,16 +94,17 @@ class PengajuanCutiObserver
         }
 
 
+        $this->logStatus($pengajuanCuti, null, $pengajuanCuti->status, 'Pengajuan dibuat');
     }
 
 
     public function updating(PengajuanCuti $pengajuanCuti)
     {
         $oldStatus = $pengajuanCuti->getOriginal('status');
-        
+
         $isOwner = auth()->check() && auth()->id() === $pengajuanCuti->user_id;
         $isAdmin = auth()->check() && auth()->user()->hasRole(['super_admin', 'admin']);
-        
+
         if (($isOwner || $isAdmin) && in_array($oldStatus, ['perubahan', 'ditangguhkan']) && !$pengajuanCuti->isDirty(['keputusan_kanit', 'keputusan_kasubag', 'keputusan_pejabat'])) {
             $submitter = $pengajuanCuti->user;
             $kanitValue = $submitter->hasRole(['kanit', 'kasubag']) ? 'dilewati' : null;
@@ -194,10 +195,56 @@ class PengajuanCutiObserver
                     ->sendToDatabase($pengajuanCuti->user);
             }
         }
+        if ($pengajuanCuti->wasChanged('status')) {
+            $oldStatus = $pengajuanCuti->getOriginal('status');
+            $this->logStatus($pengajuanCuti, $oldStatus, $pengajuanCuti->status);
+        }
     }
 
     public function deleting(PengajuanCuti $pengajuanCuti)
     {
         CutiService::releaseSaldo($pengajuanCuti);
+        if ($pengajuanCuti->isForceDeleting())
+            return;
+
+        $this->logStatus($pengajuanCuti, $pengajuanCuti->status, 'dihapus', 'Pengajuan dihapus oleh admin');
+    }
+
+    private function logStatus(PengajuanCuti $pengajuanCuti, ?string $from, string $to, ?string $keterangan = null): void
+    {
+        if (!$keterangan) {
+            $keterangan = $this->getStatusChangeDescription($pengajuanCuti, $to);
+        }
+
+        $pengajuanCuti->statusLogs()->create([
+            'status_from' => $from,
+            'status_to' => $to,
+            'changed_by' => auth()->check() ? auth()->id() : $pengajuanCuti->user_id,
+            'keterangan' => $keterangan,
+        ]);
+    }
+
+    private function getStatusChangeDescription(PengajuanCuti $pengajuanCuti, string $newStatus): string
+    {
+        if ($newStatus === 'ditolak_kanit') {
+            return 'Ditolak oleh Kanit' . ($pengajuanCuti->alasan_kanit ? ': ' . $pengajuanCuti->alasan_kanit : '');
+        }
+        if ($newStatus === 'ditolak_kasubag') {
+            return 'Ditolak oleh Kasubag' . ($pengajuanCuti->alasan_kasubag ? ': ' . $pengajuanCuti->alasan_kasubag : '');
+        }
+        if ($newStatus === 'ditolak_pejabat') {
+            return 'Ditolak oleh Pejabat Berwenang' . ($pengajuanCuti->alasan_pejabat ? ': ' . $pengajuanCuti->alasan_pejabat : '');
+        }
+        if ($newStatus === 'perubahan') {
+            $alasan = $pengajuanCuti->alasan_kanit ?? $pengajuanCuti->alasan_kasubag ?? $pengajuanCuti->alasan_pejabat;
+            return 'Diminta perubahan' . ($alasan ? ' oleh approver: ' . $alasan : '');
+        }
+        if ($newStatus === 'disetujui') {
+            return 'Disetujui oleh Pejabat Berwenang';
+        }
+        if (in_array($newStatus, ['menunggu_atasan', 'menunggu_pejabat'])) {
+            return 'Pengajuan dikirim ulang oleh pemohon';
+        }
+        return 'Status berubah menjadi ' . str_replace('_', ' ', $newStatus);   
     }
 }
