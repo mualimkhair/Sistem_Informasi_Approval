@@ -12,7 +12,8 @@ return new class extends Migration {
     {
         Schema::create('pengajuan_cuti_status_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pengajuan_cuti_id')->constrained('pengajuan_cutis')->cascadeOnDelete();
+            $table->string('pengajuan_cuti_id', 26);
+            $table->foreign('pengajuan_cuti_id')->references('id')->on('pengajuan_cutis')->cascadeOnDelete();
             $table->string('status_from')->nullable();
             $table->string('status_to');
             $table->foreignId('changed_by')->nullable()->constrained('users')->nullOnDelete();
