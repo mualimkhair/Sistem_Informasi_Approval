@@ -81,7 +81,9 @@ class PengajuanCutiObserver
                 ->info()
                 ->sendToDatabase($user);
         }
-        $this->logStatus($pengajuanCuti, null, $pengajuanCuti->status, 'Pengajuan dibuat');
+        if ($pengajuanCuti->status) {
+            $this->logStatus($pengajuanCuti, null, $pengajuanCuti->status, 'Pengajuan dibuat');
+        }
     }
 
 
