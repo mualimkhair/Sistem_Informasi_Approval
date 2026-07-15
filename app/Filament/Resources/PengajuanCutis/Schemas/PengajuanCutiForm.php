@@ -300,6 +300,10 @@ class PengajuanCutiForm
 
         if ($jenis !== 'diluar_tanggungan_negara') {
             $activeHolds = CutiService::getActiveHoldsByJenis($targetUser, $jenis);
+            if ($record && $record->jenis_cuti === $jenis) {
+                $activeHolds -= $record->getOriginal('lama_cuti');
+            }
+            $activeHolds = max(0, $activeHolds);
 
             if ($activeHolds > 0 && $jenis === 'tahunan') {
                 if ($n2 >= $activeHolds) {
