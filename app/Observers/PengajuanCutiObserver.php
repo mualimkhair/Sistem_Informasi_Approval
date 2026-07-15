@@ -168,6 +168,40 @@ class PengajuanCutiObserver
             if (!$isResubmit && $lamaLama !== null && $lamaLama !== $lamaBaru) {
                 CutiService::koreksiSaldo($pengajuanCuti, $lamaLama, $lamaBaru);
             }
+
+            if ($pengajuanCuti->isDirty(['tanggal_mulai', 'tanggal_selesai'])) {
+                $oldStart = $pengajuanCuti->getOriginal('tanggal_mulai');
+                $oldEnd = $pengajuanCuti->getOriginal('tanggal_selesai');
+
+                $keterangan = sprintf(
+                    "Perubahan tanggal: %s - %s menjadi %s - %s",
+                    $oldStart ? Carbon::parse($oldStart)->format('d/m/Y') : '-',
+                    $oldEnd ? Carbon::parse($oldEnd)->format('d/m/Y') : '-',
+                    Carbon::parse($pengajuanCuti->tanggal_mulai)->format('d/m/Y'),
+                    Carbon::parse($pengajuanCuti->tanggal_selesai)->format('d/m/Y')
+                );
+
+                $this->logStatus($pengajuanCuti, $pengajuanCuti->status, $pengajuanCuti->status, $keterangan);
+            }
+
+            $changed = $pengajuanCuti->getChanges();
+            unset($changed['updated_at'], $changed['lama_cuti']);
+
+            // Log perubahan field oleh admin
+            if (!empty($changed) && auth()->check() && auth()->user()->hasRole(['super_admin', 'admin'])) {
+                $entries = [];
+                foreach ($changed as $field => $new) {
+                    $entries[] = [
+                        'field' => $field,
+                        'old' => $pengajuanCuti->getOriginal($field),
+                        'new' => $new,
+                    ];
+                }
+                $pengajuanCuti->auditLogs()->create([
+                    'changed_by' => auth()->id(),
+                    'changes' => $entries,
+                ]);
+            }
         }
         if ($pengajuanCuti->wasChanged('status')) {
             $oldStatus = $pengajuanCuti->getOriginal('status');
