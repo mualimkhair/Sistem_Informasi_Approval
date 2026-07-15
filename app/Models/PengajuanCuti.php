@@ -120,4 +120,9 @@ class PengajuanCuti extends Model
     {
         return $this->hasMany(PengajuanCutiStatusLog::class);
     }
+
+    public function auditLogs()
+    {
+        return $this->hasMany(PengajuanCutiAuditLog::class);
+    }
 }

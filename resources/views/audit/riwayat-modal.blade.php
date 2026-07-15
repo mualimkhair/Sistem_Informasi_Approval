@@ -82,4 +82,41 @@
             </tbody>
         </table>
     </div>
+    {{-- Perubahan Data oleh Admin --}}
+<div>
+    <h3 class="text-base font-semibold mb-3">Perubahan Data</h3>
+    @php
+        $audits = $pengajuan->auditLogs ?? collect();
+    @endphp
+    @if($audits->isNotEmpty())
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 border-b">
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Waktu</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Oleh</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Field</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Lama</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">Baru</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @foreach($audits as $audit)
+                        @foreach($audit->changes as $change)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-3 py-2 text-gray-500 whitespace-nowrap">{{ $audit->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="px-3 py-2">{{ $audit->user?->nama ?? '-' }}</td>
+                                <td class="px-3 py-2 font-medium">{{ str_replace('_', ' ', $change['field']) }}</td>
+                                <td class="px-3 py-2 text-gray-600">{{ is_string($change['old'] ?? '') ? $change['old'] : '-' }}</td>
+                                <td class="px-3 py-2 text-gray-600">{{ is_string($change['new'] ?? '') ? $change['new'] : '-' }}</td>
+                            </tr>
+                        @endforeach
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @else
+        <div class="text-sm text-gray-400">Belum ada perubahan data oleh admin.</div>
+    @endif
+</div>
 </div>
