@@ -61,7 +61,7 @@ class ListAuditPengajuanCutis extends ListRecords
                     ->formatStateUsing(fn($state) => $state ? 'DIHAPUS' : null)
                     ->color('danger')
                     ->visible(fn() => true),
-                TextColumn::make('created_at')->label('Diajukan')->dateTime()->sortable(),
+                TextColumn::make('created_at')->label('Diajukan')->date()->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

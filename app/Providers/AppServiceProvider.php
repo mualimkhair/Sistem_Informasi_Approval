@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,5 +23,7 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\UnitKerja::observe(\App\Observers\UnitKerjaObserver::class);
         \App\Models\Seksi::observe(\App\Observers\SeksiObserver::class);
         \App\Models\User::observe(\App\Observers\UserObserver::class);
+
+        Gate::policy(\App\Models\PengajuanCuti::class, \App\Policies\PengajuanCutiPolicy::class);
     }
 }

@@ -26,26 +26,34 @@ class PengajuanCutiForm
                         TextInput::make('nama_display')
                             ->label('Nama')
                             ->default(fn() => Auth::user()->nama)
+                            ->formatStateUsing(fn($record) => $record ? $record->user->nama : Auth::user()->nama)
                             ->disabled()
                             ->dehydrated(false),
                         TextInput::make('nip_display')
                             ->label('NIP')
                             ->default(fn() => Auth::user()->nip)
+                            ->formatStateUsing(fn($record) => $record ? $record->user->nip : Auth::user()->nip)
                             ->disabled()
                             ->dehydrated(false),
                         TextInput::make('jabatan_display')
                             ->label('Jabatan')
                             ->default(fn() => Auth::user()->jabatan)
+                            ->formatStateUsing(fn($record) => $record ? $record->user->jabatan : Auth::user()->jabatan)
                             ->disabled()
                             ->dehydrated(false),
                         TextInput::make('unit_kerja_display')
                             ->label('Unit Kerja')
                             ->default(fn() => Auth::user()->unitKerja->nama_unit ?? '-')
+                            ->formatStateUsing(fn($record) => $record ? ($record->user->unitKerja->nama_unit ?? '-') : (Auth::user()->unitKerja->nama_unit ?? '-'))
                             ->disabled()
                             ->dehydrated(false),
                         TextInput::make('masa_kerja_display')
                             ->label('Masa Kerja')
                             ->default(fn() => Auth::user()->tanggal_masuk ? Auth::user()->tanggal_masuk->diffInYears(now()) . ' Tahun' : '0 Tahun')
+                            ->formatStateUsing(function ($record) {
+                                $u = $record ? $record->user : Auth::user();
+                                return $u->tanggal_masuk ? $u->tanggal_masuk->diffInYears(now()) . ' Tahun' : '0 Tahun';
+                            })
                             ->disabled()
                             ->dehydrated(false),
                     ])->columns(3),
@@ -95,17 +103,18 @@ class PengajuanCutiForm
                             ->minDate(today())
                             ->live()
                             ->rules([
-                                fn($get) => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                fn($get, $record) => function (string $attribute, $value, \Closure $fail) use ($get, $record) {
                                     $date = Carbon::parse($value);
-                                    $unitKerja = Auth::user()->unitKerja;
+                                    $owner = $record ? $record->user : Auth::user();
+                                    $unitKerja = $owner->unitKerja;
                                     $kelompokKerja = $get('kelompok_kerja_id') ? KelompokKerja::find($get('kelompok_kerja_id')) : null;
                                     if (\App\Services\CutiService::hitungLamaCuti($date, $date, $unitKerja, $kelompokKerja) === 0) {
                                         $fail('Tanggal tidak boleh jatuh pada hari libur / jadwal libur Anda.');
                                     }
                                 },
                             ])
-                            ->afterStateUpdated(function ($state, $get, $set) {
-                                self::kalkulasiLamaCuti($get, $set);
+                            ->afterStateUpdated(function ($state, $get, $set, $record) {
+                                self::kalkulasiLamaCuti($get, $set, $record);
                             }),
 
                         DatePicker::make('tanggal_selesai')
@@ -116,17 +125,18 @@ class PengajuanCutiForm
                             ->afterOrEqual('tanggal_mulai')
                             ->live()
                             ->rules([
-                                fn($get) => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                fn($get, $record) => function (string $attribute, $value, \Closure $fail) use ($get, $record) {
                                     $date = Carbon::parse($value);
-                                    $unitKerja = Auth::user()->unitKerja;
+                                    $owner = $record ? $record->user : Auth::user();
+                                    $unitKerja = $owner->unitKerja;
                                     $kelompokKerja = $get('kelompok_kerja_id') ? KelompokKerja::find($get('kelompok_kerja_id')) : null;
                                     if (\App\Services\CutiService::hitungLamaCuti($date, $date, $unitKerja, $kelompokKerja) === 0) {
                                         $fail('Tanggal tidak boleh jatuh pada hari libur / jadwal libur Anda.');
                                     }
                                 },
                             ])
-                            ->afterStateUpdated(function ($state, $get, $set) {
-                                self::kalkulasiLamaCuti($get, $set);
+                            ->afterStateUpdated(function ($state, $get, $set, $record) {
+                                self::kalkulasiLamaCuti($get, $set, $record);
                             }),
 
                         TextInput::make('lama_cuti')
@@ -137,32 +147,32 @@ class PengajuanCutiForm
 
                         Placeholder::make('tanggal_alert')
                             ->label('Tanggal Libur Dikecualikan')
-                            ->content(fn($get): string => self::invalidDateSummary($get))
+                            ->content(fn($get, $record): string => self::invalidDateSummary($get, $record))
                             ->columnSpanFull(),
 
                         \Filament\Schemas\Components\Fieldset::make('Informasi Sisa Saldo Cuti')
                             ->schema([
                                 Placeholder::make('sisa_n2')
                                     ->label('Saldo N-2')
-                                    ->content(fn($get) => self::getSimulasiSaldo($get)['n2']),
+                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['n2']),
                                 Placeholder::make('sisa_n1')
                                     ->label('Saldo N-1')
-                                    ->content(fn($get) => self::getSimulasiSaldo($get)['n1']),
+                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['n1']),
                                 Placeholder::make('sisa_n')
                                     ->label('Saldo N')
-                                    ->content(fn($get) => self::getSimulasiSaldo($get)['n']),
+                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['n']),
                                 Placeholder::make('sisa_besar')
                                     ->label('Cuti Besar')
-                                    ->content(fn($get) => self::getSimulasiSaldo($get)['besar']),
+                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['besar']),
                                 Placeholder::make('sisa_sakit')
                                     ->label('Cuti Sakit')
-                                    ->content(fn($get) => self::getSimulasiSaldo($get)['sakit']),
+                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['sakit']),
                                 Placeholder::make('sisa_melahirkan')
                                     ->label('Melahirkan')
-                                    ->content(fn($get) => self::getSimulasiSaldo($get)['melahirkan']),
+                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['melahirkan']),
                                 Placeholder::make('sisa_alasan_penting')
                                     ->label('Alasan Penting')
-                                    ->content(fn($get) => self::getSimulasiSaldo($get)['penting']),
+                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['penting']),
                             ])
                             ->gridContainer(),
 
@@ -195,7 +205,7 @@ class PengajuanCutiForm
             ]);
     }
 
-    public static function kalkulasiLamaCuti($get, $set)
+    public static function kalkulasiLamaCuti($get, $set, $record = null)
     {
         $start = $get('tanggal_mulai');
         $end = $get('tanggal_selesai');
@@ -204,7 +214,8 @@ class PengajuanCutiForm
             $startDate = Carbon::parse($start);
             $endDate = Carbon::parse($end);
 
-            $unitKerja = Auth::user()->unitKerja;
+            $owner = $record ? $record->user : Auth::user();
+            $unitKerja = $owner->unitKerja;
             $kelompokId = $get('kelompok_kerja_id');
             $kelompokKerja = $kelompokId ? KelompokKerja::find($kelompokId) : null;
 
@@ -215,7 +226,7 @@ class PengajuanCutiForm
         }
     }
 
-    private static function invalidDateSummary($get): string
+    private static function invalidDateSummary($get, $record = null): string
     {
         $start = $get('tanggal_mulai');
         $end = $get('tanggal_selesai');
@@ -231,7 +242,8 @@ class PengajuanCutiForm
             return 'Tanggal selesai tidak valid.';
         }
 
-        $unitKerja = Auth::user()->unitKerja;
+        $owner = $record ? $record->user : Auth::user();
+        $unitKerja = $owner->unitKerja;
         $kelompokId = $get('kelompok_kerja_id');
         $kelompokKerja = $kelompokId ? KelompokKerja::find($kelompokId) : null;
 
@@ -253,9 +265,10 @@ class PengajuanCutiForm
         return implode(', ', $invalidDates);
     }
 
-    public static function getSimulasiSaldo($get): array
+    public static function getSimulasiSaldo($get, $record = null): array
     {
-        $saldo = Auth::user()->fresh()->saldoCuti;
+        $targetUser = $record ? $record->user : Auth::user();
+        $saldo = $targetUser->fresh()->saldoCuti;
         $default = ['n2' => '-', 'n1' => '-', 'n' => '-', 'besar' => '-', 'sakit' => '-', 'melahirkan' => '-', 'penting' => '-'];
 
         $lama = (int) $get('lama_cuti');
@@ -263,20 +276,19 @@ class PengajuanCutiForm
 
         if (!$jenis || $jenis === 'diluar_tanggungan_negara') {
             return [
-                'n2' => $saldo->saldo_n2 . ' hari',
-                'n1' => $saldo->saldo_n1 . ' hari',
-                'n' => $saldo->saldo_n . ' hari',
-                'besar' => $saldo->saldo_cuti_besar . ' hari',
-                'sakit' => $saldo->saldo_cuti_sakit . ' hari',
-                'melahirkan' => $saldo->saldo_cuti_melahirkan . ' hari',
-                'penting' => $saldo->saldo_cuti_alasan_penting . ' hari',
+                'n2' => ($saldo->saldo_n2 ?? 0) . ' hari',
+                'n1' => ($saldo->saldo_n1 ?? 0) . ' hari',
+                'n' => ($saldo->saldo_n ?? 0) . ' hari',
+                'besar' => ($saldo->saldo_cuti_besar ?? 0) . ' hari',
+                'sakit' => ($saldo->saldo_cuti_sakit ?? 0) . ' hari',
+                'melahirkan' => ($saldo->saldo_cuti_melahirkan ?? 0) . ' hari',
+                'penting' => ($saldo->saldo_cuti_alasan_penting ?? 0) . ' hari',
             ];
         }
 
         if (!$saldo)
             return $default;
 
-        //get base values from saldo_cutis
         $n2 = $saldo->saldo_n2;
         $n1 = $saldo->saldo_n1;
         $n = $saldo->saldo_n;
@@ -285,11 +297,8 @@ class PengajuanCutiForm
         $melahirkan = $saldo->saldo_cuti_melahirkan;
         $penting = $saldo->saldo_cuti_alasan_penting;
 
-
-
         if ($jenis !== 'diluar_tanggungan_negara') {
-            $user = Auth::user();
-            $activeHolds = CutiService::getActiveHoldsByJenis($user, $jenis);
+            $activeHolds = CutiService::getActiveHoldsByJenis($targetUser, $jenis);
 
             if ($activeHolds > 0 && $jenis === 'tahunan') {
                 if ($n2 >= $activeHolds) {
@@ -328,7 +337,6 @@ class PengajuanCutiForm
                 }
             }
         }
-
 
         if ($lama > 0) {
             switch ($jenis) {

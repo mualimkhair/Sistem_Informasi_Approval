@@ -42,11 +42,11 @@ class UserForm
                             ->nullable()
                             ->rule(\Illuminate\Validation\Rule::in(array_keys(\App\Models\User::PANGKAT_GOLONGAN))),
                         Select::make('seksi_id')
-                            ->label('Seksi (Khusus Level Kasi/Kasubag)')
+                            ->label('Seksi (Jabatan Kasi/Kasubag)')
                             ->relationship('seksi', 'nama_seksi')
-                            ->searchable()
-                            ->preload()
-                            ->nullable(),
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->helperText('Dikelola otomatis lewat menu Manajemen Seksi — tidak dapat diubah di sini.'),
                         Select::make('unit_kerja_id')
                             ->label('Unit Kerja')
                             ->relationship('unitKerja', 'nama_unit')
@@ -118,12 +118,16 @@ class UserForm
                     ->schema([
                         Select::make('roles')
                             ->label('Role')
-                            ->relationship('roles', 'name', fn($query) => $query->where('name', '!=', 'super_admin'))
+                            ->relationship('roles', 'name', fn($query) => $query
+                                ->where('name', '!=', 'super_admin')
+                                ->whereNotIn('name', ['kasubag', 'kanit']) // Dikelola oleh Observer Seksi/Unit
+                            )
                             ->multiple()
                             ->preload()
                             ->searchable()
                             ->default(fn() => [\Spatie\Permission\Models\Role::where('name', 'pegawai')->value('id')])
                             ->live()
+                            ->helperText('Role kasubag/kanit dikelola otomatis oleh sistem saat assign di Seksi/Unit Kerja.')
                             ->required(),
                     ])
                     ->visible($isSuperAdmin)
