@@ -70,16 +70,27 @@ class PengajuanCutiObserver
 
     public function created(PengajuanCuti $pengajuanCuti)
     {
-        $kanitKasubags = User::role(['kanit', 'kasubag'])
-            ->where('unit_kerja_id', $pengajuanCuti->user->unit_kerja_id)
-            ->where('id', '!=', $pengajuanCuti->user_id)
-            ->get();
-        foreach ($kanitKasubags as $user) {
-            Notification::make()
-                ->title('Pengajuan Cuti Baru')
-                ->body('Pengajuan cuti dari ' . $pengajuanCuti->user->nama . ' menunggu persetujuan Anda.')
-                ->info()
-                ->sendToDatabase($user);
+        if ($pengajuanCuti->user->hasRole('kasubag')) {
+            $pejabats = User::role('pejabat_berwenang')->get();
+            foreach ($pejabats as $pejabat) {
+                Notification::make()
+                    ->title('Pengajuan Cuti Baru (Skip-Level)')
+                    ->body('Pengajuan cuti dari ' . $pengajuanCuti->user->nama . ' langsung menunggu persetujuan final Anda (Kasubag).')
+                    ->info()
+                    ->sendToDatabase($pejabat);
+            }
+        } else {
+            $kanitKasubags = User::role(['kanit', 'kasubag'])
+                ->where('unit_kerja_id', $pengajuanCuti->user->unit_kerja_id)
+                ->where('id', '!=', $pengajuanCuti->user_id)
+                ->get();
+            foreach ($kanitKasubags as $user) {
+                Notification::make()
+                    ->title('Pengajuan Cuti Baru')
+                    ->body('Pengajuan cuti dari ' . $pengajuanCuti->user->nama . ' menunggu persetujuan Anda.')
+                    ->info()
+                    ->sendToDatabase($user);
+            }
         }
         if ($pengajuanCuti->status) {
             $this->logStatus($pengajuanCuti, null, $pengajuanCuti->status, 'Pengajuan dibuat');
@@ -145,9 +156,18 @@ class PengajuanCutiObserver
                         ->sendToDatabase($pejabat);
                 }
             } else {
+                $body = 'Status pengajuan cuti Anda menjadi: ' . str_replace('_', ' ', strtoupper($pengajuanCuti->status));
+                
+                if (in_array($pengajuanCuti->status, ['ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat', 'perubahan'])) {
+                    $reason = $pengajuanCuti->alasan_pejabat ?? $pengajuanCuti->alasan_kasubag ?? $pengajuanCuti->alasan_kanit;
+                    if ($reason) {
+                        $body .= " (Alasan: " . $reason . ")";
+                    }
+                }
+
                 Notification::make()
                     ->title('Status Pengajuan Cuti Berubah')
-                    ->body('Status pengajuan cuti Anda menjadi: ' . str_replace('_', ' ', strtoupper($pengajuanCuti->status)))
+                    ->body($body)
                     ->info()
                     ->sendToDatabase($pengajuanCuti->user);
             }
@@ -167,6 +187,12 @@ class PengajuanCutiObserver
             
             if (!$isResubmit && $lamaLama !== null && $lamaLama !== $lamaBaru) {
                 CutiService::koreksiSaldo($pengajuanCuti, $lamaLama, $lamaBaru);
+
+                Notification::make()
+                    ->title('Koreksi Data Administratif')
+                    ->body('Tanggal pada pengajuan cuti Anda telah disesuaikan secara administratif. Saldo Anda telah dikoreksi menyesuaikan perubahan hari cuti.')
+                    ->info()
+                    ->sendToDatabase($pengajuanCuti->user);
             }
 
             if ($pengajuanCuti->isDirty(['tanggal_mulai', 'tanggal_selesai'])) {
