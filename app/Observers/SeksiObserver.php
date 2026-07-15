@@ -39,7 +39,7 @@ class SeksiObserver
                     if ($newUser) {
                         $newUser->assignRole('kasubag');
 
-                        if ($newUser->seksi_id !== $seksi->id) {
+                        if ($newUser->seksi_id != $seksi->id) {
                             $newUser->seksi_id = $seksi->id;
                             $newUser->saveQuietly();
                         }

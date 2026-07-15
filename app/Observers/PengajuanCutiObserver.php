@@ -108,7 +108,7 @@ class PengajuanCutiObserver
     {
         $oldStatus = $pengajuanCuti->getOriginal('status');
 
-        $isOwner = auth()->check() && auth()->id() === $pengajuanCuti->user_id;
+        $isOwner = auth()->check() && auth()->id() == $pengajuanCuti->user_id;
         $isAdmin = auth()->check() && auth()->user()->hasRole(['super_admin', 'admin']);
 
         if (($isOwner || $isAdmin) && in_array($oldStatus, ['perubahan', 'ditangguhkan']) && !$pengajuanCuti->isDirty(['keputusan_kanit', 'keputusan_kasubag', 'keputusan_pejabat'])) {
