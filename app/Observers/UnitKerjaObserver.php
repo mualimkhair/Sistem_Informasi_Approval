@@ -39,7 +39,7 @@ class UnitKerjaObserver
                     if ($newUser) {
                         $newUser->assignRole('kanit');
 
-                        if ($newUser->unit_kerja_id !== $unitKerja->id) {
+                        if ($newUser->unit_kerja_id != $unitKerja->id) {
                             $newUser->unit_kerja_id = $unitKerja->id;
                             $newUser->saveQuietly();
                         }

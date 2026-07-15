@@ -89,7 +89,7 @@ class PersetujuanCutisTable
                         auth()->user()->hasRole('kanit')
                         && $record->status === 'menunggu_atasan'
                         && is_null($record->keputusan_kanit)
-                        && $record->user_id !== auth()->id()
+                        && $record->user_id != auth()->id()
                     )
                     ->form([
                         \Filament\Forms\Components\Placeholder::make('detail_pengajuan')
@@ -119,10 +119,10 @@ class PersetujuanCutisTable
                     ])
                     ->action(function (PengajuanCuti $record, array $data) {
                         $user = auth()->user();
-                        if ($record->user_id === $user->id) {
+                        if ($record->user_id == $user->id) {
                             abort(403, 'Anda tidak dapat menyetujui pengajuan cuti Anda sendiri.');
                         }
-                        if ($record->unitKerja?->kepala_unit_id !== $user->id && !$user->hasRole(['super_admin', 'admin'])) {
+                        if ($record->unitKerja?->kepala_unit_id != $user->id && !$user->hasRole(['super_admin', 'admin'])) {
                             abort(403, 'Anda bukan supervisor Kanit untuk unit pegawai ini.');
                         }
 
@@ -146,7 +146,7 @@ class PersetujuanCutisTable
                         auth()->user()->hasRole('kasubag')
                         && $record->status === 'menunggu_atasan'
                         && is_null($record->keputusan_kasubag)
-                        && $record->user_id !== auth()->id()
+                        && $record->user_id != auth()->id()
                     )
                     ->form([
                         \Filament\Forms\Components\Placeholder::make('detail_pengajuan')
@@ -177,10 +177,10 @@ class PersetujuanCutisTable
                     ])
                     ->action(function (PengajuanCuti $record, array $data) {
                         $user = auth()->user();
-                        if ($record->user_id === $user->id) {
+                        if ($record->user_id == $user->id) {
                             abort(403, 'Anda tidak dapat menyetujui pengajuan cuti Anda sendiri.');
                         }
-                        if ($record->seksi?->kepala_seksi_id !== $user->id && !$user->hasRole(['super_admin', 'admin'])) {
+                        if ($record->seksi?->kepala_seksi_id != $user->id && !$user->hasRole(['super_admin', 'admin'])) {
                             abort(403, 'Anda bukan supervisor Kasubag untuk unit pegawai ini.');
                         }
 
@@ -203,7 +203,7 @@ class PersetujuanCutisTable
                         fn($record) =>
                         auth()->user()->hasRole('pejabat_berwenang')
                         && $record->status === 'menunggu_pejabat'
-                        && $record->user_id !== auth()->id()
+                        && $record->user_id != auth()->id()
                     )
                     ->form([
                         \Filament\Forms\Components\Placeholder::make('detail_pengajuan')
