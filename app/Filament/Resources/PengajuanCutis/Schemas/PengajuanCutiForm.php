@@ -64,15 +64,16 @@ class PengajuanCutiForm
 
                         Select::make('kelompok_kerja_id')
                             ->label('Kelompok Kerja')
-                            ->options(function () {
-                                if (Auth::user()->unitKerja?->jenis === 'operasional') {
-                                    return KelompokKerja::where('unit_kerja_id', Auth::user()->unit_kerja_id)->pluck('nama_kelompok', 'id');
+                            ->options(function (?\App\Models\PengajuanCuti $record) {
+                                $owner = $record ? $record->user : Auth::user();
+                                if ($owner->unitKerja?->jenis === 'operasional') {
+                                    return KelompokKerja::where('unit_kerja_id', $owner->unit_kerja_id)->pluck('nama_kelompok', 'id');
                                 }
                                 return [];
                             })
                             ->searchable()
-                            ->visible(fn() => Auth::user()->unitKerja?->jenis === 'operasional')
-                            ->required(fn() => Auth::user()->unitKerja?->jenis === 'operasional')
+                            ->visible(fn(?\App\Models\PengajuanCuti $record) => ($record ? $record->user : Auth::user())->unitKerja?->jenis === 'operasional')
+                            ->required(fn(?\App\Models\PengajuanCuti $record) => ($record ? $record->user : Auth::user())->unitKerja?->jenis === 'operasional')
                             ->live()
                             ->afterStateUpdated(function ($state, $get, $set) {
                                 self::kalkulasiLamaCuti($get, $set);
@@ -154,25 +155,25 @@ class PengajuanCutiForm
                             ->schema([
                                 Placeholder::make('sisa_n2')
                                     ->label('Saldo N-2')
-                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['n2']),
+                                    ->content(fn(\Filament\Forms\Get $get, ?\App\Models\PengajuanCuti $record) => self::getSimulasiSaldo($get, $record)['n2']),
                                 Placeholder::make('sisa_n1')
                                     ->label('Saldo N-1')
-                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['n1']),
+                                    ->content(fn(\Filament\Forms\Get $get, ?\App\Models\PengajuanCuti $record) => self::getSimulasiSaldo($get, $record)['n1']),
                                 Placeholder::make('sisa_n')
                                     ->label('Saldo N')
-                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['n']),
+                                    ->content(fn(\Filament\Forms\Get $get, ?\App\Models\PengajuanCuti $record) => self::getSimulasiSaldo($get, $record)['n']),
                                 Placeholder::make('sisa_besar')
                                     ->label('Cuti Besar')
-                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['besar']),
+                                    ->content(fn(\Filament\Forms\Get $get, ?\App\Models\PengajuanCuti $record) => self::getSimulasiSaldo($get, $record)['besar']),
                                 Placeholder::make('sisa_sakit')
                                     ->label('Cuti Sakit')
-                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['sakit']),
+                                    ->content(fn(\Filament\Forms\Get $get, ?\App\Models\PengajuanCuti $record) => self::getSimulasiSaldo($get, $record)['sakit']),
                                 Placeholder::make('sisa_melahirkan')
                                     ->label('Melahirkan')
-                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['melahirkan']),
+                                    ->content(fn(\Filament\Forms\Get $get, ?\App\Models\PengajuanCuti $record) => self::getSimulasiSaldo($get, $record)['melahirkan']),
                                 Placeholder::make('sisa_alasan_penting')
                                     ->label('Alasan Penting')
-                                    ->content(fn($get, $record) => self::getSimulasiSaldo($get, $record)['penting']),
+                                    ->content(fn(\Filament\Forms\Get $get, ?\App\Models\PengajuanCuti $record) => self::getSimulasiSaldo($get, $record)['penting']),
                             ])
                             ->gridContainer(),
 
