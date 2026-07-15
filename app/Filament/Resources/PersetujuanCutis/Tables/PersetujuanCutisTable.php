@@ -97,7 +97,7 @@ class PersetujuanCutisTable
                             ->content(fn($record) => new \Illuminate\Support\HtmlString(
                                 "<strong>Pegawai:</strong> {$record->user->nama}<br>
                                 <strong>Jenis Cuti:</strong> {$record->jenis_cuti}<br>
-                                <strong>Tanggal:</strong> {$record->tanggal_mulai} s/d {$record->tanggal_selesai} ({$record->lama_cuti} hari)<br>
+                                <strong>Tanggal:</strong> {$record->tanggal_mulai->format('d-m-Y')} s/d {$record->tanggal_selesai->format('d-m-Y')} ({$record->lama_cuti} hari)<br>
                                 <strong>Alasan:</strong> {$record->alasan_cuti}"
                             ))
                             ->columnSpanFull(),
@@ -154,7 +154,7 @@ class PersetujuanCutisTable
                             ->content(fn($record) => new \Illuminate\Support\HtmlString(
                                 "<strong>Pegawai:</strong> {$record->user->nama}<br>
                                 <strong>Jenis Cuti:</strong> {$record->jenis_cuti}<br>
-                                <strong>Tanggal:</strong> {$record->tanggal_mulai} s/d {$record->tanggal_selesai} ({$record->lama_cuti} hari)<br>
+                                <strong>Tanggal:</strong> {$record->tanggal_mulai->format('d-m-Y')} s/d {$record->tanggal_selesai->format('d-m-Y')} ({$record->lama_cuti} hari)<br>
                                 <strong>Alasan:</strong> {$record->alasan_cuti}<br>
                                 <strong>Catatan Kanit:</strong> " . ($record->alasan_kanit ?? '-')
                             ))
@@ -211,7 +211,7 @@ class PersetujuanCutisTable
                             ->content(fn($record) => new \Illuminate\Support\HtmlString(
                                 "<strong>Pegawai:</strong> {$record->user->nama}<br>
                                 <strong>Jenis Cuti:</strong> {$record->jenis_cuti}<br>
-                                <strong>Tanggal:</strong> {$record->tanggal_mulai} s/d {$record->tanggal_selesai} ({$record->lama_cuti} hari)<br>
+                                <strong>Tanggal:</strong> {$record->tanggal_mulai->format('d-m-Y')} s/d {$record->tanggal_selesai->format('d-m-Y')} ({$record->lama_cuti} hari)<br>
                                 <strong>Alasan:</strong> {$record->alasan_cuti}<br>
                                 <strong>Catatan Kanit:</strong> " . ($record->alasan_kanit ?? '-') . "<br>
                                 <strong>Catatan Kasubag:</strong> " . ($record->alasan_kasubag ?? '-')
