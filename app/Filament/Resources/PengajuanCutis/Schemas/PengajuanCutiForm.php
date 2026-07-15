@@ -91,6 +91,8 @@ class PengajuanCutiForm
                             ])
                             ->searchable()
                             ->required()
+                            ->disabled(fn(?\App\Models\PengajuanCuti $record) => $record && (Auth::user()->hasRole('admin') || Auth::user()->hasRole('super_admin')))
+                            ->dehydrated(fn(?\App\Models\PengajuanCuti $record) => !($record && (Auth::user()->hasRole('admin') || Auth::user()->hasRole('super_admin'))))
                             ->live(),
 
                         Textarea::make('alasan_cuti')
