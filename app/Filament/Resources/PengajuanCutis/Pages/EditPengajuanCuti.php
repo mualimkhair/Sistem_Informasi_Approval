@@ -28,7 +28,7 @@ class EditPengajuanCuti extends EditRecord
 
         if (!$saldo) return;
 
-        $jenis = $data['jenis_cuti'];
+        $jenis = $data['jenis_cuti'] ?? $this->record->jenis_cuti;
         $lama = (int) ($data['lama_cuti'] ?? 0);
 
         if ($lama <= 0 || $jenis === 'diluar_tanggungan_negara') return;
