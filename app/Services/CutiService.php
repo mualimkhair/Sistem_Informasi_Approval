@@ -14,6 +14,16 @@ use App\Models\SaldoCuti;
 
 class CutiService
 {
+    public static function validasiTanggal(Carbon $tanggal, string $konteks): bool
+    {
+        return match ($konteks) {
+            'create' => $tanggal->startOfDay()->gte(Carbon::today()),
+            'edit_pegawai' => $tanggal->startOfDay()->gte(Carbon::today()),
+            'koreksi_admin' => $tanggal->startOfDay()->gte(Carbon::parse('2000-01-01')),
+            default => throw new \InvalidArgumentException("Konteks validasi tidak dikenal: {$konteks}"),
+        };
+    }
+
     public static function invalidDates(Carbon $start, Carbon $end, ?UnitKerja $unitKerja, ?KelompokKerja $kelompokKerja): array
     {
         if ($end->lt($start)) {

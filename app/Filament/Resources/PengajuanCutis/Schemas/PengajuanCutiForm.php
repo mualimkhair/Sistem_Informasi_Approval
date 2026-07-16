@@ -103,12 +103,42 @@ class PengajuanCutiForm
                             ->label('Tanggal Mulai')
                             ->required()
                             ->native(false)
-                            ->minDate(today())
+                            ->minDate(fn (string $operation, ?\App\Models\PengajuanCuti $record) => match (true) {
+                                $operation === 'create' => today(),
+                                $operation === 'edit' && Auth::user()->hasRole(['admin', 'super_admin']) => Carbon::parse('2000-01-01'),
+                                $operation === 'edit' && $record => Carbon::parse($record->getOriginal('tanggal_mulai'))->startOfDay()->lt(today()) ? Carbon::parse($record->getOriginal('tanggal_mulai'))->startOfDay() : today(),
+                                default => today(),
+                            })
                             ->live()
                             ->rules([
-                                fn($get, $record) => function (string $attribute, $value, \Closure $fail) use ($get, $record) {
+                                fn(string $operation, $get, $record) => function (string $attribute, $value, \Closure $fail) use ($operation, $get, $record) {
                                     $date = Carbon::parse($value);
-                                    $owner = $record ? $record->user : Auth::user();
+                                    
+                                    $user = Auth::user();
+                                    $konteks = 'create';
+                                    if ($operation === 'edit') {
+                                        $konteks = $user->hasRole(['admin', 'super_admin']) ? 'koreksi_admin' : 'edit_pegawai';
+                                    }
+
+                                    $shouldValidateTime = true;
+                                    if ($konteks === 'edit_pegawai' && $record) {
+                                        $originalDate = Carbon::parse($record->getOriginal('tanggal_mulai'))->startOfDay();
+                                        if ($date->startOfDay()->equalTo($originalDate)) {
+                                            $shouldValidateTime = false;
+                                        }
+                                    }
+
+                                    if ($shouldValidateTime) {
+                                        if (!\App\Services\CutiService::validasiTanggal($date, $konteks)) {
+                                            if ($konteks === 'koreksi_admin') {
+                                                $fail("Tanggal tidak wajar (terlalu lampau).");
+                                            } else {
+                                                $fail("Tanggal tidak boleh sebelum hari ini.");
+                                            }
+                                        }
+                                    }
+
+                                    $owner = $record ? $record->user : $user;
                                     $unitKerja = $owner->unitKerja;
                                     $kelompokKerja = $get('kelompok_kerja_id') ? KelompokKerja::find($get('kelompok_kerja_id')) : null;
                                     if (\App\Services\CutiService::hitungLamaCuti($date, $date, $unitKerja, $kelompokKerja) === 0) {
@@ -124,13 +154,43 @@ class PengajuanCutiForm
                             ->label('Tanggal Selesai')
                             ->required()
                             ->native(false)
-                            ->minDate(today())
+                            ->minDate(fn (string $operation, ?\App\Models\PengajuanCuti $record) => match (true) {
+                                $operation === 'create' => today(),
+                                $operation === 'edit' && Auth::user()->hasRole(['admin', 'super_admin']) => Carbon::parse('2000-01-01'),
+                                $operation === 'edit' && $record => Carbon::parse($record->getOriginal('tanggal_selesai'))->startOfDay()->lt(today()) ? Carbon::parse($record->getOriginal('tanggal_selesai'))->startOfDay() : today(),
+                                default => today(),
+                            })
                             ->afterOrEqual('tanggal_mulai')
                             ->live()
                             ->rules([
-                                fn($get, $record) => function (string $attribute, $value, \Closure $fail) use ($get, $record) {
+                                fn(string $operation, $get, $record) => function (string $attribute, $value, \Closure $fail) use ($operation, $get, $record) {
                                     $date = Carbon::parse($value);
-                                    $owner = $record ? $record->user : Auth::user();
+                                    
+                                    $user = Auth::user();
+                                    $konteks = 'create';
+                                    if ($operation === 'edit') {
+                                        $konteks = $user->hasRole(['admin', 'super_admin']) ? 'koreksi_admin' : 'edit_pegawai';
+                                    }
+
+                                    $shouldValidateTime = true;
+                                    if ($konteks === 'edit_pegawai' && $record) {
+                                        $originalDate = Carbon::parse($record->getOriginal('tanggal_selesai'))->startOfDay();
+                                        if ($date->startOfDay()->equalTo($originalDate)) {
+                                            $shouldValidateTime = false;
+                                        }
+                                    }
+
+                                    if ($shouldValidateTime) {
+                                        if (!\App\Services\CutiService::validasiTanggal($date, $konteks)) {
+                                            if ($konteks === 'koreksi_admin') {
+                                                $fail("Tanggal tidak wajar (terlalu lampau).");
+                                            } else {
+                                                $fail("Tanggal tidak boleh sebelum hari ini.");
+                                            }
+                                        }
+                                    }
+
+                                    $owner = $record ? $record->user : $user;
                                     $unitKerja = $owner->unitKerja;
                                     $kelompokKerja = $get('kelompok_kerja_id') ? KelompokKerja::find($get('kelompok_kerja_id')) : null;
                                     if (\App\Services\CutiService::hitungLamaCuti($date, $date, $unitKerja, $kelompokKerja) === 0) {
