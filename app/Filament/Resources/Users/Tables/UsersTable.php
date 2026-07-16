@@ -41,9 +41,28 @@ class UsersTable
                     ])
                     ->action(function (array $data) {
                         $file = is_array($data['file']) ? reset($data['file']) : $data['file'];
-                        \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\UserImport, $file);
+                        $import = new \App\Imports\UserImport();
+                        \Maatwebsite\Excel\Facades\Excel::import($import, $file);
+
+                        $results = $import->results;
+                        $berhasil  = collect($results)->where('status', 'berhasil')->count();
+                        $dilewati  = collect($results)->where('status', 'dilewati')->count();
+                        $gagal     = collect($results)->where('status', 'gagal')->count();
+
+                        $body = "Berhasil dibuat: {$berhasil} | Dilewati (sudah ada): {$dilewati} | Gagal: {$gagal}";
+
+                        $details = collect($results)
+                            ->filter(fn($r) => $r['status'] === 'gagal')
+                            ->map(fn($r) => "Baris {$r['row']}: {$r['pesan']}")
+                            ->implode("\n");
+
+                        if ($details) {
+                            $body .= "\n\n" . $details;
+                        }
+
                         \Filament\Notifications\Notification::make()
-                            ->title('Berhasil import data pegawai')
+                            ->title('Import Selesai')
+                            ->body($body)
                             ->success()
                             ->send();
                     })
