@@ -274,18 +274,21 @@ class CutiService
         ]);
     }
 
-    public static function koreksiSaldo(PengajuanCuti $pengajuan, int $lamaLama, int $lamaBaru): void
+    public static function koreksiSaldo(PengajuanCuti $pengajuan, int $lamaLama, int $lamaBaru, bool $dryRun = false): ?array
     {
         $selisih = $lamaBaru - $lamaLama;
-        if ($selisih === 0) return;
+        if ($selisih === 0) return null;
 
         if ($pengajuan->status === 'disetujui') {
             $saldo = $pengajuan->user->fresh()->saldoCuti;
-            if (!$saldo) return;
+            if (!$saldo) return null;
 
             if ($selisih > 0) {
                 $tersedia = self::hitungSaldoTersedia($pengajuan->user, $pengajuan->jenis_cuti);
                 if ($tersedia < $selisih) {
+                    if ($dryRun) {
+                        return ['error' => 'Saldo cuti tidak mencukupi untuk penambahan hari.'];
+                    }
                     throw new \Exception("Saldo cuti tidak mencukupi untuk penambahan hari.");
                 }
 
@@ -318,7 +321,7 @@ class CutiService
                         $saldo->{$field} -= $sisaPotong;
                     }
                 }
-                $saldo->save();
+                if (!$dryRun) $saldo->save();
             } else {
                 $refund = abs($selisih);
                 if ($pengajuan->jenis_cuti === 'tahunan') {
@@ -349,7 +352,19 @@ class CutiService
                         $saldo->{$field} += $refund;
                     }
                 }
-                $saldo->save();
+                if (!$dryRun) $saldo->save();
+            }
+            
+            if ($dryRun) {
+                return [
+                    'n2' => $saldo->saldo_n2,
+                    'n1' => $saldo->saldo_n1,
+                    'n' => $saldo->saldo_n,
+                    'besar' => $saldo->saldo_cuti_besar,
+                    'sakit' => $saldo->saldo_cuti_sakit,
+                    'melahirkan' => $saldo->saldo_cuti_melahirkan,
+                    'penting' => $saldo->saldo_cuti_alasan_penting,
+                ];
             }
 
             SaldoCutiLedger::create([
@@ -363,7 +378,7 @@ class CutiService
 
         } else {
             if (in_array($pengajuan->status, ['ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat', 'ditangguhkan', 'perubahan'])) {
-                return; 
+                return null; 
             }
 
             if ($selisih > 0) {
@@ -390,6 +405,7 @@ class CutiService
                 ]);
             }
         }
+        return null;
     }
 
     public static function rolloverSaldoTahunan(SaldoCuti $saldo): void

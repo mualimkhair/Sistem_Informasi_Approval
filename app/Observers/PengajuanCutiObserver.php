@@ -22,12 +22,16 @@ class PengajuanCutiObserver
         }
 
         $submitter = $pengajuanCuti->user;
+        $unitKerjaRecord = $pengajuanCuti->unit_kerja_id ? \App\Models\UnitKerja::find($pengajuanCuti->unit_kerja_id) : null;
+
         if ($submitter?->hasRole('kasubag')) {
             $pengajuanCuti->keputusan_kanit = 'dilewati';
             $pengajuanCuti->keputusan_kasubag = 'dilewati';
             $pengajuanCuti->status = 'menunggu_atasan';
             CutiService::handleApprovalStatus($pengajuanCuti);
         } elseif ($submitter?->hasRole('kanit')) {
+            $pengajuanCuti->keputusan_kanit = 'dilewati';
+        } elseif ($unitKerjaRecord && is_null($unitKerjaRecord->kepala_unit_id)) {
             $pengajuanCuti->keputusan_kanit = 'dilewati';
         }
 
@@ -113,8 +117,8 @@ class PengajuanCutiObserver
 
         if (($isOwner || $isAdmin) && in_array($oldStatus, ['perubahan', 'ditangguhkan']) && !$pengajuanCuti->isDirty(['keputusan_kanit', 'keputusan_kasubag', 'keputusan_pejabat'])) {
             $submitter = $pengajuanCuti->user;
-            $kanitValue = $submitter->hasRole(['kanit', 'kasubag']) ? 'dilewati' : null;
-            $kasubagValue = $submitter->hasRole('kasubag') ? 'dilewati' : null;
+            $kanitValue = $pengajuanCuti->getOriginal('keputusan_kanit') === 'dilewati' ? 'dilewati' : null;
+            $kasubagValue = $pengajuanCuti->getOriginal('keputusan_kasubag') === 'dilewati' ? 'dilewati' : null;
 
             if ($submitter->hasRole('kasubag')) {
                 $pengajuanCuti->status = 'menunggu_pejabat';

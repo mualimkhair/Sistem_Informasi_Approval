@@ -43,6 +43,9 @@ class PengajuanCutiPolicy
      */
     public function create(User $user): bool
     {
+        if ($user->hasRole('pejabat_berwenang')) {
+            return false;
+        }
         return true;
     }
 
