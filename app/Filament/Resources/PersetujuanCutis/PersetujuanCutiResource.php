@@ -51,6 +51,6 @@ class PersetujuanCutiResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->forApprover(auth()->user());
+        return parent::getEloquentQuery()->with(['user.unitKerja'])->forApprover(auth()->user());
     }
 }

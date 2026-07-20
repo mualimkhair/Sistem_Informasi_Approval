@@ -32,12 +32,13 @@ class PersetujuanCutisTable
             ])
             ->columns([
                 TextColumn::make('user.nama')->label('Pegawai')->searchable()->sortable(),
-                TextColumn::make('user.unitKerja.nama_unit')->label('Unit Kerja')->searchable()->sortable(),
-                TextColumn::make('jenis_cuti')->badge()->sortable()->searchable(),
-                TextColumn::make('tanggal_mulai')->date()->sortable(),
-                TextColumn::make('tanggal_selesai')->date()->sortable(),
-                TextColumn::make('lama_cuti')->label('Lama (Hari)')->sortable(),
+                TextColumn::make('user.unitKerja.nama_unit')->label('Unit Kerja')->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('jenis_cuti')->label('Jenis Cuti')->badge()->sortable()->searchable()->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('tanggal_mulai')->label('Tgl Mulai')->date()->sortable(),
+                TextColumn::make('tanggal_selesai')->label('Tgl Selesai')->date()->sortable(),
+                TextColumn::make('lama_cuti')->label('Lama (Hari)')->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
+                    ->label('Status')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'menunggu_atasan' => 'Menunggu Atasan',
                         'menunggu_pejabat' => 'Menunggu Pejabat',

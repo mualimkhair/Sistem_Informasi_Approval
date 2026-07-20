@@ -53,7 +53,7 @@ class PengajuanCutiResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = parent::getEloquentQuery();
+        $query = parent::getEloquentQuery()->with(['user.unitKerja']);
         $user = auth()->user();
 
         if ($user->hasRole(['super_admin', 'admin'])) {
