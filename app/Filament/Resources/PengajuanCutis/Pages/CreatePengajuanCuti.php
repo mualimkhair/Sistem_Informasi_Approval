@@ -11,6 +11,15 @@ class CreatePengajuanCuti extends CreateRecord
 {
     protected static string $resource = PengajuanCutiResource::class;
 
+    public function mount(): void
+    {
+        if (Auth::user()->hasRole('pejabat_berwenang')) {
+            abort(403, 'Pengajuan cuti untuk Pejabat Berwenang diproses langsung melalui Bagian Kepegawaian.');
+        }
+
+        parent::mount();
+    }
+
     protected function beforeCreate(): void
     {
         $data = $this->form->getState();

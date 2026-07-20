@@ -40,12 +40,11 @@ class HariLibursTable
                         Select::make('tahun')
                             ->label('Tahun')
                             ->options(function () {
-                                $years = [];
-                                $current = date('Y');
-                                for ($i = $current - 2; $i <= $current + 2; $i++) {
-                                    $years[(string)$i] = $i;
-                                }
-                                return $years;
+                                return \App\Models\HariLibur::selectRaw('YEAR(tanggal) as year')
+                                    ->distinct()
+                                    ->orderBy('year', 'desc')
+                                    ->pluck('year', 'year')
+                                    ->toArray();
                             })->searchable(),
                     ])
                     ->query(function (Builder $query, array $data): Builder {

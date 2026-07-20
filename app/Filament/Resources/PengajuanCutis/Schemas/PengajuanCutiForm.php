@@ -334,6 +334,8 @@ class PengajuanCutiForm
         $saldo = $targetUser->fresh()->saldoCuti;
         $default = ['n2' => '-', 'n1' => '-', 'n' => '-', 'besar' => '-', 'sakit' => '-', 'melahirkan' => '-', 'penting' => '-'];
 
+        if (!$saldo) return $default;
+
         $lama = (int) $get('lama_cuti');
         $jenis = $get('jenis_cuti');
 
@@ -349,9 +351,6 @@ class PengajuanCutiForm
             ];
         }
 
-        if (!$saldo)
-            return $default;
-
         $n2 = $saldo->saldo_n2;
         $n1 = $saldo->saldo_n1;
         $n = $saldo->saldo_n;
@@ -359,99 +358,81 @@ class PengajuanCutiForm
         $sakit = $saldo->saldo_cuti_sakit;
         $melahirkan = $saldo->saldo_cuti_melahirkan;
         $penting = $saldo->saldo_cuti_alasan_penting;
+        $isSimulated = false;
 
-        if ($jenis !== 'diluar_tanggungan_negara') {
-            $activeHolds = CutiService::getActiveHoldsByJenis($targetUser, $jenis);
-            if ($record && $record->jenis_cuti === $jenis) {
-                $activeHolds -= $record->getOriginal('lama_cuti');
+        if ($record && $record->status === 'disetujui' && $lama !== $record->getOriginal('lama_cuti')) {
+            $dryRunResult = \App\Services\CutiService::koreksiSaldo($record, $record->getOriginal('lama_cuti'), $lama, true);
+            if (isset($dryRunResult['error'])) {
+                return ['n2' => 'Error: ' . $dryRunResult['error'], 'n1' => '-', 'n' => '-', 'besar' => '-', 'sakit' => '-', 'melahirkan' => '-', 'penting' => '-'];
             }
-            $activeHolds = max(0, $activeHolds);
-
-            if ($activeHolds > 0 && $jenis === 'tahunan') {
-                if ($n2 >= $activeHolds) {
-                    $n2 -= $activeHolds;
-                    $activeHolds = 0;
-                } else {
-                    $activeHolds -= $n2;
-                    $n2 = 0;
-                }
-                if ($activeHolds > 0) {
-                    if ($n1 >= $activeHolds) {
-                        $n1 -= $activeHolds;
-                        $activeHolds = 0;
-                    } else {
-                        $activeHolds -= $n1;
-                        $n1 = 0;
-                    }
-                }
-                if ($activeHolds > 0) {
-                    $n = max(0, $n - $activeHolds);
-                }
-            } elseif ($activeHolds > 0 && in_array($jenis, ['besar', 'sakit', 'melahirkan', 'alasan_penting'])) {
-                switch ($jenis) {
-                    case 'besar':
-                        $besar = max(0, $besar - $activeHolds);
-                        break;
-                    case 'sakit':
-                        $sakit = max(0, $sakit - $activeHolds);
-                        break;
-                    case 'melahirkan':
-                        $melahirkan = max(0, $melahirkan - $activeHolds);
-                        break;
-                    case 'alasan_penting':
-                        $penting = max(0, $penting - $activeHolds);
-                        break;
-                }
+            if ($dryRunResult) {
+                $n2 = $dryRunResult['n2'];
+                $n1 = $dryRunResult['n1'];
+                $n = $dryRunResult['n'];
+                $besar = $dryRunResult['besar'];
+                $sakit = $dryRunResult['sakit'];
+                $melahirkan = $dryRunResult['melahirkan'];
+                $penting = $dryRunResult['penting'];
+                $isSimulated = true;
             }
         }
 
-        if ($lama > 0) {
+        $activeHolds = \App\Services\CutiService::getActiveHoldsByJenis($targetUser, $jenis);
+        $isPending = $record && in_array($record->status, ['menunggu_atasan', 'menunggu_pejabat', 'disetujui_sementara_kanit']);
+        if ($isPending && $record->jenis_cuti === $jenis) {
+            $activeHolds -= $record->getOriginal('lama_cuti');
+        }
+        $activeHolds = max(0, $activeHolds);
+
+        if ($activeHolds > 0 && $jenis === 'tahunan') {
+            if ($n2 >= $activeHolds) { $n2 -= $activeHolds; $activeHolds = 0; }
+            else { $activeHolds -= $n2; $n2 = 0; }
+            
+            if ($activeHolds > 0) {
+                if ($n1 >= $activeHolds) { $n1 -= $activeHolds; $activeHolds = 0; }
+                else { $activeHolds -= $n1; $n1 = 0; }
+            }
+            if ($activeHolds > 0) { $n = max(0, $n - $activeHolds); }
+        } elseif ($activeHolds > 0) {
             switch ($jenis) {
-                case 'tahunan':
-                    if ($n2 >= $lama) {
-                        $n2 -= $lama;
-                        $lama = 0;
-                    } else {
-                        $lama -= $n2;
-                        $n2 = 0;
-                    }
-
-                    if ($lama > 0) {
-                        if ($n1 >= $lama) {
-                            $n1 -= $lama;
-                            $lama = 0;
-                        } else {
-                            $lama -= $n1;
-                            $n1 = 0;
-                        }
-                    }
-                    if ($lama > 0) {
-                        $n -= $lama;
-                    }
-                    break;
-                case 'besar':
-                    $besar -= $lama;
-                    break;
-                case 'sakit':
-                    $sakit -= $lama;
-                    break;
-                case 'melahirkan':
-                    $melahirkan -= $lama;
-                    break;
-                case 'alasan_penting':
-                    $penting -= $lama;
-                    break;
+                case 'besar': $besar = max(0, $besar - $activeHolds); break;
+                case 'sakit': $sakit = max(0, $sakit - $activeHolds); break;
+                case 'melahirkan': $melahirkan = max(0, $melahirkan - $activeHolds); break;
+                case 'alasan_penting': $penting = max(0, $penting - $activeHolds); break;
             }
         }
 
+        if (!$record || $record->status !== 'disetujui') {
+            $isSimulated = true;
+            if ($jenis === 'tahunan') {
+                $sisaPotong = $lama;
+                if ($n2 >= $sisaPotong) { $n2 -= $sisaPotong; $sisaPotong = 0; }
+                else { $sisaPotong -= $n2; $n2 = 0; }
+                
+                if ($sisaPotong > 0) {
+                    if ($n1 >= $sisaPotong) { $n1 -= $sisaPotong; $sisaPotong = 0; }
+                    else { $sisaPotong -= $n1; $n1 = 0; }
+                }
+                if ($sisaPotong > 0) { $n -= $sisaPotong; }
+            } else {
+                switch ($jenis) {
+                    case 'besar': $besar -= $lama; break;
+                    case 'sakit': $sakit -= $lama; break;
+                    case 'melahirkan': $melahirkan -= $lama; break;
+                    case 'alasan_penting': $penting -= $lama; break;
+                }
+            }
+        }
+
+        $suffix = $isSimulated ? ' hari (Preview)' : ' hari';
         return [
-            'n2' => $n2 . ' hari',
-            'n1' => $n1 . ' hari',
-            'n' => $n . ' hari',
-            'besar' => $besar . ' hari',
-            'sakit' => $sakit . ' hari',
-            'melahirkan' => $melahirkan . ' hari',
-            'penting' => $penting . ' hari',
+            'n2' => $n2 . $suffix,
+            'n1' => $n1 . $suffix,
+            'n' => $n . $suffix,
+            'besar' => $besar . $suffix,
+            'sakit' => $sakit . $suffix,
+            'melahirkan' => $melahirkan . $suffix,
+            'penting' => $penting . $suffix,
         ];
     }
 }
