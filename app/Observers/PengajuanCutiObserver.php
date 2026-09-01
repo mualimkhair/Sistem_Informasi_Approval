@@ -167,7 +167,7 @@ class PengajuanCutiObserver
                 }
             } else {
                 $body = 'Status pengajuan cuti Anda menjadi: ' . str_replace('_', ' ', strtoupper($pengajuanCuti->status));
-                
+
                 if (in_array($pengajuanCuti->status, ['ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat', 'perubahan'])) {
                     $reason = $pengajuanCuti->alasan_pejabat ?? $pengajuanCuti->alasan_kasubag ?? $pengajuanCuti->alasan_kanit;
                     if ($reason) {
@@ -194,7 +194,7 @@ class PengajuanCutiObserver
             $pengajuanCuti->lama_cuti = $lamaBaru;
 
             $isResubmit = in_array($oldStatus, ['perubahan', 'ditangguhkan']) && $pengajuanCuti->status === 'menunggu_atasan';
-            
+
             if (!$isResubmit && $lamaLama !== null && $lamaLama !== $lamaBaru) {
                 CutiService::koreksiSaldo($pengajuanCuti, $lamaLama, $lamaBaru);
 
@@ -220,28 +220,37 @@ class PengajuanCutiObserver
                 $this->logStatus($pengajuanCuti, $pengajuanCuti->status, $pengajuanCuti->status, $keterangan);
             }
 
-            $changed = $pengajuanCuti->getChanges();
-            unset($changed['updated_at'], $changed['lama_cuti']);
-
-            // Log perubahan field oleh admin
-            if (!empty($changed) && auth()->check() && auth()->user()->hasRole(['super_admin', 'admin'])) {
-                $entries = [];
-                foreach ($changed as $field => $new) {
-                    $entries[] = [
-                        'field' => $field,
-                        'old' => $pengajuanCuti->getOriginal($field),
-                        'new' => $new,
-                    ];
-                }
-                $pengajuanCuti->auditLogs()->create([
-                    'changed_by' => auth()->id(),
-                    'changes' => $entries,
-                ]);
-            }
         }
         if ($pengajuanCuti->wasChanged('status')) {
             $oldStatus = $pengajuanCuti->getOriginal('status');
             $this->logStatus($pengajuanCuti, $oldStatus, $pengajuanCuti->status);
+        }
+    }
+
+    public function updated(PengajuanCuti $pengajuanCuti)
+    {
+        // 1. status transition (already correct here)
+        if ($pengajuanCuti->wasChanged('status')) {
+            $this->logStatus($pengajuanCuti, $pengajuanCuti->getOriginal('status'), $pengajuanCuti->status);
+        }
+
+        // 2. field changes made by admin/super_admin
+        $changed = $pengajuanCuti->getChanges();
+        unset($changed['updated_at'], $changed['lama_cuti']);
+
+        if (!empty($changed) && auth()->check() && auth()->user()->hasRole(['super_admin', 'admin'])) {
+            $entries = [];
+            foreach ($changed as $field => $new) {
+                $entries[] = [
+                    'field' => $field,
+                    'old' => $pengajuanCuti->getOriginal($field),
+                    'new' => $new,
+                ];
+            }
+            $pengajuanCuti->auditLogs()->create([
+                'user_id' => auth()->id(),   // ponytail: column is user_id, not changed_by
+                'changes' => $entries,
+            ]);
         }
     }
 
@@ -289,6 +298,6 @@ class PengajuanCutiObserver
         if (in_array($newStatus, ['menunggu_atasan', 'menunggu_pejabat'])) {
             return 'Pengajuan dikirim ulang oleh pemohon';
         }
-        return 'Status berubah menjadi ' . str_replace('_', ' ', $newStatus);   
+        return 'Status berubah menjadi ' . str_replace('_', ' ', $newStatus);
     }
 }
