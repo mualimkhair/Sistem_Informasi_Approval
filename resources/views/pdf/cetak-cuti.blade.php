@@ -11,6 +11,7 @@
             font-family: Arial, Helvetica, sans-serif;
             font-size: 10pt;
             color: #000;
+            line-height: 1.25;
         }
         .surat-header {
             width: 46%;
@@ -43,7 +44,7 @@
         }
         .form-table td {
             border: 1px solid #000;
-            padding: 4px 6px;
+            padding: 5px 8px;
             vertical-align: middle;
             text-align: left;
         }
@@ -51,10 +52,25 @@
         .form-table td.top { vertical-align: top; }
 
         .section-title { font-weight: normal; }
-        .tall-box { height: 60px; }
-        .tall-box-lg { height: 100px; }
+        .tall-box { height: 72px; }
+        .tall-box-lg { height: 118px; }
 
-        .signature-img { max-width: 90px; max-height: 70px; }
+        .signature-img { max-width: 75px; max-height: 42px; vertical-align: middle; }
+
+        .persetujuan-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        .persetujuan-table td {
+            border: 1px solid #000;
+            padding: 6px;
+            vertical-align: top;
+            text-align: center;
+            word-wrap: break-word;
+        }
+        .persetujuan-title { font-weight: bold; }
+        .approval-cell { height: 118px; }
     </style>
 </head>
 <body>
@@ -132,34 +148,27 @@
     // --- Operasional flow: Kepala Unit, Kepala Seksi, Kanit Kepegawaian, Kasubag TU ---
     $isOperasional = ($pengajuanCuti->tipe_aliran ?? 'administrasi') === 'operasional';
 
-    $kepalaUnitApproved = strtolower($pengajuanCuti->keputusan_kepala_unit ?? '') === 'disetujui';
-    $kepalaUnitRejected = !empty($pengajuanCuti->keputusan_kepala_unit) && !in_array(strtolower($pengajuanCuti->keputusan_kepala_unit), ['disetujui', 'dilewati']);
-
-    $kepalaSeksiApproved = strtolower($pengajuanCuti->keputusan_kepala_seksi ?? '') === 'disetujui';
-    $kepalaSeksiRejected = !empty($pengajuanCuti->keputusan_kepala_seksi) && !in_array(strtolower($pengajuanCuti->keputusan_kepala_seksi), ['disetujui', 'dilewati']);
-
-    $kanitKepegawaianApproved = strtolower($pengajuanCuti->keputusan_kanit_kepegawaian ?? '') === 'disetujui';
-    $kanitKepegawaianRejected = !empty($pengajuanCuti->keputusan_kanit_kepegawaian) && !in_array(strtolower($pengajuanCuti->keputusan_kanit_kepegawaian), ['disetujui', 'dilewati']);
-
-    $kasubagTuApproved = strtolower($pengajuanCuti->keputusan_kasubag_tu ?? '') === 'disetujui';
-    $kasubagTuRejected = !empty($pengajuanCuti->keputusan_kasubag_tu) && !in_array(strtolower($pengajuanCuti->keputusan_kasubag_tu), ['disetujui', 'dilewati']);
-
-    $formatBox = function ($approved, $rejected, $approver, $alasan, $canSign = true, $showRejectedReason = false) {
-        if (! $approved && ! $rejected) {
+    $formatBox = function ($keputusan, $approver, $alasan, $canSign = true, $showRejectedReason = false) {
+        $kep = strtolower($keputusan ?? '');
+        if ($kep === '' || $kep === 'dilewati') {
             return '';
         }
+
+        $approved = $kep === 'disetujui';
+        $rejected = ! in_array($kep, ['disetujui', 'dilewati'], true);
 
         $out = '';
         if ($approver) {
             $sig = $canSign ? getSignatureBase64($approver->signature_path) : null;
-            $out .= $sig ? "<img src=\"{$sig}\" class=\"signature-img\"><br>" : '<br><br><br>';
+            $out .= $sig ? "<img src=\"{$sig}\" class=\"signature-img\"><br>" : '<br><br>';
             $out .= "<u>{$approver->nama}</u><br>";
             $out .= 'NIP. ' . $approver->nip . '<br>';
+            $out .= '<span style="font-size: 9pt;">' . ($approver->pangkat_gol ?? '-') . '</span>';
         } else {
-            $out .= '<br><br><br>';
+            $out .= '<br><br>';
         }
         if ($rejected && $showRejectedReason && $alasan) {
-            $out .= '<i>(' . $alasan . ')</i>';
+            $out .= '<br><i>(' . $alasan . ')</i>';
         }
         return $out;
     };
@@ -429,20 +438,26 @@
     {{-- ===================== VII. PERSETUJUAN BERJENJANG (ALIRAN OPERASIONAL) ===================== --}}
     <tr><td colspan="7" class="section-title">VII. PERSETUJUAN BERJENJANG</td></tr>
     <tr>
-        <td colspan="4" class="tc">DISETUJUI</td>
-        <td colspan="3" class="tc">DITANGGUHKAN / TIDAK DISETUJUI</td>
-    </tr>
-    <tr>
-        <td colspan="2" class="tc">KEPALA UNIT</td>
-        <td colspan="2" class="tc">KEPALA SEKSI</td>
-        <td colspan="2" class="tc">KANIT KEPEGAWAIAN</td>
-        <td class="tc">KASUBAG TU</td>
-    </tr>
-    <tr>
-        <td colspan="2" class="tc tall-box">{!! $formatBox($kepalaUnitApproved, $kepalaUnitRejected, $pengajuanCuti->kepalaUnit, $pengajuanCuti->alasan_kepala_unit, false, true) !!}</td>
-        <td colspan="2" class="tc tall-box">{!! $formatBox($kepalaSeksiApproved, $kepalaSeksiRejected, $pengajuanCuti->kepalaSeksi, $pengajuanCuti->alasan_kepala_seksi, false, true) !!}</td>
-        <td colspan="2" class="tc tall-box">{!! $formatBox($kanitKepegawaianApproved, $kanitKepegawaianRejected, $pengajuanCuti->kanitKepegawaian, $pengajuanCuti->alasan_kanit_kepegawaian, true, true) !!}</td>
-        <td class="tc tall-box">{!! $formatBox($kasubagTuApproved, $kasubagTuRejected, $pengajuanCuti->kasubagTu, $pengajuanCuti->alasan_kasubag_tu, true, true) !!}</td>
+        <td colspan="7" style="padding: 0; border: none;">
+            <table class="persetujuan-table">
+                <tr>
+                    <td colspan="2" class="persetujuan-title">DISETUJUI</td>
+                    <td colspan="2" class="persetujuan-title">DITANGGUHKAN / TIDAK DISETUJUI</td>
+                </tr>
+                <tr>
+                    <td class="persetujuan-title">KEPALA UNIT</td>
+                    <td class="persetujuan-title">KEPALA SEKSI</td>
+                    <td class="persetujuan-title">KANIT KEPEGAWAIAN</td>
+                    <td class="persetujuan-title">KASUBAG TU</td>
+                </tr>
+                <tr>
+                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kepala_unit, $pengajuanCuti->kepalaUnit, $pengajuanCuti->alasan_kepala_unit, false, true) !!}</td>
+                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kepala_seksi, $pengajuanCuti->kepalaSeksi, $pengajuanCuti->alasan_kepala_seksi, false, true) !!}</td>
+                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kanit_kepegawaian, $pengajuanCuti->kanitKepegawaian, $pengajuanCuti->alasan_kanit_kepegawaian, true, true) !!}</td>
+                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kasubag_tu, $pengajuanCuti->kasubagTu, $pengajuanCuti->alasan_kasubag_tu, true, true) !!}</td>
+                </tr>
+            </table>
+        </td>
     </tr>
     @endif
 
