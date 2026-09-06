@@ -23,17 +23,48 @@ class PengajuanCutiPolicy
      */
     public function view(User $user, PengajuanCuti $pengajuanCuti): bool
     {
-        if ($user->hasRole(['super_admin', 'admin'])) return true;
-        
+        if ($user->hasRole(['super_admin', 'admin'])) {
+            return true;
+        }
+
         // Owner
-        if ($pengajuanCuti->user_id == $user->id) return true;
+        if ($pengajuanCuti->user_id == $user->id) {
+            return true;
+        }
+
+        // Off-limits if this is not the approver's flow type
+        if ($pengajuanCuti->tipe_aliran === 'operasional') {
+            // Operasional approvers only see operasional requests they are assigned to.
+            // KU uses role kanit (org-matched), KS uses role kasubag (org-matched),
+            // stage 3/4 use their dedicated roles.
+            if ($user->hasRole('kanit') && $pengajuanCuti->kepala_unit_id == $user->id) {
+                return true;
+            }
+            if ($user->hasRole('kasubag') && $pengajuanCuti->kepala_seksi_id == $user->id) {
+                return true;
+            }
+            if ($user->hasRole('kanit_kepegawaian') && $pengajuanCuti->kanit_kepegawaian_id == $user->id) {
+                return true;
+            }
+            if ($user->hasRole('kasubag_tu') && $pengajuanCuti->kasubag_tu_id == $user->id) {
+                return true;
+            }
+
+            return false;
+        }
 
         // Approvers can view it if it's from their unit (Kanit/Kasubag) or they are Pejabat
-        if ($user->hasRole('pejabat_berwenang')) return true;
+        if ($user->hasRole('pejabat_berwenang')) {
+            return true;
+        }
 
-        if ($user->hasRole('kasubag') && $pengajuanCuti->seksi_id == $user->seksi_id) return true;
-        
-        if ($user->hasRole('kanit') && $pengajuanCuti->unit_kerja_id == $user->unit_kerja_id) return true;
+        if ($user->hasRole('kasubag') && $pengajuanCuti->seksi_id == $user->seksi_id) {
+            return true;
+        }
+
+        if ($user->hasRole('kanit') && $pengajuanCuti->unit_kerja_id == $user->unit_kerja_id) {
+            return true;
+        }
 
         return false;
     }
@@ -46,6 +77,7 @@ class PengajuanCutiPolicy
         if ($user->hasRole('pejabat_berwenang')) {
             return false;
         }
+
         return true;
     }
 
@@ -54,7 +86,9 @@ class PengajuanCutiPolicy
      */
     public function update(User $user, PengajuanCuti $pengajuanCuti): bool
     {
-        if ($user->hasRole(['super_admin', 'admin'])) return true;
+        if ($user->hasRole(['super_admin', 'admin'])) {
+            return true;
+        }
 
         // Owner can edit only if status is perubahan or ditangguhkan
         if ($pengajuanCuti->user_id == $user->id) {
@@ -69,7 +103,9 @@ class PengajuanCutiPolicy
      */
     public function delete(User $user, PengajuanCuti $pengajuanCuti): bool
     {
-        if ($user->hasRole(['super_admin', 'admin'])) return true;
+        if ($user->hasRole(['super_admin', 'admin'])) {
+            return true;
+        }
 
         // Owner can delete ONLY if it's not approved yet (disetujui).
         if ($pengajuanCuti->user_id == $user->id) {

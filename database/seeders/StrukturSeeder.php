@@ -2,12 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\KelompokKerja;
+use App\Models\Seksi;
+use App\Models\UnitKerja;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use App\Models\Seksi;
-use App\Models\UnitKerja;
 
 class StrukturSeeder extends Seeder
 {
@@ -29,7 +30,7 @@ class StrukturSeeder extends Seeder
 
         DB::table('unit_kerjas')->delete();
         DB::table('seksis')->delete();
-        
+
         // Remove users (except roles)
         $rolesId = DB::table('model_has_roles')->pluck('model_id')->toArray();
         DB::table('model_has_roles')->delete();
@@ -65,7 +66,7 @@ class StrukturSeeder extends Seeder
                     ['nama_unit' => 'Unit Terminal dan Pengamanan Kampen', 'kanit' => ['nama' => 'Fery Sefrian, S.M', 'nip' => '199009192014021004', 'gol' => 'Penata Muda Tk.I (III/b)']],
                     ['nama_unit' => 'Unit Proteksi', 'kanit' => ['nama' => 'Moh. Rifan', 'nip' => '198404112009011009', 'gol' => 'Penata Muda (III/a)']],
                     ['nama_unit' => 'Unit PKP-PK', 'kanit' => ['nama' => 'Muhammad Nur, S.Sos', 'nip' => '198302072006041004', 'gol' => 'Penata Tk.I (III/d)']],
-                ]
+                ],
             ],
             'Kepala Seksi Pelayanan dan Kerjasama' => [
                 'kasi' => ['nama' => 'Muhammad Arief Sagana, SE, MM', 'nip' => '198512222007121001', 'gol' => 'Penata (III/c)'],
@@ -73,7 +74,7 @@ class StrukturSeeder extends Seeder
                     ['nama_unit' => 'Unit Kerjasama', 'kanit' => ['nama' => 'Haryati Mihari, SE', 'nip' => '198109122009122003', 'gol' => 'Penata (III/c)']],
                     ['nama_unit' => 'Unit Informasi', 'kanit' => ['nama' => 'Nurasma, SE', 'nip' => '197410252006042001', 'gol' => 'Penata Tk.I (III/d)']],
                     ['nama_unit' => 'Unit Terminal, Hygiene dan Sanitasi', 'kanit' => ['nama' => 'Romi Yosep Sigar', 'nip' => '198610132010121002', 'gol' => 'Pengatur Tk.I (II/d)']],
-                ]
+                ],
             ],
             'Kepala Seksi Teknik dan Operasi' => [
                 'kasi' => ['nama' => 'Winariyanto, SE', 'nip' => '197704271999031004', 'gol' => 'Penata Tk.I (III/d)'],
@@ -84,7 +85,7 @@ class StrukturSeeder extends Seeder
                     ['nama_unit' => 'Unit Bangunan', 'kanit' => ['nama' => 'Subhan, ST', 'nip' => '197806102002121003', 'gol' => 'Penata Tk.I (III/d)']],
                     ['nama_unit' => 'Unit Alat-Alat Besar (A2B)', 'kanit' => ['nama' => 'Andi Reza Asyari Iqbal, A.Md', 'nip' => '198706072014021004', 'gol' => 'Penata Muda Tk.I (III/b)']],
                     ['nama_unit' => 'Unit Landasan', 'kanit' => ['nama' => 'Yunus Panto, SH', 'nip' => '198012142007121001', 'gol' => 'Penata Muda Tk.I (III/b)']],
-                ]
+                ],
             ],
             'Kasubag Keuangan dan Tata Usaha' => [
                 'kasi' => ['nama' => 'Hastuty, SE, MM', 'nip' => '197504211999032001', 'gol' => 'Pembina (IV/a)'],
@@ -98,13 +99,13 @@ class StrukturSeeder extends Seeder
                     ['nama_unit' => 'Unit SPI', 'kanit' => ['nama' => 'Umar, S.Kom', 'nip' => '197706112006041001', 'gol' => 'Penata Tk.I (III/d)']],
                     ['nama_unit' => 'Unit BMN', 'kanit' => ['nama' => 'Yani Yuliawati, S.Sos, M.M', 'nip' => '197607232006042002', 'gol' => 'Penata Tk.I (III/d)']],
                     ['nama_unit' => 'Unit Tata Usaha', 'kanit' => null],
-                ]
+                ],
             ],
         ];
 
         foreach ($seksisData as $namaSeksi => $data) {
             $seksi = Seksi::create(['nama_seksi' => $namaSeksi]);
-            
+
             $kasiUser = User::create([
                 'nip' => $data['kasi']['nip'],
                 'nama' => $data['kasi']['nama'],
@@ -115,6 +116,9 @@ class StrukturSeeder extends Seeder
             ]);
             $kasiUser->assignRole('kasubag');
             $kasiUser->assignRole('pegawai');
+            if ($namaSeksi === 'Kasubag Keuangan dan Tata Usaha') {
+                $kasiUser->assignRole('kasubag_tu');
+            }
             DB::table('saldo_cutis')->insert(['user_id' => $kasiUser->id, 'saldo_n' => 12, 'saldo_n1' => 0, 'saldo_n2' => 0, 'tahun_berjalan' => date('Y'), 'created_at' => now(), 'updated_at' => now()]);
 
             $seksi->update(['kepala_seksi_id' => $kasiUser->id]);
@@ -127,6 +131,17 @@ class StrukturSeeder extends Seeder
                     'seksi_id' => $seksi->id,
                 ]);
 
+                // Operasional units need at least one Kelompok Kerja so cuti submissions
+                // can be made. One default group per unit (standar weekend Sabtu/Minggu).
+                if ($jenis === 'operasional') {
+                    KelompokKerja::create([
+                        'unit_kerja_id' => $unit->id,
+                        'nama_kelompok' => 'Kelompok '.substr($unit->nama_unit, 5).' 1',
+                        'hari_libur_1' => 'Sabtu',
+                        'hari_libur_2' => 'Minggu',
+                    ]);
+                }
+
                 if ($unitData['kanit']) {
                     $kanitUser = User::create([
                         'nip' => $unitData['kanit']['nip'],
@@ -138,6 +153,9 @@ class StrukturSeeder extends Seeder
                     ]);
                     $kanitUser->assignRole('kanit');
                     $kanitUser->assignRole('pegawai');
+                    if ($unitData['nama_unit'] === 'Unit Kepegawaian') {
+                        $kanitUser->assignRole('kanit_kepegawaian');
+                    }
                     DB::table('saldo_cutis')->insert(['user_id' => $kanitUser->id, 'saldo_n' => 12, 'saldo_n1' => 0, 'saldo_n2' => 0, 'tahun_berjalan' => date('Y'), 'created_at' => now(), 'updated_at' => now()]);
 
                     $unit->update(['kepala_unit_id' => $kanitUser->id]);

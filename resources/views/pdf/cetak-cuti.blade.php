@@ -128,6 +128,41 @@
 
     $pejabatApproved = strtolower($pengajuanCuti->keputusan_pejabat ?? '') === 'disetujui';
     $pejabatRejected = !empty($pengajuanCuti->keputusan_pejabat) && !in_array(strtolower($pengajuanCuti->keputusan_pejabat), ['disetujui', 'dilewati']);
+
+    // --- Operasional flow: Kepala Unit, Kepala Seksi, Kanit Kepegawaian, Kasubag TU ---
+    $isOperasional = ($pengajuanCuti->tipe_aliran ?? 'administrasi') === 'operasional';
+
+    $kepalaUnitApproved = strtolower($pengajuanCuti->keputusan_kepala_unit ?? '') === 'disetujui';
+    $kepalaUnitRejected = !empty($pengajuanCuti->keputusan_kepala_unit) && !in_array(strtolower($pengajuanCuti->keputusan_kepala_unit), ['disetujui', 'dilewati']);
+
+    $kepalaSeksiApproved = strtolower($pengajuanCuti->keputusan_kepala_seksi ?? '') === 'disetujui';
+    $kepalaSeksiRejected = !empty($pengajuanCuti->keputusan_kepala_seksi) && !in_array(strtolower($pengajuanCuti->keputusan_kepala_seksi), ['disetujui', 'dilewati']);
+
+    $kanitKepegawaianApproved = strtolower($pengajuanCuti->keputusan_kanit_kepegawaian ?? '') === 'disetujui';
+    $kanitKepegawaianRejected = !empty($pengajuanCuti->keputusan_kanit_kepegawaian) && !in_array(strtolower($pengajuanCuti->keputusan_kanit_kepegawaian), ['disetujui', 'dilewati']);
+
+    $kasubagTuApproved = strtolower($pengajuanCuti->keputusan_kasubag_tu ?? '') === 'disetujui';
+    $kasubagTuRejected = !empty($pengajuanCuti->keputusan_kasubag_tu) && !in_array(strtolower($pengajuanCuti->keputusan_kasubag_tu), ['disetujui', 'dilewati']);
+
+    $formatBox = function ($approved, $rejected, $approver, $alasan, $canSign = true, $showRejectedReason = false) {
+        if (! $approved && ! $rejected) {
+            return '';
+        }
+
+        $out = '';
+        if ($approver) {
+            $sig = $canSign ? getSignatureBase64($approver->signature_path) : null;
+            $out .= $sig ? "<img src=\"{$sig}\" class=\"signature-img\"><br>" : '<br><br><br>';
+            $out .= "<u>{$approver->nama}</u><br>";
+            $out .= 'NIP. ' . $approver->nip . '<br>';
+        } else {
+            $out .= '<br><br><br>';
+        }
+        if ($rejected && $showRejectedReason && $alasan) {
+            $out .= '<i>(' . $alasan . ')</i>';
+        }
+        return $out;
+    };
 @endphp
 
 {{-- ===================== KOP SURAT ===================== --}}
@@ -273,6 +308,7 @@
     </tr>
     <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== VII. PERTIMBANGAN ATASAN LANGSUNG ===================== --}}
+    @if(!$isOperasional)
     <tr><td colspan="7" class="section-title">VII. PERTIMBANGAN ATASAN LANGSUNG</td></tr>
     <tr>
         <td colspan="4" class="tc">DISETUJUI</td>
@@ -389,6 +425,26 @@
             @endif
         </td>
     </tr>
+    @else
+    {{-- ===================== VII. PERSETUJUAN BERJENJANG (ALIRAN OPERASIONAL) ===================== --}}
+    <tr><td colspan="7" class="section-title">VII. PERSETUJUAN BERJENJANG</td></tr>
+    <tr>
+        <td colspan="4" class="tc">DISETUJUI</td>
+        <td colspan="3" class="tc">DITANGGUHKAN / TIDAK DISETUJUI</td>
+    </tr>
+    <tr>
+        <td colspan="2" class="tc">KEPALA UNIT</td>
+        <td colspan="2" class="tc">KEPALA SEKSI</td>
+        <td colspan="2" class="tc">KANIT KEPEGAWAIAN</td>
+        <td class="tc">KASUBAG TU</td>
+    </tr>
+    <tr>
+        <td colspan="2" class="tc tall-box">{!! $formatBox($kepalaUnitApproved, $kepalaUnitRejected, $pengajuanCuti->kepalaUnit, $pengajuanCuti->alasan_kepala_unit, false, true) !!}</td>
+        <td colspan="2" class="tc tall-box">{!! $formatBox($kepalaSeksiApproved, $kepalaSeksiRejected, $pengajuanCuti->kepalaSeksi, $pengajuanCuti->alasan_kepala_seksi, false, true) !!}</td>
+        <td colspan="2" class="tc tall-box">{!! $formatBox($kanitKepegawaianApproved, $kanitKepegawaianRejected, $pengajuanCuti->kanitKepegawaian, $pengajuanCuti->alasan_kanit_kepegawaian, true, true) !!}</td>
+        <td class="tc tall-box">{!! $formatBox($kasubagTuApproved, $kasubagTuRejected, $pengajuanCuti->kasubagTu, $pengajuanCuti->alasan_kasubag_tu, true, true) !!}</td>
+    </tr>
+    @endif
 
     </tbody>
 </table>

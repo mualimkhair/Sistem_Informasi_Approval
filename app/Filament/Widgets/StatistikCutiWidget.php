@@ -1,5 +1,5 @@
 <?php
-
+git 
 namespace App\Filament\Widgets;
 
 use App\Models\PengajuanCuti;
@@ -23,7 +23,11 @@ class StatistikCutiWidget extends BaseWidget
             Stat::make('Total Pengajuan Cuti', PengajuanCuti::count()),
             Stat::make('Pengajuan Disetujui', PengajuanCuti::where('status', 'disetujui')->count())
                 ->color('success'),
-            Stat::make('Pengajuan Menunggu', PengajuanCuti::whereIn('status', ['menunggu_atasan', 'menunggu_pejabat'])->count())
+            Stat::make('Pengajuan Menunggu', PengajuanCuti::whereIn('status', [
+                'menunggu_atasan', 'menunggu_pejabat',
+                'menunggu_kepala_unit', 'menunggu_kepala_seksi',
+                'menunggu_kanit_kepegawaian', 'menunggu_kasubag_tu',
+            ])->count())
                 ->color('warning'),
         ];
     }

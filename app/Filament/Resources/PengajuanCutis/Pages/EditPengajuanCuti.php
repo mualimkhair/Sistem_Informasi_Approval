@@ -53,7 +53,13 @@ class EditPengajuanCuti extends EditRecord
 
     protected function afterSave(): void
     {
-        if ($this->record->status === 'menunggu_atasan') {
+        if (in_array($this->record->status, [
+            'menunggu_atasan',
+            'menunggu_kepala_unit',
+            'menunggu_kepala_seksi',
+            'menunggu_kanit_kepegawaian',
+            'menunggu_kasubag_tu',
+        ])) {
             \App\Services\CutiService::holdSaldo($this->record);
         }
     }

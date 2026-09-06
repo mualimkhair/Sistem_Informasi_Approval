@@ -2,18 +2,18 @@
 
 namespace App\Filament\Resources\PengajuanCutis\Tables;
 
-use App\Models\PengajuanCuti;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use App\Exports\PengajuanCutiExport;
 use Filament\Actions\Action;
-use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Filters\Filter;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PengajuanCutisTable
 {
@@ -21,12 +21,12 @@ class PengajuanCutisTable
     {
         return $table
             ->headerActions([
-                \Filament\Actions\Action::make('export')
+                Action::make('export')
                     ->label('Export Excel')
                     ->icon('heroicon-o-document-arrow-down')
                     ->action(function ($livewire) {
-                        return \Maatwebsite\Excel\Facades\Excel::download(
-                            new \App\Exports\PengajuanCutiExport($livewire->getFilteredTableQuery()),
+                        return Excel::download(
+                            new PengajuanCutiExport($livewire->getFilteredTableQuery()),
                             'Rekap-Pengajuan-Cuti.xlsx'
                         );
                     })
@@ -48,6 +48,14 @@ class PengajuanCutisTable
                         'ditolak_kanit' => 'Ditolak Kanit',
                         'ditolak_kasubag' => 'Ditolak Kasubag',
                         'ditolak_pejabat' => 'Ditolak Pejabat',
+                        'menunggu_kepala_unit' => 'Menunggu Kepala Unit',
+                        'menunggu_kepala_seksi' => 'Menunggu Kepala Seksi',
+                        'menunggu_kanit_kepegawaian' => 'Menunggu Kanit Kepegawaian',
+                        'menunggu_kasubag_tu' => 'Menunggu Kasubag TU',
+                        'ditolak_kepala_unit' => 'Ditolak Kepala Unit',
+                        'ditolak_kepala_seksi' => 'Ditolak Kepala Seksi',
+                        'ditolak_kanit_kepegawaian' => 'Ditolak Kanit Kepegawaian',
+                        'ditolak_kasubag_tu' => 'Ditolak Kasubag TU',
                         'perubahan' => 'Perlu Perubahan',
                         'ditangguhkan' => 'Ditangguhkan',
                         default => ucwords(str_replace('_', ' ', $state)),
@@ -55,9 +63,13 @@ class PengajuanCutisTable
                     ->badge()
                     ->sortable()
                     ->color(fn (string $state): string => match ($state) {
-                        'menunggu_atasan', 'menunggu_pejabat' => 'warning',
+                        'menunggu_atasan', 'menunggu_pejabat',
+                        'menunggu_kepala_unit', 'menunggu_kepala_seksi',
+                        'menunggu_kanit_kepegawaian', 'menunggu_kasubag_tu' => 'warning',
                         'disetujui' => 'success',
-                        'ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat' => 'danger',
+                        'ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat',
+                        'ditolak_kepala_unit', 'ditolak_kepala_seksi',
+                        'ditolak_kanit_kepegawaian', 'ditolak_kasubag_tu' => 'danger',
                         'ditangguhkan', 'perubahan' => 'gray',
                         default => 'gray',
                     }),
@@ -78,12 +90,12 @@ class PengajuanCutisTable
                                 $data['sampai'],
                                 fn (Builder $query, $date): Builder => $query->whereDate('tanggal_selesai', '<=', $date),
                             );
-                    })
+                    }),
             ])
             ->filtersLayout(FiltersLayout::AboveContent)
             ->filtersFormColumns(2)
             ->actions([
-                \Filament\Actions\ViewAction::make(),
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
                 Action::make('cetak_pdf')

@@ -8,6 +8,7 @@ use App\Models\PengajuanCuti;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PersetujuanCutiResource extends Resource
 {
@@ -19,7 +20,7 @@ class PersetujuanCutiResource extends Resource
 
     protected static ?string $modelLabel = 'Persetujuan Cuti';
 
-    public static function getNavigationIcon(): string | \BackedEnum | null
+    public static function getNavigationIcon(): string|BackedEnum|null
     {
         return 'heroicon-o-clipboard-document-check';
     }
@@ -27,7 +28,11 @@ class PersetujuanCutiResource extends Resource
     public static function canViewAny(): bool
     {
         $user = auth()->user();
-        return $user->hasRole(['super_admin', 'admin', 'kanit', 'kasubag', 'pejabat_berwenang']);
+
+        return $user->hasRole([
+            'super_admin', 'admin', 'kanit', 'kasubag', 'pejabat_berwenang',
+            'kanit_kepegawaian', 'kasubag_tu',
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -49,7 +54,7 @@ class PersetujuanCutiResource extends Resource
         ];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()->with(['user.unitKerja'])->forApprover(auth()->user());
     }
