@@ -70,7 +70,7 @@
             word-wrap: break-word;
         }
         .persetujuan-title { font-weight: bold; }
-        .approval-cell { height: 118px; }
+        .persetujuan-table td.approval-cell { height: 82px; padding: 30px 6px 6px; }
     </style>
 </head>
 <body>
@@ -114,7 +114,7 @@
     }
 
     // --- Tanda jenis cuti ---
-    $tandaJenis = fn ($tipe) => $pengajuanCuti->jenis_cuti === $tipe ? 'V' : '-';
+    $tandaJenis = fn ($tipe) => $pengajuanCuti->jenis_cuti === $tipe ? '&#10003;' : '-';
 
     // --- Saldo cuti (N-2, N-1, N) ---
     $tahunN  = now()->year;
@@ -154,18 +154,19 @@
             return '';
         }
 
-        $approved = $kep === 'disetujui';
         $rejected = ! in_array($kep, ['disetujui', 'dilewati'], true);
 
         $out = '';
+        $sig = $canSign && $approver ? getSignatureBase64($approver->signature_path) : null;
+        if ($sig) {
+            $out .= "<img src=\"{$sig}\" class=\"signature-img\"><br>";
+        } elseif ($approver) {
+            $out .= '<br><br>';
+        }
         if ($approver) {
-            $sig = $canSign ? getSignatureBase64($approver->signature_path) : null;
-            $out .= $sig ? "<img src=\"{$sig}\" class=\"signature-img\"><br>" : '<br><br>';
             $out .= "<u>{$approver->nama}</u><br>";
             $out .= 'NIP. ' . $approver->nip . '<br>';
             $out .= '<span style="font-size: 9pt;">' . ($approver->pangkat_gol ?? '-') . '</span>';
-        } else {
-            $out .= '<br><br>';
         }
         if ($rejected && $showRejectedReason && $alasan) {
             $out .= '<br><i>(' . $alasan . ')</i>';
@@ -223,21 +224,21 @@
     <tr><td colspan="7" class="section-title">II. JENIS CUTI YANG DIAMBIL</td></tr>
     <tr>
         <td colspan="2">1. Cuti Tahunan / Bersama</td>
-        <td class="tc">{{ $tandaJenis('tahunan') }}</td>
+        <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('tahunan') !!}</span></td>
         <td colspan="3">2. Cuti Besar</td>
-        <td class="tc">{{ $tandaJenis('besar') }}</td>
+        <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('besar') !!}</span></td>
     </tr>
     <tr>
         <td colspan="2">3. Cuti Sakit</td>
-        <td class="tc">{{ $tandaJenis('sakit') }}</td>
+        <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('sakit') !!}</span></td>
         <td colspan="3">4. Cuti Melahirkan</td>
-        <td class="tc">{{ $tandaJenis('melahirkan') }}</td>
+        <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('melahirkan') !!}</span></td>
     </tr>
     <tr>
         <td colspan="2">5. Cuti Karena Alasan Penting</td>
-        <td class="tc">{{ $tandaJenis('alasan_penting') }}</td>
+        <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('alasan_penting') !!}</span></td>
         <td colspan="3">6. Cuti di luar Tanggungan Negara</td>
-        <td class="tc">{{ $tandaJenis('diluar_tanggungan_negara') }}</td>
+        <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('diluar_tanggungan_negara') !!}</span></td>
     </tr>
     <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== III. ALASAN CUTI ===================== --}}
