@@ -371,18 +371,96 @@ class CutiService
             ->whereIn('aksi', ['release', 'potong'])
             ->sum('jumlah');
 
-        if ($activeHoldCount <= $releaseCount) {
+        if ($activeHoldCount > $releaseCount) {
+            SaldoCutiLedger::create([
+                'user_id' => $pengajuan->user_id,
+                'pengajuan_cuti_id' => $pengajuan->id,
+                'jenis_cuti' => $pengajuan->jenis_cuti,
+                'aksi' => 'release',
+                'jumlah' => $pengajuan->lama_cuti,
+                'keterangan' => 'Release hold saat pengajuan (lama: '.$pengajuan->lama_cuti.' hari)',
+            ]);
+
             return;
         }
 
-        SaldoCutiLedger::create([
-            'user_id' => $pengajuan->user_id,
-            'pengajuan_cuti_id' => $pengajuan->id,
-            'jenis_cuti' => $pengajuan->jenis_cuti,
-            'aksi' => 'release',
-            'jumlah' => $pengajuan->lama_cuti,
-            'keterangan' => 'Release hold saat pengajuan (lama: '.$pengajuan->lama_cuti.' hari)',
-        ]);
+        $potong = SaldoCutiLedger::where('pengajuan_cuti_id', $pengajuan->id)
+            ->where('aksi', 'potong')
+            ->first();
+
+        if ($potong) {
+            self::refundPotong($pengajuan);
+            $potong->delete();
+
+            SaldoCutiLedger::create([
+                'user_id' => $pengajuan->user_id,
+                'pengajuan_cuti_id' => $pengajuan->id,
+                'jenis_cuti' => $pengajuan->jenis_cuti,
+                'aksi' => 'release',
+                'jumlah' => $pengajuan->lama_cuti,
+                'keterangan' => 'Release potong karena pengajuan ditangguhkan (lama: '.$pengajuan->lama_cuti.' hari)',
+            ]);
+        }
+    }
+
+    private static function refundPotong(PengajuanCuti $pengajuan): void
+    {
+        $saldo = $pengajuan->user->fresh()->saldoCuti;
+        if (! $saldo) {
+            return;
+        }
+
+        $refund = $pengajuan->lama_cuti;
+        if ($refund <= 0) {
+            return;
+        }
+
+        if ($pengajuan->jenis_cuti === 'tahunan') {
+            if ($saldo->saldo_n < 12) {
+                $tambah = min(12 - $saldo->saldo_n, $refund);
+                $saldo->saldo_n += $tambah;
+                $refund -= $tambah;
+            }
+            if ($refund > 0 && $saldo->saldo_n1 < 6) {
+                $tambah = min(6 - $saldo->saldo_n1, $refund);
+                $saldo->saldo_n1 += $tambah;
+                $refund -= $tambah;
+            }
+            if ($refund > 0 && $saldo->saldo_n2 < 6) {
+                $tambah = min(6 - $saldo->saldo_n2, $refund);
+                $saldo->saldo_n2 += $tambah;
+                $refund -= $tambah;
+            }
+            if ($refund > 0) {
+                $saldo->saldo_n2 += $refund;
+            }
+        } else {
+            $field = 'saldo_cuti_'.$pengajuan->jenis_cuti;
+            if (in_array($pengajuan->jenis_cuti, ['besar', 'sakit', 'melahirkan', 'alasan_penting'])) {
+                $saldo->{$field} = ($saldo->{$field} ?? 0) + $refund;
+            }
+        }
+
+        $saldo->save();
+    }
+
+    public static function tangguhkanPengajuan(PengajuanCuti $pengajuan, ?string $alasan = null): void
+    {
+        if (! auth()->user()?->hasRole(['super_admin', 'admin'])) {
+            throw new \RuntimeException('Hanya Admin/Super Admin yang dapat menangguhkan pengajuan.');
+        }
+
+        if ($pengajuan->status !== 'disetujui') {
+            throw new \RuntimeException('Hanya pengajuan berstatus disetujui yang dapat ditangguhkan.');
+        }
+
+        self::releaseSaldo($pengajuan);
+
+        $pengajuan->status = 'ditangguhkan';
+        if ($alasan) {
+            $pengajuan->status_log_keterangan = 'Ditangguhkan oleh Admin: '.$alasan;
+        }
+        $pengajuan->save();
     }
 
     public static function koreksiSaldo(PengajuanCuti $pengajuan, int $lamaLama, int $lamaBaru, bool $dryRun = false): ?array

@@ -14,6 +14,8 @@ class PengajuanCuti extends Model
 {
     use HasUlids, SoftDeletes;
 
+    public ?string $status_log_keterangan = null;
+
     protected $guarded = ['id'];
 
     protected $casts = [

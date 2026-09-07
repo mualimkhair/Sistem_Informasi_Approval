@@ -3,16 +3,21 @@
 namespace App\Filament\Resources\PengajuanCutis\Tables;
 
 use App\Exports\PengajuanCutiExport;
+use App\Models\PengajuanCuti;
+use App\Services\CutiService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PengajuanCutisTable
@@ -104,6 +109,40 @@ class PengajuanCutisTable
                     ->url(fn ($record) => route('pengajuan-cuti.pdf', $record))
                     ->openUrlInNewTab()
                     ->visible(fn ($record) => $record->status === 'disetujui' || auth()->user()->hasRole(['super_admin', 'admin'])),
+                Action::make('tangguhkan')
+                    ->label('Tangguhkan')
+                    ->icon('heroicon-o-pause-circle')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Tangguhkan Pengajuan Cuti')
+                    ->modalDescription('Pengajuan cuti berstatus Disetujui akan ditangguhkan dan saldo cuti pegawai akan dikembalikan. Keputusan para pejabat pada PDF tetap tervalidasi sebagai riwayat.')
+                    ->form([
+                        Textarea::make('alasan')
+                            ->label('Alasan Penangguhan')
+                            ->placeholder('Opsional')
+                            ->rows(3),
+                    ])
+                    ->visible(fn (PengajuanCuti $record) => $record->status === 'disetujui' && auth()->user()->hasRole(['super_admin', 'admin']))
+                    ->action(function (PengajuanCuti $record, array $data): void {
+                        try {
+                            DB::transaction(fn () => CutiService::tangguhkanPengajuan(
+                                $record,
+                                filled($data['alasan'] ?? null) ? $data['alasan'] : null
+                            ));
+
+                            Notification::make()
+                                ->title('Pengajuan Cuti Ditangguhkan')
+                                ->body('Saldo cuti pegawai telah dikembalikan.')
+                                ->success()
+                                ->send();
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->title('Gagal Menangguhkan Pengajuan')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ])
             ->defaultSort('created_at', 'desc');
     }

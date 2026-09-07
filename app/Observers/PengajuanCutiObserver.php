@@ -368,7 +368,8 @@ class PengajuanCutiObserver
     private function logStatus(PengajuanCuti $pengajuanCuti, ?string $from, string $to, ?string $keterangan = null): void
     {
         if (! $keterangan) {
-            $keterangan = $this->getStatusChangeDescription($pengajuanCuti, $to);
+            $keterangan = $pengajuanCuti->status_log_keterangan
+                ?? $this->getStatusChangeDescription($pengajuanCuti, $to);
         }
 
         $pengajuanCuti->statusLogs()->create([
