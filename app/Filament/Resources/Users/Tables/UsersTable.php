@@ -152,38 +152,6 @@ class UsersTable
                     }),
                 EditAction::make(),
                 DeleteAction::make(),
-                \Filament\Actions\Action::make('reset_all_saldo')
-                    ->label('Reset All Saldo (Rollover)')
-                    ->icon('heroicon-o-arrow-path')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalHeading('Jalankan Rollover Saldo Tahunan?')
-                    ->modalDescription(function () {
-                        $sudahDijalankan = SaldoCuti::where('last_rollover_year', now()->year)->exists();
-                        if ($sudahDijalankan) {
-                            return 'PERHATIAN: Rollover sudah pernah dijalankan untuk tahun ini. Jalankan lagi akan melewatkan user yang sudah dirollover.';
-                        }
-                        return 'Ini akan menjalankan rollover saldo tahunan untuk SELURUH pegawai. N2 akan hangus, N1 → N2, N → N1, N baru = 12.';
-                    })
-                    ->visible(fn() => auth()->user()->hasRole('super_admin'))
-                    ->action(function () {
-                        $count = 0;
-                        DB::transaction(function () use (&$count) {
-                            $saldos = SaldoCuti::all();
-                            foreach ($saldos as $saldo) {
-                                if ($saldo->user && !$saldo->user->hasRole('super_admin')) {
-                                    CutiService::rolloverSaldoTahunan($saldo);
-                                    $count++;
-                                }
-                            }
-                        });
-                        Notification::make()
-                            ->title("Rollover selesai untuk {$count} pegawai.")
-                            ->success()
-                            ->send();
-                    }),
-
-
             ]);
     }
 }

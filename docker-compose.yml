@@ -1,0 +1,44 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: approval_app
+    restart: unless-stopped
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/var/www
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    container_name: approval_mysql
+    restart: unless-stopped
+    tty: true
+    ports:
+      - '3307:3306'
+    environment:
+      MYSQL_DATABASE: 'sistem_approval'
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_PASSWORD: 'root'
+      MYSQL_USER: 'approval_user'
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: approval_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - '8080:80'
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: 'root'
+    depends_on:
+      - mysql
+
+volumes:
+  dbdata:
+    driver: local
