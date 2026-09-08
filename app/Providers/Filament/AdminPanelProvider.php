@@ -44,6 +44,7 @@ class AdminPanelProvider extends PanelProvider
                 NavigationItem::make('Profil Saya')
                     ->url(fn (): string => \App\Filament\Pages\EditProfile::getUrl())
                     ->icon('heroicon-o-user')
+                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.admin.auth.profile'))
                     ->sort(-1),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')

@@ -8,11 +8,13 @@ use App\Filament\Resources\Seksis\Pages\ListSeksis;
 use App\Filament\Resources\Seksis\Schemas\SeksiForm;
 use App\Filament\Resources\Seksis\Tables\SeksisTable;
 use App\Models\Seksi;
-use BackedEnum;
+
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SeksiResource extends Resource
 {
@@ -29,6 +31,7 @@ class SeksiResource extends Resource
     {
         return auth()->user()->hasRole(['super_admin', 'admin']);
     }
+
     public static function form(Schema $schema): Schema
     {
         return SeksiForm::configure($schema);
@@ -37,6 +40,14 @@ class SeksiResource extends Resource
     public static function table(Table $table): Table
     {
         return SeksisTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 
     public static function getRelations(): array

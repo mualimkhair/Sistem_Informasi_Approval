@@ -41,7 +41,7 @@ class PengajuanCuti extends Model
 
     public function seksi()
     {
-        return $this->belongsTo(Seksi::class);
+        return $this->belongsTo(Seksi::class)->withTrashed();
     }
 
     public function unitKerja()
