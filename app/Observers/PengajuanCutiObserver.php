@@ -210,6 +210,8 @@ class PengajuanCutiObserver
                 $pengajuanCuti->alasan_kasubag = null;
                 $pengajuanCuti->alasan_pejabat = null;
 
+                $this->clearApprovalSnapshots($pengajuanCuti);
+
                 if (! $submitter->hasRole('kasubag')) {
                     // Only notify approvers whose stage is still open (was not skipped)
                     $rolesToNotify = [];
@@ -236,6 +238,8 @@ class PengajuanCutiObserver
                 }
             }
         }
+
+        $this->captureApprovalSnapshot($pengajuanCuti);
 
         if ($isOperasional) {
             if ($pengajuanCuti->isDirty($operasionalKeputusan)) {
@@ -365,6 +369,66 @@ class PengajuanCutiObserver
         $this->logStatus($pengajuanCuti, $pengajuanCuti->status, 'dihapus', 'Pengajuan dihapus oleh admin');
     }
 
+    private function captureApprovalSnapshot(PengajuanCuti $pengajuanCuti): void
+    {
+        // Batasan #42 (disepakati): kepala_unit/kepala_seksi operasional HANYA memiliki snapshot ID
+        // (kepala_unit_id/kepala_seksi_id dari issue #44). Nama/NIP/pangkat/jabatan mereka tidak
+        // di-snapshot di sini dan di-render live via aksesor di PDF — batas scope implementasi ini.
+        // Sumber identitas ditentukan oleh flow (bukan auth()):
+        // - operasional: approver di-snapshot saat submit (kanit_kepegawaian_id / kasubag_tu_id);
+        // - administrasi: Kepala Unit / Kepala Seksi dari struktur saat keputusan dibuat,
+        //   Pejabat Berwenang dari pemegang role.
+        $sources = [
+            'keputusan_kanit_kepegawaian' => ['prefix' => 'kanit', 'userId' => $pengajuanCuti->kanit_kepegawaian_id],
+            'keputusan_kasubag_tu' => ['prefix' => 'kasubag', 'userId' => $pengajuanCuti->kasubag_tu_id],
+            'keputusan_kanit' => ['prefix' => 'kanit', 'userId' => $pengajuanCuti->unitKerja?->kepala_unit_id],
+            'keputusan_kasubag' => ['prefix' => 'kasubag', 'userId' => $pengajuanCuti->seksi?->kepala_seksi_id],
+            'keputusan_pejabat' => ['prefix' => 'pejabat', 'userId' => User::role('pejabat_berwenang')->first()?->id],
+        ];
+
+        foreach ($sources as $field => $config) {
+            if (! $pengajuanCuti->isDirty($field)) {
+                continue;
+            }
+
+            $keputusan = $pengajuanCuti->{$field};
+            if ($keputusan === null || $keputusan === 'dilewati') {
+                continue; // dilewati = auto-skip, bukan keputusan manusia
+            }
+
+            $prefix = $config['prefix'];
+
+            // Idempotent: snapshot yang sudah terisi tidak boleh ditimpa.
+            if ($pengajuanCuti->{$prefix.'_nama'} !== null) {
+                continue;
+            }
+
+            $approver = $config['userId'] ? User::find($config['userId']) : null;
+            if (! $approver) {
+                continue;
+            }
+
+            $pengajuanCuti->{$prefix.'_nama'} = $approver->nama;
+            $pengajuanCuti->{$prefix.'_nip'} = $approver->nip;
+            $pengajuanCuti->{$prefix.'_pangkat'} = $approver->pangkat_gol;
+            $pengajuanCuti->{$prefix.'_jabatan'} = $approver->jabatan;
+            $pengajuanCuti->{$prefix.'_tanggal_keputusan'} = Carbon::now();
+        }
+    }
+
+    private function clearApprovalSnapshots(PengajuanCuti $pengajuanCuti): void
+    {
+        $fields = [
+            'kanit_nama', 'kanit_nip', 'kanit_pangkat', 'kanit_jabatan', 'kanit_tanggal_keputusan',
+            'kasubag_nama', 'kasubag_nip', 'kasubag_pangkat', 'kasubag_jabatan', 'kasubag_tanggal_keputusan',
+            'pejabat_nama', 'pejabat_nip', 'pejabat_pangkat', 'pejabat_jabatan', 'pejabat_tanggal_keputusan',
+        ];
+
+        foreach ($fields as $field) {
+            $pengajuanCuti->{$field} = null;
+        }
+    }
+
     private function logStatus(PengajuanCuti $pengajuanCuti, ?string $from, string $to, ?string $keterangan = null): void
     {
         if (! $keterangan) {
@@ -461,6 +525,8 @@ class PengajuanCutiObserver
         $pengajuanCuti->alasan_kepala_seksi = null;
         $pengajuanCuti->alasan_kanit_kepegawaian = null;
         $pengajuanCuti->alasan_kasubag_tu = null;
+
+        $this->clearApprovalSnapshots($pengajuanCuti);
 
         $this->resetOperasionalToFirstOpenStage($pengajuanCuti);
     }

@@ -148,7 +148,52 @@
     // --- Operasional flow: Kepala Unit, Kepala Seksi, Kanit Kepegawaian, Kasubag TU ---
     $isOperasional = ($pengajuanCuti->tipe_aliran ?? 'administrasi') === 'operasional';
 
-    $formatBox = function ($keputusan, $approver, $alasan, $canSign = true, $showRejectedReason = false) {
+    // --- Snapshot historis approver (Issue #42): prefer snapshot, fallback ke relasi existing ---
+    $kanitUser = $pengajuanCuti->kanit;
+    $kanitNama = $pengajuanCuti->kanit_nama ?? $kanitUser?->nama;
+    $kanitNip = $pengajuanCuti->kanit_nip ?? $kanitUser?->nip;
+    $kanitPangkat = $pengajuanCuti->kanit_pangkat ?? ($kanitUser?->pangkat_gol ?? '-');
+    $kanitTanggal = $pengajuanCuti->kanit_tanggal_keputusan;
+    $hasKanit = $kanitNama !== null;
+
+    $kasubagUser = $pengajuanCuti->kasubag;
+    $kasubagNama = $pengajuanCuti->kasubag_nama ?? $kasubagUser?->nama;
+    $kasubagNip = $pengajuanCuti->kasubag_nip ?? $kasubagUser?->nip;
+    $kasubagPangkat = $pengajuanCuti->kasubag_pangkat ?? ($kasubagUser?->pangkat_gol ?? '-');
+    $kasubagTanggal = $pengajuanCuti->kasubag_tanggal_keputusan;
+    $hasKasubag = $kasubagNama !== null;
+
+    $pejabatUser = $pengajuanCuti->pejabat;
+    $pejabatNama = $pengajuanCuti->pejabat_nama ?? $pejabatUser?->nama;
+    $pejabatNip = $pengajuanCuti->pejabat_nip ?? $pejabatUser?->nip;
+    $pejabatPangkat = $pengajuanCuti->pejabat_pangkat ?? ($pejabatUser?->pangkat_gol ?? '-');
+    $pejabatTanggal = $pengajuanCuti->pejabat_tanggal_keputusan;
+    $hasPejabat = $pejabatNama !== null;
+
+    $renderBox = function ($approver, $nama, $nip, $tanggal = null, $pangkat = null, $alasan = null) {
+        $out = '';
+        $sig = $approver ? getSignatureBase64($approver->signature_path) : null;
+        if ($sig) {
+            $out .= '<img src="'.$sig.'" class="signature-img"><br>';
+        } else {
+            $out .= '<br><br><br>';
+        }
+        $out .= '<u>'.$nama.'</u><br>';
+        $out .= 'NIP. '.$nip.'<br>';
+        if ($pangkat) {
+            $out .= 'Pangkat/Gol. '.$pangkat.'<br>';
+        }
+        if ($tanggal) {
+            $out .= '<span style="font-size: 9pt;">'.$tanggal->format('d/m/Y').'</span>';
+        }
+        if ($alasan) {
+            $out .= '<i>('.$alasan.')</i>';
+        }
+
+        return $out;
+    };
+
+    $formatBox = function ($keputusan, $approver, $alasan, $canSign = true, $showRejectedReason = false, $snapshot = null) {
         $kep = strtolower($keputusan ?? '');
         if ($kep === '' || $kep === 'dilewati') {
             return '';
@@ -156,17 +201,25 @@
 
         $rejected = ! in_array($kep, ['disetujui', 'dilewati'], true);
 
+        $nama = $snapshot['nama'] ?? $approver?->nama;
+        $nip = $snapshot['nip'] ?? $approver?->nip;
+        $pangkat = $snapshot['pangkat'] ?? ($approver?->pangkat_gol ?? '-');
+        $tanggal = $snapshot['tanggal'] ?? null;
+
         $out = '';
-        $sig = $canSign && $approver ? getSignatureBase64($approver->signature_path) : null;
-        if ($sig) {
-            $out .= "<img src=\"{$sig}\" class=\"signature-img\"><br>";
-        } elseif ($approver) {
-            $out .= '<br><br>';
-        }
-        if ($approver) {
-            $out .= "<u>{$approver->nama}</u><br>";
-            $out .= 'NIP. ' . $approver->nip . '<br>';
-            $out .= '<span style="font-size: 9pt;">' . ($approver->pangkat_gol ?? '-') . '</span>';
+        if ($nama !== null) {
+            $sig = $canSign && $approver ? getSignatureBase64($approver->signature_path) : null;
+            if ($sig) {
+                $out .= "<img src=\"{$sig}\" class=\"signature-img\"><br>";
+            } else {
+                $out .= '<br><br>';
+            }
+            $out .= "<u>{$nama}</u><br>";
+            $out .= 'NIP. ' . $nip . '<br>';
+            $out .= '<span style="font-size: 9pt;">' . ($pangkat) . '</span>';
+            if ($tanggal) {
+                $out .= '<br><span style="font-size: 8pt;">' . $tanggal->format('d/m/Y') . '</span>';
+            }
         }
         if ($rejected && $showRejectedReason && $alasan) {
             $out .= '<br><i>(' . $alasan . ')</i>';
@@ -333,14 +386,8 @@
     <tr>
         <td colspan="2" class="tc tall-box">
             @if($kanitApproved)
-                @if($pengajuanCuti->kanit)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kanit->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->kanit->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kanit->nip }}<br>
+                @if($hasKanit)
+                    {!! $renderBox($kanitUser, $kanitNama, $kanitNip, $kanitTanggal) !!}
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kanit }}
                 @endif
@@ -348,14 +395,8 @@
         </td>
         <td colspan="2" class="tc tall-box">
             @if($kasubagApproved)
-                @if($pengajuanCuti->kasubag)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kasubag->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->kasubag->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kasubag->nip }}<br>
+                @if($hasKasubag)
+                    {!! $renderBox($kasubagUser, $kasubagNama, $kasubagNip, $kasubagTanggal) !!}
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kasubag }}
                 @endif
@@ -363,15 +404,8 @@
         </td>
         <td colspan="2" class="tc tall-box">
             @if($kanitRejected)
-                @if($pengajuanCuti->kanit)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kanit->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->kanit->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kanit->nip }}<br>
-                    <i>({{ $pengajuanCuti->alasan_kanit }})</i>
+                @if($hasKanit)
+                    {!! $renderBox($kanitUser, $kanitNama, $kanitNip, $kanitTanggal, null, $pengajuanCuti->alasan_kanit) !!}
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kanit }}
                 @endif
@@ -379,15 +413,8 @@
         </td>
         <td class="tc tall-box">
             @if($kasubagRejected)
-                @if($pengajuanCuti->kasubag)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kasubag->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->kasubag->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kasubag->nip }}<br>
-                    <i>({{ $pengajuanCuti->alasan_kasubag }})</i>
+                @if($hasKasubag)
+                    {!! $renderBox($kasubagUser, $kasubagNama, $kasubagNip, $kasubagTanggal, null, $pengajuanCuti->alasan_kasubag) !!}
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kasubag }}
                 @endif
@@ -404,14 +431,8 @@
     <tr>
         <td colspan="4" class="tc tall-box">
             @if($pejabatApproved)
-                @if($pengajuanCuti->pejabat)
-                    @if($sig = getSignatureBase64($pengajuanCuti->pejabat->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->pejabat->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->pejabat->nip }}<br>
+                @if($hasPejabat)
+                    {!! $renderBox($pejabatUser, $pejabatNama, $pejabatNip, $pejabatTanggal) !!}
                 @else
                     V<br>{{ $pengajuanCuti->alasan_pejabat }}
                 @endif
@@ -419,16 +440,8 @@
         </td>
         <td colspan="3" class="tc tall-box">
             @if($pejabatRejected)
-                @if($pengajuanCuti->pejabat)
-                    @if($sig = getSignatureBase64($pengajuanCuti->pejabat->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->pejabat->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->pejabat->nip }}<br>
-                    Pangkat/Gol. {{ $pengajuanCuti->pejabat->pangkat_gol ?? '-' }}<br>
-                    <i>({{ $pengajuanCuti->alasan_pejabat }})</i>
+                @if($hasPejabat)
+                    {!! $renderBox($pejabatUser, $pejabatNama, $pejabatNip, $pejabatTanggal, $pejabatPangkat, $pengajuanCuti->alasan_pejabat) !!}
                 @else
                     V<br>{{ $pengajuanCuti->alasan_pejabat }}
                 @endif
@@ -452,10 +465,11 @@
                     <td class="persetujuan-title">KASUBAG TU</td>
                 </tr>
                 <tr>
+                    {{-- Batasan #42: KU & KS operasional hanya snapshot ID (issue #44); nama/NIP/pangkat/jabatan tampil dari profil live --}}
                     <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kepala_unit, $pengajuanCuti->kepalaUnit, $pengajuanCuti->alasan_kepala_unit, false, true) !!}</td>
                     <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kepala_seksi, $pengajuanCuti->kepalaSeksi, $pengajuanCuti->alasan_kepala_seksi, false, true) !!}</td>
-                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kanit_kepegawaian, $pengajuanCuti->kanitKepegawaian, $pengajuanCuti->alasan_kanit_kepegawaian, true, true) !!}</td>
-                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kasubag_tu, $pengajuanCuti->kasubagTu, $pengajuanCuti->alasan_kasubag_tu, true, true) !!}</td>
+                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kanit_kepegawaian, $pengajuanCuti->kanitKepegawaian, $pengajuanCuti->alasan_kanit_kepegawaian, true, true, ['nama' => $pengajuanCuti->kanit_nama, 'nip' => $pengajuanCuti->kanit_nip, 'pangkat' => $pengajuanCuti->kanit_pangkat, 'tanggal' => $pengajuanCuti->kanit_tanggal_keputusan]) !!}</td>
+                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kasubag_tu, $pengajuanCuti->kasubagTu, $pengajuanCuti->alasan_kasubag_tu, true, true, ['nama' => $pengajuanCuti->kasubag_nama, 'nip' => $pengajuanCuti->kasubag_nip, 'pangkat' => $pengajuanCuti->kasubag_pangkat, 'tanggal' => $pengajuanCuti->kasubag_tanggal_keputusan]) !!}</td>
                 </tr>
             </table>
         </td>
