@@ -259,13 +259,8 @@ class PengajuanCutiForm
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->visible(fn ($record) => $record && $record->alasan_kasubag !== null),
-                                Textarea::make('alasan_pejabat')
-                                    ->label('Catatan Pejabat')
-                                    ->disabled()
-                                    ->dehydrated(false)
-                                    ->visible(fn ($record) => $record && $record->alasan_pejabat !== null),
                             ])
-                            ->visible(fn ($record) => $record && ($record->alasan_kanit !== null || $record->alasan_kasubag !== null || $record->alasan_pejabat !== null))
+                            ->visible(fn ($record) => $record && ($record->alasan_kanit !== null || $record->alasan_kasubag !== null))
                             ->columnSpanFull(),
                     ])->columns(2),
 
@@ -385,7 +380,7 @@ class PengajuanCutiForm
 
         $activeHolds = CutiService::getActiveHoldsByJenis($targetUser, $jenis);
         $isPending = $record && in_array($record->status, [
-            'menunggu_atasan', 'menunggu_pejabat', 'disetujui_sementara_kanit',
+            'menunggu_atasan',
             'menunggu_kepala_unit', 'menunggu_kepala_seksi',
             'menunggu_kanit_kepegawaian', 'menunggu_kasubag_tu',
         ]);

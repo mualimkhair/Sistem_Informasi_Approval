@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class HariLibursTable
 {
@@ -40,7 +41,11 @@ class HariLibursTable
                         Select::make('tahun')
                             ->label('Tahun')
                             ->options(function () {
-                                return \App\Models\HariLibur::selectRaw('YEAR(tanggal) as year')
+                                $yearExpression = DB::getDriverName() === 'sqlite'
+                                    ? "strftime('%Y', tanggal)"
+                                    : 'YEAR(tanggal)';
+
+                                return \App\Models\HariLibur::selectRaw("{$yearExpression} as year")
                                     ->distinct()
                                     ->orderBy('year', 'desc')
                                     ->pluck('year', 'year')

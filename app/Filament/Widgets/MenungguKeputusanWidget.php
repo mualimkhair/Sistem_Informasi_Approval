@@ -70,17 +70,6 @@ class MenungguKeputusanWidget extends BaseWidget
             }
         }
 
-        // --- Administrasi flow: Pejabat Berwenang (final) ---
-        if ($user->hasRole('pejabat_berwenang')) {
-            $menungguFinal = PengajuanCuti::forApprover($user)
-                ->where('status', 'menunggu_pejabat')
-                ->where('user_id', '!=', $user->id)
-                ->count();
-            $stats[] = Stat::make('Menunggu Keputusan Final', $menungguFinal)
-                ->icon('heroicon-o-clipboard-document-check')
-                ->color('warning');
-        }
-
         // --- Operasional flow: Kanit Kepegawaian (stage 3) ---
         if ($user->hasRole('kanit_kepegawaian')) {
             $menungguStage3 = PengajuanCuti::forApprover($user)

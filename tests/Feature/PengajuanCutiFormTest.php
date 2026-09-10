@@ -7,16 +7,21 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 use App\Filament\Resources\PengajuanCutis\Pages\EditPengajuanCuti;
 
 class PengajuanCutiFormTest extends TestCase
 {
-    use \Illuminate\Foundation\Testing\DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        foreach (['super_admin', 'admin', 'pegawai', 'kanit', 'kasubag', 'pejabat_berwenang', 'kanit_kepegawaian', 'kasubag_tu'] as $role) {
+            Role::firstOrCreate(['name' => $role]);
+        }
     }
 
     private function createUser($role) {
@@ -55,10 +60,6 @@ class PengajuanCutiFormTest extends TestCase
                 'alasan_cuti' => 'Alasan baru' // diubah
             ])
             ->call('save');
-
-        if ($component->errors()->has('data.tanggal_mulai')) {
-            dd($component->errors()->get('data.tanggal_mulai'));
-        }
 
         $component->assertHasNoFormErrors(['tanggal_mulai']);
     }

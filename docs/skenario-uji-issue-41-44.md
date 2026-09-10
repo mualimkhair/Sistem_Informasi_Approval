@@ -94,6 +94,32 @@ $p?->user?->saldoCuti?->only(['saldo_n','saldo_n1','saldo_n2']);          // sal
 ```
 Kolom ledger: `aksi` = `hold | release | potong | koreksi`.
 
+### 1.4 Uji multi-user (3 window/akun sekaligus)
+Simulasi nyata memakai **3 browser/window terpisah** pada alur yang sama:
+
+- **Window A — Pegawai/Koordinator** (pemohon): mis. **Muhajir** (`197204211997031003`, Keuangan) sebagai pemohon.
+- **Window B — Kanit/Kasi/Kasubag** (Atasan Langsung / approver): mis. **Hastuty** (`197504211999032001`, Kasubag Keuangan & TU).
+- **Window C — Pejabat Berwenang**: **Prasetiyohadi** (`197804042002121003`).
+
+> ⚠️ **Tab di browser/session yang sama berbagi session login** — jika Window A login
+> lalu Window B dibuka di tab lain browser yang sama, keduanya akan jadi pemohon yang
+> sama. **Wajib** memakai **jendela profil/private terpisah** (Window A = browser normal,
+> Window C = private window, Window B = profil berbeda) agar session tidak tertukar.
+> Tidak ada mekanisme session-isolation per-tab di aplikasi ini.
+
+Alur contoh (Window A → B, tanpa melibatkan Pejabat): ajukan di A → status `menunggu_atasan`
+→ B melihat di menu **Persetujuan Cuti** → B **Disetujui** → status final **Disetujui**
++ saldo potong + notifikasi ke A. Sementara itu di **Window C (Pejabat)**: **tidak ada**
+task di Persetujuan Cuti; dashboard tetap menampilkan statistik "Pegawai Sedang Cuti".
+
+### 1.5 Uji otomatis (PHPUnit)
+Bagian otorisasi/isolasi sudah dicakup otomatis (login, redirect guest, kelengkapan profil,
+scope approver, pemisahan unit, pejabat tidak bisa membuat pengajuan):
+
+```bash
+docker exec laravel-cuti-app php artisan test         # ≥ 47 test hijau
+```
+
 ---
 
 ## 2. Matriks Akun
@@ -104,7 +130,7 @@ Kolom ledger: `aksi` = `hold | release | potong | koreksi`.
 | Peran | Nama | NIP (password) | Keterangan |
 |---|---|---|---|
 | `super_admin` | Super Admin | `000000000000000000` | Lihat semua; satu-satunya "admin" (role `admin` kosong dari seed) |
-| `pejabat_berwenang` (+`pegawai`) | Prasetiyohadi, S.T, S.H, M.H | `197804042002121003` | Penyetuju final aliran administrasi |
+| `pejabat_berwenang` (+`pegawai`) | Prasetiyohadi, S.T, S.H, M.H | `197804042002121003` | BUKAN penyetuju; penandatangan dokumen (Blangko Cuti → "Approval Kabandara") + liat dashboard |
 | `kanit_kepegawaian` (+`kanit`,`pegawai`) | Asmaul Husna Sabil, SE | `198202092006042001` | Tahap-3 aliran operasional (unit Kepegawaian) |
 | `kasubag_tu` (+`kasubag`,`pegawai`) | Hastuty, SE, MM | `197504211999032001` | Tahap-4 aliran operasional; Kasubag aliran administrasi |
 
@@ -159,12 +185,23 @@ Status menunggu: `menunggu_kepala_unit` → `menunggu_kepala_seksi` → `menungg
 
 ### Aliran administrasi (`tipe_aliran = 'administrasi'`)
 ```
-Pegawai submit → [1 KANIT] → [2 KASUBAG] → [3 PEJABAT BERWENANG] → Disetujui (saldo dipotong)
+Pegawai submit → [1 KANIT] → [2 KASUBAG] → Disetujui (saldo dipotong)
 ```
-Status menunggu: `menunggu_atasan` (kanit/kasubag) → `menunggu_pejabat` → `disetujui`.
+Status menunggu: `menunggu_atasan` → `disetujui`.
+
+> **Workflow pengajuan cuti berakhir** ketika Kanit dan/atau Kasubag memberikan keputusan
+> final sesuai jalur approval (disetujui, tidak disetujui, perubahan, atau ditangguhkan).
+> **Pejabat Berwenang TIDAK melakukan approval terhadap Pengajuan Cuti.**
+>
+> Pejabat Berwenang hanya melakukan **approval/penandatanganan pada modul Blangko Cuti**
+> setelah pengajuan cuti berstatus **Disetujui**. Peran Pejabat Berwenang di sistem:
+> login & dashboard (statistik "Pegawai Sedang Cuti"), akses menu **Blangko Cuti**
+> (penandatangan dokumen "Approval Kabandara" → tanda tangan digital dipakai di dokumen final),
+> dan melihat/mengunduh PDF. Ia TIDAK menerima approval task dari workflow cuti.
 
 - **Skip tahap-1**: pemohon = kanit unitnya, atau unit tanpa kepala unit → `keputusan_kanit = dilewati`.
-- **Skip tahap-1 & 2 (skip-level)**: pemohon berperan `kasubag` → langsung `menunggu_pejabat`, notifikasi "Pengajuan Cuti Baru (Skip-Level)" ke pejabat.
+- **Skip tahap-1 & 2 (skip-level)**: pemohon berperan `kasubag` → seluruh tahap dilewati,
+  langsung `disetujui` (self-approval final) + saldo dipotong.
 
 ### Perilaku saldo
 - Submit → **hold** (saldo tersedia berkurang, tersimpan rapi di ledger `hold`).
@@ -241,15 +278,15 @@ Status menunggu: `menunggu_atasan` (kanit/kasubag) → `menunggu_pejabat` → `d
 | 6 | **Pegawai biasa** | dashboard | Widget **Menunggu Keputusan** = 0 / tidak ada; tidak melihat menu Persetujuan | | |
 
 ### A-07. Regresi aliran administrasi (fitur lama tetap jalan & PDF lama)
-**Pelaku:** **Muhajir** (`197204211997031003`, Unit Keuangan) sebagai pemohon (ia kanit, jadi tahap-1 dilewati); **Hastuty** (kasubag); **Prasetiyohadi** (pejabat).
+**Pelaku:** **Muhajir** (`197204211997031003`, Unit Keuangan) sebagai pemohon (ia kanit, jadi tahap-1 dilewati); **Hastuty** (kasubag). **TANPA tahap pejabat.**
 
 | # | Langkah | Ekspektasi | Hasil ✔ | Catatan |
 |---|---|---|---|---|
 | 1 | Login **Muhajir** → ajukan (Unit Keuangan, jenis administrasi) | Status **Menunggu Atasan**; **tidak ada** field Kelompok Kerja; `keputusan_kanit = dilewati` (pemohon=kanit); notif ke kasubag | | |
-| 2 | **Hastuty**: Persetujuan → **Disetujui** | Status → **Menunggu Pejabat**; notif ke **Prasetiyohadi** | | |
-| 3 | **Prasetiyohadi**: **Disetujui** | Status → **Disetujui**; saldo **potong** | | |
+| 2 | **Hastuty**: Persetujuan → **Disetujui** | Status → **Disetujui** (langsung final, tanpa tahap pejabat); saldo **potong**; notif **Disetujui** ke pemohon | | |
+| 3 | Menu Persetujuan **Prasetiyohadi** (pejabat) | **Tidak ada** task cuti; widget Menunggu Keputusan tidak menampilkan stat "Menunggu Keputusan Final"; dashboard tetap menampilkan stat "Pegawai Sedang Cuti" | | |
 | 4 | Cetak PDF rekord administrasi | Judul **"VII. PERTIMBANGAN ATASAN LANGSUNG"** + **"VIII. KEPUTUSAN PEJABAT"** (BUKAN "PERSETUJUAN BERJENJANG"); nama pejabat + ttd pada Bagian VIII | | |
-| 5 | **Kasubag skip-level**: login **Hastuty**, ajukan (ia kasubag) | Langsung **Menunggu Pejabat**; notifikasi "Pengajuan Cuti Baru (Skip-Level)" ke pejabat; kasubag tidak perlu menyetujui sendiri | | |
+| 5 | **Kasubag skip-level**: login **Hastuty**, ajukan (ia kasubag) | Langsung **Disetujui** final + saldo potong; kasubag tidak perlu menyetujui sendiri; **tidak ada** notifikasi ke pejabat | | |
 
 ---
 

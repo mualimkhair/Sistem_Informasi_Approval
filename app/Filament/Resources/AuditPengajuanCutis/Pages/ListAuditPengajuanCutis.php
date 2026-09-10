@@ -38,11 +38,11 @@ class ListAuditPengajuanCutis extends ListRecords
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'menunggu_atasan', 'menunggu_pejabat',
+                        'menunggu_atasan',
                         'menunggu_kepala_unit', 'menunggu_kepala_seksi',
                         'menunggu_kanit_kepegawaian', 'menunggu_kasubag_tu' => 'warning',
                         'disetujui' => 'success',
-                        'ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat',
+                        'ditolak_kanit', 'ditolak_kasubag',
                         'ditolak_kepala_unit', 'ditolak_kepala_seksi',
                         'ditolak_kanit_kepegawaian', 'ditolak_kasubag_tu' => 'danger',
                         'ditangguhkan', 'perubahan' => 'gray',
@@ -51,11 +51,9 @@ class ListAuditPengajuanCutis extends ListRecords
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'menunggu_atasan' => 'Menunggu Atasan',
-                        'menunggu_pejabat' => 'Menunggu Pejabat',
                         'disetujui' => 'Disetujui',
                         'ditolak_kanit' => 'Ditolak Kanit',
                         'ditolak_kasubag' => 'Ditolak Kasubag',
-                        'ditolak_pejabat' => 'Ditolak Pejabat',
                         'menunggu_kepala_unit' => 'Menunggu Kepala Unit',
                         'menunggu_kepala_seksi' => 'Menunggu Kepala Seksi',
                         'menunggu_kanit_kepegawaian' => 'Menunggu Kanit Kepegawaian',
@@ -81,11 +79,9 @@ class ListAuditPengajuanCutis extends ListRecords
                 SelectFilter::make('status')
                     ->options([
                         'menunggu_atasan' => 'Menunggu Atasan',
-                        'menunggu_pejabat' => 'Menunggu Pejabat',
                         'disetujui' => 'Disetujui',
                         'ditolak_kanit' => 'Ditolak Kanit',
                         'ditolak_kasubag' => 'Ditolak Kasubag',
-                        'ditolak_pejabat' => 'Ditolak Pejabat',
                         'menunggu_kepala_unit' => 'Menunggu Kepala Unit',
                         'menunggu_kepala_seksi' => 'Menunggu Kepala Seksi',
                         'menunggu_kanit_kepegawaian' => 'Menunggu Kanit Kepegawaian',

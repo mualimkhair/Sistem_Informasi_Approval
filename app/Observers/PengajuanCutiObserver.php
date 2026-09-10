@@ -137,19 +137,11 @@ class PengajuanCutiObserver
         // was deferred until the record had an id.
         if ($pengajuanCuti->status === 'disetujui') {
             CutiService::potongSaldo($pengajuanCuti);
+            $this->ensureBlangkoForApproved($pengajuanCuti);
         }
 
         if ($pengajuanCuti->tipe_aliran === 'operasional') {
             $this->notifyOperasionalFirstApprover($pengajuanCuti);
-        } elseif ($pengajuanCuti->user->hasRole('kasubag')) {
-            $pejabats = User::role('pejabat_berwenang')->get();
-            foreach ($pejabats as $pejabat) {
-                Notification::make()
-                    ->title('Pengajuan Cuti Baru (Skip-Level)')
-                    ->body('Pengajuan cuti dari '.$pengajuanCuti->user->nama.' langsung menunggu persetujuan final Anda (Kasubag).')
-                    ->info()
-                    ->sendToDatabase($pejabat);
-            }
         } else {
             $kanits = User::role('kanit')
                 ->where('unit_kerja_id', $pengajuanCuti->user->unit_kerja_id)
@@ -184,7 +176,7 @@ class PengajuanCutiObserver
         $isOperasional = $pengajuanCuti->tipe_aliran === 'operasional';
 
         $operasionalKeputusan = ['keputusan_kepala_unit', 'keputusan_kepala_seksi', 'keputusan_kanit_kepegawaian', 'keputusan_kasubag_tu'];
-        $administrasiKeputusan = ['keputusan_kanit', 'keputusan_kasubag', 'keputusan_pejabat'];
+        $administrasiKeputusan = ['keputusan_kanit', 'keputusan_kasubag'];
 
         $resubmitPossible = $isOperasional
             ? ! $pengajuanCuti->isDirty(array_merge($operasionalKeputusan, $administrasiKeputusan))
@@ -202,7 +194,7 @@ class PengajuanCutiObserver
                 $kasubagValue = $pengajuanCuti->getOriginal('keputusan_kasubag') === 'dilewati' ? 'dilewati' : null;
 
                 if ($submitter->hasRole('kasubag')) {
-                    $pengajuanCuti->status = 'menunggu_pejabat';
+                    $pengajuanCuti->status = 'menunggu_atasan';
                 } else {
                     $pengajuanCuti->status = 'menunggu_atasan';
                 }
@@ -326,23 +318,9 @@ class PengajuanCutiObserver
         // 1. status transition (already correct here)
         if ($pengajuanCuti->wasChanged('status')) {
             $this->logStatus($pengajuanCuti, $pengajuanCuti->getOriginal('status'), $pengajuanCuti->status);
-            
+
             if ($pengajuanCuti->status === 'disetujui') {
-                $blangko = \App\Models\BlangkoCuti::firstOrCreate(
-                    ['pengajuan_cuti_id' => $pengajuanCuti->id],
-                    ['status' => 'menunggu']
-                );
-                
-                if ($blangko->wasRecentlyCreated) {
-                    $pejabats = User::role('pejabat_berwenang')->get();
-                    foreach ($pejabats as $pejabat) {
-                        Notification::make()
-                            ->title('Blangko Cuti Baru')
-                            ->body('Terdapat blangko cuti baru dari ' . $pengajuanCuti->user->nama . ' yang menunggu persetujuan Anda.')
-                            ->warning()
-                            ->sendToDatabase($pejabat);
-                    }
-                }
+                $this->ensureBlangkoForApproved($pengajuanCuti);
             }
         }
 
@@ -376,6 +354,25 @@ class PengajuanCutiObserver
         $this->logStatus($pengajuanCuti, $pengajuanCuti->status, 'dihapus', 'Pengajuan dihapus oleh admin');
     }
 
+    private function ensureBlangkoForApproved(PengajuanCuti $pengajuanCuti): void
+    {
+        $blangko = \App\Models\BlangkoCuti::firstOrCreate(
+            ['pengajuan_cuti_id' => $pengajuanCuti->id],
+            ['status' => 'menunggu']
+        );
+
+        if ($blangko->wasRecentlyCreated) {
+            $pejabats = User::role('pejabat_berwenang')->get();
+            foreach ($pejabats as $pejabat) {
+                Notification::make()
+                    ->title('Blangko Cuti Baru')
+                    ->body('Terdapat blangko cuti baru dari '.$pengajuanCuti->user->nama.' yang menunggu persetujuan Anda.')
+                    ->warning()
+                    ->sendToDatabase($pejabat);
+            }
+        }
+    }
+
     private function logStatus(PengajuanCuti $pengajuanCuti, ?string $from, string $to, ?string $keterangan = null): void
     {
         if (! $keterangan) {
@@ -399,20 +396,17 @@ class PengajuanCutiObserver
         if ($newStatus === 'ditolak_kasubag') {
             return 'Ditolak oleh Kasubag'.($pengajuanCuti->alasan_kasubag ? ': '.$pengajuanCuti->alasan_kasubag : '');
         }
-        if ($newStatus === 'ditolak_pejabat') {
-            return 'Ditolak oleh Pejabat Berwenang'.($pengajuanCuti->alasan_pejabat ? ': '.$pengajuanCuti->alasan_pejabat : '');
-        }
         if ($newStatus === 'perubahan') {
-            $alasan = $pengajuanCuti->alasan_kanit ?? $pengajuanCuti->alasan_kasubag ?? $pengajuanCuti->alasan_pejabat;
+            $alasan = $pengajuanCuti->alasan_kanit ?? $pengajuanCuti->alasan_kasubag;
 
             return 'Diminta perubahan'.($alasan ? ' oleh approver: '.$alasan : '');
         }
         if ($newStatus === 'disetujui') {
             return $pengajuanCuti->tipe_aliran === 'operasional'
                 ? 'Disetujui oleh Kasubag Tata Usaha'
-                : 'Disetujui oleh Pejabat Berwenang';
+                : 'Disetujui oleh Kanit dan Kasubag';
         }
-        if (in_array($newStatus, ['menunggu_atasan', 'menunggu_pejabat'])) {
+        if ($newStatus === 'menunggu_atasan') {
             return 'Pengajuan dikirim ulang oleh pemohon';
         }
         if ($newStatus === 'ditolak_kepala_unit') {

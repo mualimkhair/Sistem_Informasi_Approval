@@ -48,11 +48,9 @@ class PersetujuanCutisTable
                     ->label('Status')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'menunggu_atasan' => 'Menunggu Atasan',
-                        'menunggu_pejabat' => 'Menunggu Pejabat',
                         'disetujui' => 'Disetujui',
                         'ditolak_kanit' => 'Ditolak Kanit',
                         'ditolak_kasubag' => 'Ditolak Kasubag',
-                        'ditolak_pejabat' => 'Ditolak Pejabat',
                         'menunggu_kepala_unit' => 'Menunggu Kepala Unit',
                         'menunggu_kepala_seksi' => 'Menunggu Kepala Seksi',
                         'menunggu_kanit_kepegawaian' => 'Menunggu Kanit Kepegawaian',
@@ -68,11 +66,11 @@ class PersetujuanCutisTable
                     ->badge()
                     ->sortable()
                     ->color(fn (string $state): string => match ($state) {
-                        'menunggu_atasan', 'menunggu_pejabat',
+                        'menunggu_atasan',
                         'menunggu_kepala_unit', 'menunggu_kepala_seksi',
                         'menunggu_kanit_kepegawaian', 'menunggu_kasubag_tu' => 'warning',
                         'disetujui' => 'success',
-                        'ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat',
+                        'ditolak_kanit', 'ditolak_kasubag',
                         'ditolak_kepala_unit', 'ditolak_kepala_seksi',
                         'ditolak_kanit_kepegawaian', 'ditolak_kasubag_tu' => 'danger',
                         'ditangguhkan', 'perubahan' => 'gray',
@@ -424,12 +422,12 @@ class PersetujuanCutisTable
                         $blangko = $record->blangkoCuti;
                         
                         $suratIzinName = match($record->jenis_cuti) {
-                            'cuti_tahunan' => 'Surat Izin Cuti Tahunan',
-                            'cuti_besar' => 'Surat Izin Cuti Besar',
-                            'cuti_sakit' => 'Surat Izin Cuti Sakit',
-                            'cuti_melahirkan' => 'Surat Izin Cuti Bersalin',
-                            'cuti_alasan_penting' => 'Surat Izin Cuti Alasan Penting',
-                            'cuti_diluar_tanggungan_negara' => 'Surat Izin Cuti di Luar Tanggungan Negara',
+                            'tahunan' => 'Surat Izin Cuti Tahunan',
+                            'besar' => 'Surat Izin Cuti Besar',
+                            'sakit' => 'Surat Izin Cuti Sakit',
+                            'melahirkan' => 'Surat Izin Cuti Bersalin',
+                            'alasan_penting' => 'Surat Izin Cuti Alasan Penting',
+                            'diluar_tanggungan_negara' => 'Surat Izin Cuti di Luar Tanggungan Negara',
                             default => 'Surat Izin Cuti'
                         };
 

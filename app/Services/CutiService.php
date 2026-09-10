@@ -131,22 +131,11 @@ class CutiService
             in_array($pengajuan->keputusan_kasubag, ['disetujui', 'dilewati'])
         ) {
             if ($pengajuan->status === 'menunggu_atasan') {
-                $pengajuan->status = 'menunggu_pejabat';
-            }
-        }
-
-        if ($pengajuan->status === 'menunggu_pejabat' && $pengajuan->keputusan_pejabat) {
-            if ($pengajuan->keputusan_pejabat === 'disetujui') {
+                // Pejabat stage was removed: kanit + kasubag approval finalizes the
+                // administrasi flow. The Blangko (signed by pejabat_berwenang) is
+                // created by the observer when status becomes 'disetujui'.
                 $pengajuan->status = 'disetujui';
                 self::potongSaldo($pengajuan);
-            } else {
-                if ($pengajuan->keputusan_pejabat === 'tidak_disetujui') {
-                    $pengajuan->status = 'ditolak_pejabat';
-                } elseif ($pengajuan->keputusan_pejabat === 'ditangguhkan') {
-                    $pengajuan->status = 'ditangguhkan';
-                } else {
-                    $pengajuan->status = 'perubahan';
-                }
             }
         }
     }
@@ -574,7 +563,7 @@ class CutiService
             ]);
 
         } else {
-            if (in_array($pengajuan->status, ['ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat', 'ditangguhkan', 'perubahan'])) {
+            if (in_array($pengajuan->status, ['ditolak_kanit', 'ditolak_kasubag', 'ditangguhkan', 'perubahan'])) {
                 return null;
             }
 
