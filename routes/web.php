@@ -10,6 +10,8 @@ use App\Http\Controllers\PdfController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/pengajuan-cuti/{pengajuanCuti}/pdf', [PdfController::class, 'cetak'])->name('pengajuan-cuti.pdf');
+    Route::get('/pengajuan-cuti/{pengajuanCuti}/surat-izin', [PdfController::class, 'cetakSuratIzinCuti'])->name('cetak-surat-izin-cuti');
+    Route::get('/pengajuan-cuti/{pengajuanCuti}/blangko', [PdfController::class, 'cetakBlangko'])->name('cetak-blangko');
     Route::get('/users/template', function () {
         $export = new class implements
             \Maatwebsite\Excel\Concerns\WithHeadings,

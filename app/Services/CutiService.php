@@ -655,4 +655,51 @@ class CutiService
             'keterangan' => 'Factory reset saldo by admin',
         ]);
     }
+
+    public static function generateAndSaveFinalDocuments(\App\Models\BlangkoCuti $blangko): void
+    {
+        $pengajuan = $blangko->pengajuanCuti;
+        if (!$pengajuan) {
+            return;
+        }
+
+        $pengajuan->load(['user.unitKerja', 'kelompokKerja']);
+
+        // 1. Generate Blangko Cuti PDF
+        $pdfBlangko = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.cetak-blangko', ['pengajuanCuti' => $pengajuan])
+            ->setPaper('legal', 'portrait');
+
+        $blangkoFilename = $pengajuan->id . '_blangko-cuti.pdf';
+        $blangkoPath = 'documents/blangko-cuti/' . $blangkoFilename;
+        \Illuminate\Support\Facades\Storage::disk('local')->put($blangkoPath, $pdfBlangko->output());
+
+        // 2. Generate Surat Izin Cuti PDF
+        $templateMap = [
+            'tahunan' => 'pdf.Kategori Surat Izin Cuti.tahunan',
+            'besar' => 'pdf.Kategori Surat Izin Cuti.besar',
+            'sakit' => 'pdf.Kategori Surat Izin Cuti.sakit',
+            'melahirkan' => 'pdf.Kategori Surat Izin Cuti.bersalin',
+            'alasan_penting' => 'pdf.Kategori Surat Izin Cuti.alasan-penting',
+            'diluar_tanggungan_negara' => 'pdf.Kategori Surat Izin Cuti.diluar-tanggungan-negara',
+        ];
+
+        $jenisCuti = $pengajuan->jenis_cuti;
+        $viewName = $templateMap[$jenisCuti] ?? null;
+
+        $suratIzinPath = null;
+        if ($viewName && view()->exists($viewName)) {
+            $pdfSuratIzin = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, ['pengajuanCuti' => $pengajuan])
+                ->setPaper('legal', 'portrait');
+
+            $suratIzinFilename = $pengajuan->id . '_surat-izin-' . $jenisCuti . '.pdf';
+            $suratIzinPath = 'documents/surat-izin/' . $suratIzinFilename;
+            \Illuminate\Support\Facades\Storage::disk('local')->put($suratIzinPath, $pdfSuratIzin->output());
+        }
+
+        // 3. Save paths to BlangkoCuti
+        $blangko->update([
+            'file_blangko_path' => $blangkoPath,
+            'file_surat_izin_path' => $suratIzinPath,
+        ]);
+    }
 }

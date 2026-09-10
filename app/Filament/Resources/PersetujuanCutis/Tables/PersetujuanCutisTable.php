@@ -215,54 +215,7 @@ class PersetujuanCutisTable
                         Notification::make()->title('Keputusan Kasubag berhasil disimpan.')->success()->send();
                     }),
 
-                Action::make('keputusan_pejabat')
-                    ->label('Keputusan Final')
-                    ->icon('heroicon-o-check-badge')
-                    ->color('success')
-                    ->visible(
-                        fn ($record) => $record->tipe_aliran === 'administrasi'
-                        && auth()->user()->hasRole('pejabat_berwenang')
-                        && $record->status === 'menunggu_pejabat'
-                        && $record->user_id != auth()->id()
-                    )
-                    ->form([
-                        Placeholder::make('detail_pengajuan')
-                            ->label('Detail Pengajuan')
-                            ->content(fn ($record) => new HtmlString(
-                                "<strong>Pegawai:</strong> {$record->user->nama}<br>
-                                <strong>Jenis Cuti:</strong> {$record->jenis_cuti}<br>
-                                <strong>Tanggal:</strong> {$record->tanggal_mulai->format('d-m-Y')} s/d {$record->tanggal_selesai->format('d-m-Y')} ({$record->lama_cuti} hari)<br>
-                                <strong>Alasan:</strong> {$record->alasan_cuti}<br>
-                                <strong>Catatan Kanit:</strong> ".($record->alasan_kanit ?? '-').'<br>
-                                <strong>Catatan Kasubag:</strong> '.($record->alasan_kasubag ?? '-')
-                            ))
-                            ->columnSpanFull(),
-                        Select::make('keputusan_pejabat')
-                            ->label('Keputusan Final')
-                            ->options([
-                                'disetujui' => 'Disetujui',
-                                'tidak_disetujui' => 'Tidak Disetujui',
-                                'perubahan' => 'Perlu Perubahan',
-                                'ditangguhkan' => 'Ditangguhkan',
-                            ])
-                            ->required()
-                            ->live(),
-                        Textarea::make('alasan_pejabat')
-                            ->label('Alasan / Catatan')
-                            ->required(fn ($get) => $get('keputusan_pejabat') !== 'disetujui')
-                            ->visible(fn ($get) => ! empty($get('keputusan_pejabat')))
-                            ->rows(3),
-                    ])
-                    ->action(function (PengajuanCuti $record, array $data) {
-                        DB::transaction(function () use ($record, $data) {
-                            $pengajuan = PengajuanCuti::lockForUpdate()->findOrFail($record->id);
-                            $pengajuan->update([
-                                'keputusan_pejabat' => $data['keputusan_pejabat'],
-                                'alasan_pejabat' => $data['alasan_pejabat'] ?? null,
-                            ]);
-                        });
-                        Notification::make()->title('Keputusan final berhasil disimpan.')->success()->send();
-                    }),
+
 
                 Action::make('keputusan_kepala_unit')
                     ->label('Keputusan Kepala Unit')
@@ -463,9 +416,65 @@ class PersetujuanCutisTable
                 Action::make('cetak_pdf')
                     ->label('Cetak PDF')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->url(fn ($record) => route('pengajuan-cuti.pdf', $record))
-                    ->openUrlInNewTab()
-                    ->visible(fn ($record) => $record->status === 'disetujui' || auth()->user()->hasRole(['super_admin', 'admin'])),
+                    ->visible(fn ($record) => ($record->blangkoCuti && $record->blangkoCuti->status === 'disetujui' && ($record->blangkoCuti->file_blangko_path || $record->blangkoCuti->file_surat_izin_path)) || auth()->user()->hasRole(['super_admin', 'admin']))
+                    ->modalHeading('DOKUMEN CUTI')
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(fn ($action) => $action->label('Tutup'))
+                    ->modalContent(function ($record) {
+                        $blangko = $record->blangkoCuti;
+                        
+                        $suratIzinName = match($record->jenis_cuti) {
+                            'cuti_tahunan' => 'Surat Izin Cuti Tahunan',
+                            'cuti_besar' => 'Surat Izin Cuti Besar',
+                            'cuti_sakit' => 'Surat Izin Cuti Sakit',
+                            'cuti_melahirkan' => 'Surat Izin Cuti Bersalin',
+                            'cuti_alasan_penting' => 'Surat Izin Cuti Alasan Penting',
+                            'cuti_diluar_tanggungan_negara' => 'Surat Izin Cuti di Luar Tanggungan Negara',
+                            default => 'Surat Izin Cuti'
+                        };
+
+                        $html = '<div class="space-y-4">';
+                        
+                        if ($blangko && $blangko->file_blangko_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_blangko_path)) {
+                            $urlBlangko = route('cetak-blangko', $record);
+                            $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                                <h4 class="font-bold text-lg mb-1">Blangko Cuti Final</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Formulir Permintaan dan Pemberian Cuti</p>
+                                <div class="flex gap-2">
+                                    <a href="'.$urlBlangko.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">
+                                        Download / Preview Blangko Cuti
+                                    </a>
+                                </div>
+                            </div>';
+                        } else {
+                            $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                                <h4 class="font-bold text-lg mb-1">Blangko Cuti Final</h4>
+                                <p class="text-sm text-red-500">Dokumen Blangko Cuti belum tersedia.</p>
+                            </div>';
+                        }
+
+                        if ($blangko && $blangko->file_surat_izin_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_surat_izin_path)) {
+                            $urlSurat = route('cetak-surat-izin-cuti', $record);
+                            $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                                <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Surat Izin Cuti sesuai kategori</p>
+                                <div class="flex gap-2">
+                                    <a href="'.$urlSurat.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">
+                                        Download / Preview Surat Izin Cuti
+                                    </a>
+                                </div>
+                            </div>';
+                        } else {
+                            $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                                <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
+                                <p class="text-sm text-red-500">Dokumen Surat Izin Cuti belum tersedia.</p>
+                            </div>';
+                        }
+                        
+                        $html .= '</div>';
+                        
+                        return new \Illuminate\Support\HtmlString($html);
+                    }),
 
                 DeleteAction::make()
                     ->visible(fn () => auth()->user()->hasRole(['super_admin', 'admin'])),

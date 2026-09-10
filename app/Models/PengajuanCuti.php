@@ -48,6 +48,11 @@ class PengajuanCuti extends Model
         return $this->hasMany(SaldoCutiLedger::class, 'pengajuan_cuti_id', 'id');
     }
 
+    public function blangkoCuti()
+    {
+        return $this->hasOne(BlangkoCuti::class);
+    }
+
     public function getIsOperasionalAttribute()
     {
         return $this->tipe_aliran === 'operasional';
@@ -90,7 +95,8 @@ class PengajuanCuti extends Model
             return User::find($this->kanit_kepegawaian_id);
         }
 
-        return User::role('kanit_kepegawaian')->first();
+        $role = \Spatie\Permission\Models\Role::where('name', 'kanit_kepegawaian')->first();
+        return $role ? User::role($role)->first() : null;
     }
 
     // Kasubag TU (operasional stage 4) — prefer snapshot, fall back to role lookup
@@ -100,13 +106,11 @@ class PengajuanCuti extends Model
             return User::find($this->kasubag_tu_id);
         }
 
-        return User::role('kasubag_tu')->first();
+        $role = \Spatie\Permission\Models\Role::where('name', 'kasubag_tu')->first();
+        return $role ? User::role($role)->first() : null;
     }
 
-    public function getPejabatAttribute()
-    {
-        return User::role('pejabat_berwenang')->first();
-    }
+    // removed getPejabatAttribute
 
     public function scopeForApprover($query, $user)
     {
@@ -118,13 +122,6 @@ class PengajuanCuti extends Model
             $q->where('user_id', $user->id);
 
             // ============ ADMINISTRASI FLOW (existing) ============
-            if ($user->hasRole('pejabat_berwenang')) {
-                $q->orWhere(function (Builder $q2) {
-                    $q2->where('tipe_aliran', 'administrasi')
-                        ->whereIn('keputusan_kanit', ['disetujui', 'dilewati'])
-                        ->whereIn('keputusan_kasubag', ['disetujui', 'dilewati']);
-                });
-            }
 
             if ($user->hasRole('kasubag')) {
                 // By snapshot
@@ -227,8 +224,7 @@ class PengajuanCuti extends Model
             if ($user->hasRole('kanit_kepegawaian')) {
                 $q->orWhere(function (Builder $q2) use ($user) {
                     $q2->where('tipe_aliran', 'operasional')
-                        ->where('kanit_kepegawaian_id', $user->id)
-                        ->whereIn('status', ['menunggu_kanit_kepegawaian']);
+                        ->where('kanit_kepegawaian_id', $user->id);
                 });
             }
 
@@ -236,8 +232,7 @@ class PengajuanCuti extends Model
             if ($user->hasRole('kasubag_tu')) {
                 $q->orWhere(function (Builder $q2) use ($user) {
                     $q2->where('tipe_aliran', 'operasional')
-                        ->where('kasubag_tu_id', $user->id)
-                        ->whereIn('status', ['menunggu_kasubag_tu']);
+                        ->where('kasubag_tu_id', $user->id);
                 });
             }
         });
