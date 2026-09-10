@@ -2,12 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,9 +15,11 @@ class DatabaseSeeder extends Seeder
             'pegawai',
             'kanit',
             'kasubag',
-            'pejabat_berwenang'
+            'pejabat_berwenang',
+            'kanit_kepegawaian',
+            'kasubag_tu',
         ];
-        
+
         foreach ($roles as $role) {
             Role::firstOrCreate(['name' => $role]);
         }

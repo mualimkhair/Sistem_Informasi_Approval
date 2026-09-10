@@ -24,6 +24,7 @@ class ListAuditPengajuanCutis extends ListRecords
             // CreateAction::make(),
         ];
     }
+
     public function table(Table $table): Table
     {
         return $table
@@ -36,21 +37,33 @@ class ListAuditPengajuanCutis extends ListRecords
                 TextColumn::make('lama_cuti')->label('Lama')->sortable(),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'menunggu_atasan', 'menunggu_pejabat' => 'warning',
+                    ->color(fn (string $state): string => match ($state) {
+                        'menunggu_atasan', 'menunggu_pejabat',
+                        'menunggu_kepala_unit', 'menunggu_kepala_seksi',
+                        'menunggu_kanit_kepegawaian', 'menunggu_kasubag_tu' => 'warning',
                         'disetujui' => 'success',
-                        'ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat' => 'danger',
+                        'ditolak_kanit', 'ditolak_kasubag', 'ditolak_pejabat',
+                        'ditolak_kepala_unit', 'ditolak_kepala_seksi',
+                        'ditolak_kanit_kepegawaian', 'ditolak_kasubag_tu' => 'danger',
                         'ditangguhkan', 'perubahan' => 'gray',
                         'dihapus' => 'gray',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
                         'menunggu_atasan' => 'Menunggu Atasan',
                         'menunggu_pejabat' => 'Menunggu Pejabat',
                         'disetujui' => 'Disetujui',
                         'ditolak_kanit' => 'Ditolak Kanit',
                         'ditolak_kasubag' => 'Ditolak Kasubag',
                         'ditolak_pejabat' => 'Ditolak Pejabat',
+                        'menunggu_kepala_unit' => 'Menunggu Kepala Unit',
+                        'menunggu_kepala_seksi' => 'Menunggu Kepala Seksi',
+                        'menunggu_kanit_kepegawaian' => 'Menunggu Kanit Kepegawaian',
+                        'menunggu_kasubag_tu' => 'Menunggu Kasubag TU',
+                        'ditolak_kepala_unit' => 'Ditolak Kepala Unit',
+                        'ditolak_kepala_seksi' => 'Ditolak Kepala Seksi',
+                        'ditolak_kanit_kepegawaian' => 'Ditolak Kanit Kepegawaian',
+                        'ditolak_kasubag_tu' => 'Ditolak Kasubag TU',
                         'perubahan' => 'Perlu Perubahan',
                         'ditangguhkan' => 'Ditangguhkan',
                         'dihapus' => 'Dihapus',
@@ -58,9 +71,9 @@ class ListAuditPengajuanCutis extends ListRecords
                     }),
                 BadgeColumn::make('deleted_at')
                     ->label('')
-                    ->formatStateUsing(fn($state) => $state ? 'DIHAPUS' : null)
+                    ->formatStateUsing(fn ($state) => $state ? 'DIHAPUS' : null)
                     ->color('danger')
-                    ->visible(fn() => true),
+                    ->visible(fn () => true),
                 TextColumn::make('created_at')->label('Diajukan')->date()->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
@@ -73,18 +86,26 @@ class ListAuditPengajuanCutis extends ListRecords
                         'ditolak_kanit' => 'Ditolak Kanit',
                         'ditolak_kasubag' => 'Ditolak Kasubag',
                         'ditolak_pejabat' => 'Ditolak Pejabat',
+                        'menunggu_kepala_unit' => 'Menunggu Kepala Unit',
+                        'menunggu_kepala_seksi' => 'Menunggu Kepala Seksi',
+                        'menunggu_kanit_kepegawaian' => 'Menunggu Kanit Kepegawaian',
+                        'menunggu_kasubag_tu' => 'Menunggu Kasubag TU',
+                        'ditolak_kepala_unit' => 'Ditolak Kepala Unit',
+                        'ditolak_kepala_seksi' => 'Ditolak Kepala Seksi',
+                        'ditolak_kanit_kepegawaian' => 'Ditolak Kanit Kepegawaian',
+                        'ditolak_kasubag_tu' => 'Ditolak Kasubag TU',
                         'perubahan' => 'Perlu Perubahan',
                         'ditangguhkan' => 'Ditangguhkan',
                     ]),
                 Filter::make('deleted_at')
                     ->label('Termasuk Dihapus')
-                    ->query(fn(Builder $query) => $query->withTrashed()),
+                    ->query(fn (Builder $query) => $query->withTrashed()),
             ])
             ->actions([
                 Action::make('riwayat')
                     ->label('Riwayat')
                     ->icon('heroicon-o-clock')
-                    ->modalHeading(fn(PengajuanCuti $record) => 'Riwayat: ' . $record->user->nama . ' - ' . str_replace('_', ' ', $record->jenis_cuti))
+                    ->modalHeading(fn (PengajuanCuti $record) => 'Riwayat: '.$record->user->nama.' - '.str_replace('_', ' ', $record->jenis_cuti))
                     ->modalContent(function (PengajuanCuti $record) {
                         $record->load(['statusLogs.changedBy', 'ledgers']);
 

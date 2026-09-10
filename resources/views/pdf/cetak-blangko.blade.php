@@ -44,7 +44,7 @@
         }
         .form-table td {
             border: 1px solid #000;
-            padding: 5px 8px;
+            padding: 3px 5px;
             vertical-align: middle;
             text-align: left;
         }
@@ -70,7 +70,7 @@
             word-wrap: break-word;
         }
         .persetujuan-title { font-weight: bold; }
-        .persetujuan-table td.approval-cell { height: 82px; padding: 30px 6px 6px; }
+        .persetujuan-table td.approval-cell { height: 60px; padding: 15px 4px 4px; }
     </style>
 </head>
 <body>
@@ -166,7 +166,9 @@
         if ($approver) {
             $out .= "<u>{$approver->nama}</u><br>";
             $out .= 'NIP. ' . $approver->nip . '<br>';
-            $out .= '<span style="font-size: 9pt;">' . ($approver->pangkat_gol ?? '-') . '</span>';
+            if ($rejected) {
+                $out .= '<span style="font-size: 9pt;">' . ($approver->pangkat_gol ?? '-') . '</span>';
+            }
         }
         if ($rejected && $showRejectedReason && $alasan) {
             $out .= '<br><i>(' . $alasan . ')</i>';
@@ -178,7 +180,7 @@
 {{-- ===================== KOP SURAT ===================== --}}
 <div class="surat-header">
     <table>
-        <tr><td>Palu, {{ $pengajuanCuti->created_at?->translatedFormat('d F Y') }}</td></tr>
+        <tr><td style="white-space: nowrap;">Palu, {{ $pengajuanCuti->created_at?->translatedFormat('d F Y') }}</td></tr>
         <tr><td>Kepada</td></tr>
         <tr>
             <td class="label-yth">Yth.</td>
@@ -318,84 +320,104 @@
     </tr>
     <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== VII. PERTIMBANGAN ATASAN LANGSUNG ===================== --}}
-    @if(!$isOperasional)
+    </tbody><tbody style="page-break-inside: avoid;">
     <tr><td colspan="7" class="section-title">VII. PERTIMBANGAN ATASAN LANGSUNG</td></tr>
     <tr>
-        <td colspan="4" class="tc">DISETUJUI</td>
-        <td colspan="3" class="tc">DITANGGUHKAN / TIDAK DISETUJUI</td>
+        <td colspan="7" style="padding: 0; border: none;">
+            <table class="persetujuan-table">
+                <tr>
+                    <td colspan="3" class="persetujuan-title">DISETUJUI</td>
+                    <td colspan="3" class="persetujuan-title">DITANGGUHKAN / TIDAK DISETUJUI</td>
+                </tr>
+                <tr>
+                    <td class="persetujuan-title" style="font-size: 8pt;">KOORDINATOR/KASI</td>
+                    <td class="persetujuan-title" style="font-size: 8pt;">KANIT KEPEGAWAIAN</td>
+                    <td class="persetujuan-title" style="font-size: 8pt;">KASUBAG TU</td>
+                    <td class="persetujuan-title" style="font-size: 8pt;">KOORDINATOR/KASI</td>
+                    <td class="persetujuan-title" style="font-size: 8pt;">KANIT KEPEGAWAIAN</td>
+                    <td class="persetujuan-title" style="font-size: 8pt;">KASUBAG TU</td>
+                </tr>
+                <tr>
+                    @php
+                        // Logic to map the approval to these 6 cells.
+                        // We will map 'Kepala Seksi'/'Kanit' to KOORDINATOR/KASI
+                        // 'Kanit Kepegawaian' to KANIT KEPEGAWAIAN
+                        // 'Kasubag TU'/'Kasubag' to KASUBAG TU
+                        
+                        $kasiApprove = $isOperasional ? ($pengajuanCuti->keputusan_kepala_seksi === 'disetujui') : ($kanitApproved);
+                        $kasiReject = $isOperasional ? (in_array($pengajuanCuti->keputusan_kepala_seksi, ['ditolak_kepala_seksi', 'ditolak', 'perubahan'])) : ($kanitRejected);
+                        $kasiApprover = $isOperasional ? $pengajuanCuti->kepalaSeksi : $pengajuanCuti->kanit;
+                        $kasiAlasan = $isOperasional ? $pengajuanCuti->alasan_kepala_seksi : $pengajuanCuti->alasan_kanit;
+                        
+                        $kanitPegApprove = $isOperasional ? ($pengajuanCuti->keputusan_kanit_kepegawaian === 'disetujui') : false;
+                        $kanitPegReject = $isOperasional ? (in_array($pengajuanCuti->keputusan_kanit_kepegawaian, ['ditolak_kanit_kepegawaian', 'ditolak', 'perubahan'])) : false;
+                        $kanitPegApprover = $isOperasional ? $pengajuanCuti->kanitKepegawaian : null;
+                        $kanitPegAlasan = $isOperasional ? $pengajuanCuti->alasan_kanit_kepegawaian : null;
+                        
+                        $kasubagApprove = $isOperasional ? ($pengajuanCuti->keputusan_kasubag_tu === 'disetujui') : ($kasubagApproved);
+                        $kasubagReject = $isOperasional ? (in_array($pengajuanCuti->keputusan_kasubag_tu, ['ditolak_kasubag_tu', 'ditolak', 'perubahan'])) : ($kasubagRejected);
+                        $kasubagApprover = $isOperasional ? $pengajuanCuti->kasubagTu : $pengajuanCuti->kasubag;
+                        $kasubagAlasan = $isOperasional ? $pengajuanCuti->alasan_kasubag_tu : $pengajuanCuti->alasan_kasubag;
+                    @endphp
+                    
+                    <td class="approval-cell" style="vertical-align: middle;">
+                        @if($kasiApprove)
+                            {!! $formatBox('disetujui', $kasiApprover, null, true, false) !!}
+                        @endif
+                    </td>
+                    <td class="approval-cell" style="vertical-align: middle;">
+                        @if($kanitPegApprove)
+                            {!! $formatBox('disetujui', $kanitPegApprover, null, true, false) !!}
+                        @endif
+                    </td>
+                    <td class="approval-cell" style="vertical-align: middle;">
+                        @if($kasubagApprove)
+                            {!! $formatBox('disetujui', $kasubagApprover, null, true, false) !!}
+                        @endif
+                    </td>
+                    
+                    <td class="approval-cell" style="vertical-align: middle;">
+                        @if($kasiReject)
+                            {!! $formatBox('ditolak', $kasiApprover, $kasiAlasan, false, true) !!}
+                        @endif
+                    </td>
+                    <td class="approval-cell" style="vertical-align: middle;">
+                        @if($kanitPegReject)
+                            {!! $formatBox('ditolak', $kanitPegApprover, $kanitPegAlasan, false, true) !!}
+                        @endif
+                    </td>
+                    <td class="approval-cell" style="vertical-align: middle;">
+                        @if($kasubagReject)
+                            {!! $formatBox('ditolak', $kasubagApprover, $kasubagAlasan, false, true) !!}
+                        @endif
+                    </td>
+                </tr>
+            </table>
+        </td>
     </tr>
-    <tr>
-        <td colspan="2" class="tc">KOORDINATOR / KANIT</td>
-        <td colspan="2" class="tc">KASI / KASUBAG</td>
-        <td colspan="2" class="tc">KOORDINATOR / KANIT</td>
-        <td class="tc">KASI / KASUBAG</td>
-    </tr>
-    <tr>
-        <td colspan="2" class="tc tall-box">
-            @if($kanitApproved)
-                @if($pengajuanCuti->kanit)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kanit->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->kanit->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kanit->nip }}<br>
-                @else
-                    V<br>{{ $pengajuanCuti->alasan_kanit }}
-                @endif
-            @endif
-        </td>
-        <td colspan="2" class="tc tall-box">
-            @if($kasubagApproved)
-                @if($pengajuanCuti->kasubag)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kasubag->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->kasubag->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kasubag->nip }}<br>
-                @else
-                    V<br>{{ $pengajuanCuti->alasan_kasubag }}
-                @endif
-            @endif
-        </td>
-        <td colspan="2" class="tc tall-box">
-            @if($kanitRejected)
-                @if($pengajuanCuti->kanit)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kanit->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->kanit->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kanit->nip }}<br>
-                    <i>({{ $pengajuanCuti->alasan_kanit }})</i>
-                @else
-                    V<br>{{ $pengajuanCuti->alasan_kanit }}
-                @endif
-            @endif
-        </td>
-        <td class="tc tall-box">
-            @if($kasubagRejected)
-                @if($pengajuanCuti->kasubag)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kasubag->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->kasubag->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kasubag->nip }}<br>
-                    <i>({{ $pengajuanCuti->alasan_kasubag }})</i>
-                @else
-                    V<br>{{ $pengajuanCuti->alasan_kasubag }}
-                @endif
-            @endif
-        </td>
-    </tr>
-    <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
+
     {{-- ===================== VIII. KEPUTUSAN PEJABAT YANG BERWENANG ===================== --}}
+    @php
+        $blangko = $pengajuanCuti->blangkoCuti;
+        $kabandaraApproved = $blangko && strtolower($blangko->status) === 'disetujui';
+        $kabandaraRejected = $blangko && in_array(strtolower($blangko->status), ['ditolak', 'perubahan', 'ditangguhkan']);
+        $alasanKabandara = $blangko ? $blangko->alasan : null;
+        
+        $kabandaraNama = $blangko ? $blangko->kabandara_nama : null;
+        $kabandaraNip = $blangko ? $blangko->kabandara_nip : null;
+        $kabandaraPangkat = $blangko ? $blangko->kabandara_pangkat : null;
+        
+        // Fallback to relation if snapshot is empty but relation exists
+        if (!$kabandaraNama && $blangko && $blangko->kabandara) {
+            $kabandaraNama = $blangko->kabandara->nama;
+            $kabandaraNip = $blangko->kabandara->nip;
+            $kabandaraPangkat = $blangko->kabandara->pangkat_gol;
+        }
+        
+        $signaturePath = ($blangko && $blangko->kabandara) ? $blangko->kabandara->signature_path : null;
+    @endphp
+    <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
+    </tbody><tbody style="page-break-before: always; page-break-inside: avoid;">
     <tr><td colspan="7" class="section-title">VIII. KEPUTUSAN PEJABAT YANG BERWENANG MEMBERIKAN CUTI</td></tr>
     <tr>
         <td colspan="4" class="tc">DISETUJUI</td>
@@ -403,64 +425,30 @@
     </tr>
     <tr>
         <td colspan="4" class="tc tall-box">
-            @if($pejabatApproved)
-                @if($pengajuanCuti->pejabat)
-                    @if($sig = getSignatureBase64($pengajuanCuti->pejabat->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->pejabat->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->pejabat->nip }}<br>
+            @if($kabandaraApproved)
+                @if($signaturePath && $sig = getSignatureBase64($signaturePath))
+                    <img src="{{ $sig }}" class="signature-img"><br>
                 @else
-                    V<br>{{ $pengajuanCuti->alasan_pejabat }}
+                    <br><br><br>
                 @endif
+                <u>{{ $kabandaraNama ?? '...................' }}</u><br>
+                NIP. {{ $kabandaraNip ?? '...................' }}<br>
             @endif
         </td>
         <td colspan="3" class="tc tall-box">
-            @if($pejabatRejected)
-                @if($pengajuanCuti->pejabat)
-                    @if($sig = getSignatureBase64($pengajuanCuti->pejabat->signature_path))
-                        <img src="{{ $sig }}" class="signature-img"><br>
-                    @else
-                        <br><br><br>
-                    @endif
-                    <u>{{ $pengajuanCuti->pejabat->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->pejabat->nip }}<br>
-                    Pangkat/Gol. {{ $pengajuanCuti->pejabat->pangkat_gol ?? '-' }}<br>
-                    <i>({{ $pengajuanCuti->alasan_pejabat }})</i>
+            @if($kabandaraRejected)
+                @if($signaturePath && $sig = getSignatureBase64($signaturePath))
+                    <img src="{{ $sig }}" class="signature-img"><br>
                 @else
-                    V<br>{{ $pengajuanCuti->alasan_pejabat }}
+                    <br><br><br>
                 @endif
+                <u>{{ $kabandaraNama ?? '...................' }}</u><br>
+                NIP. {{ $kabandaraNip ?? '...................' }}<br>
+                Pangkat/Gol. {{ $kabandaraPangkat ?? '-' }}<br>
+                <i>({{ $alasanKabandara }})</i>
             @endif
         </td>
     </tr>
-    @else
-    {{-- ===================== VII. PERSETUJUAN BERJENJANG (ALIRAN OPERASIONAL) ===================== --}}
-    <tr><td colspan="7" class="section-title">VII. PERSETUJUAN BERJENJANG</td></tr>
-    <tr>
-        <td colspan="7" style="padding: 0; border: none;">
-            <table class="persetujuan-table">
-                <tr>
-                    <td colspan="2" class="persetujuan-title">DISETUJUI</td>
-                    <td colspan="2" class="persetujuan-title">DITANGGUHKAN / TIDAK DISETUJUI</td>
-                </tr>
-                <tr>
-                    <td class="persetujuan-title">KEPALA UNIT</td>
-                    <td class="persetujuan-title">KEPALA SEKSI</td>
-                    <td class="persetujuan-title">KANIT KEPEGAWAIAN</td>
-                    <td class="persetujuan-title">KASUBAG TU</td>
-                </tr>
-                <tr>
-                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kepala_unit, $pengajuanCuti->kepalaUnit, $pengajuanCuti->alasan_kepala_unit, false, true) !!}</td>
-                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kepala_seksi, $pengajuanCuti->kepalaSeksi, $pengajuanCuti->alasan_kepala_seksi, false, true) !!}</td>
-                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kanit_kepegawaian, $pengajuanCuti->kanitKepegawaian, $pengajuanCuti->alasan_kanit_kepegawaian, true, true) !!}</td>
-                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kasubag_tu, $pengajuanCuti->kasubagTu, $pengajuanCuti->alasan_kasubag_tu, true, true) !!}</td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-    @endif
 
     </tbody>
 </table>
