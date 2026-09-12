@@ -202,7 +202,7 @@ class PengajuanCutiObserver
                 $kasubagValue = $pengajuanCuti->getOriginal('keputusan_kasubag') === 'dilewati' ? 'dilewati' : null;
 
                 if ($submitter->hasRole('kasubag')) {
-                    $pengajuanCuti->status = 'menunggu_pejabat';
+                    $pengajuanCuti->status = 'disetujui';
                 } else {
                     $pengajuanCuti->status = 'menunggu_atasan';
                 }
@@ -334,6 +334,9 @@ class PengajuanCutiObserver
                 );
                 
                 if ($blangko->wasRecentlyCreated) {
+                    // Generate initial Blangko Cuti PDF before Kabandara takes action
+                    \App\Services\CutiService::generateAndSaveFinalDocuments($blangko);
+                    
                     $pejabats = User::role('pejabat_berwenang')->get();
                     foreach ($pejabats as $pejabat) {
                         Notification::make()

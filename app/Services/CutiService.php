@@ -131,22 +131,8 @@ class CutiService
             in_array($pengajuan->keputusan_kasubag, ['disetujui', 'dilewati'])
         ) {
             if ($pengajuan->status === 'menunggu_atasan') {
-                $pengajuan->status = 'menunggu_pejabat';
-            }
-        }
-
-        if ($pengajuan->status === 'menunggu_pejabat' && $pengajuan->keputusan_pejabat) {
-            if ($pengajuan->keputusan_pejabat === 'disetujui') {
                 $pengajuan->status = 'disetujui';
                 self::potongSaldo($pengajuan);
-            } else {
-                if ($pengajuan->keputusan_pejabat === 'tidak_disetujui') {
-                    $pengajuan->status = 'ditolak_pejabat';
-                } elseif ($pengajuan->keputusan_pejabat === 'ditangguhkan') {
-                    $pengajuan->status = 'ditangguhkan';
-                } else {
-                    $pengajuan->status = 'perubahan';
-                }
             }
         }
     }
@@ -673,27 +659,30 @@ class CutiService
         $blangkoPath = 'documents/blangko-cuti/' . $blangkoFilename;
         \Illuminate\Support\Facades\Storage::disk('local')->put($blangkoPath, $pdfBlangko->output());
 
-        // 2. Generate Surat Izin Cuti PDF
-        $templateMap = [
-            'tahunan' => 'pdf.Kategori Surat Izin Cuti.tahunan',
-            'besar' => 'pdf.Kategori Surat Izin Cuti.besar',
-            'sakit' => 'pdf.Kategori Surat Izin Cuti.sakit',
-            'melahirkan' => 'pdf.Kategori Surat Izin Cuti.bersalin',
-            'alasan_penting' => 'pdf.Kategori Surat Izin Cuti.alasan-penting',
-            'diluar_tanggungan_negara' => 'pdf.Kategori Surat Izin Cuti.diluar-tanggungan-negara',
-        ];
-
-        $jenisCuti = $pengajuan->jenis_cuti;
-        $viewName = $templateMap[$jenisCuti] ?? null;
-
         $suratIzinPath = null;
-        if ($viewName && view()->exists($viewName)) {
-            $pdfSuratIzin = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, ['pengajuanCuti' => $pengajuan])
-                ->setPaper('legal', 'portrait');
+        
+        // 2. Generate Surat Izin Cuti PDF ONLY if approved
+        if ($blangko->status === 'disetujui') {
+            $templateMap = [
+                'tahunan' => 'pdf.Kategori Surat Izin Cuti.tahunan',
+                'besar' => 'pdf.Kategori Surat Izin Cuti.besar',
+                'sakit' => 'pdf.Kategori Surat Izin Cuti.sakit',
+                'melahirkan' => 'pdf.Kategori Surat Izin Cuti.bersalin',
+                'alasan_penting' => 'pdf.Kategori Surat Izin Cuti.alasan-penting',
+                'diluar_tanggungan_negara' => 'pdf.Kategori Surat Izin Cuti.diluar-tanggungan-negara',
+            ];
 
-            $suratIzinFilename = $pengajuan->id . '_surat-izin-' . $jenisCuti . '.pdf';
-            $suratIzinPath = 'documents/surat-izin/' . $suratIzinFilename;
-            \Illuminate\Support\Facades\Storage::disk('local')->put($suratIzinPath, $pdfSuratIzin->output());
+            $jenisCuti = $pengajuan->jenis_cuti;
+            $viewName = $templateMap[$jenisCuti] ?? null;
+
+            if ($viewName && view()->exists($viewName)) {
+                $pdfSuratIzin = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, ['pengajuanCuti' => $pengajuan])
+                    ->setPaper('legal', 'portrait');
+
+                $suratIzinFilename = $pengajuan->id . '_surat-izin-' . $jenisCuti . '.pdf';
+                $suratIzinPath = 'documents/surat-izin/' . $suratIzinFilename;
+                \Illuminate\Support\Facades\Storage::disk('local')->put($suratIzinPath, $pdfSuratIzin->output());
+            }
         }
 
         // 3. Save paths to BlangkoCuti

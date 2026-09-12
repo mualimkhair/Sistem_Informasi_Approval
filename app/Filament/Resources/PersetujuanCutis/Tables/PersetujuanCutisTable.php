@@ -416,12 +416,18 @@ class PersetujuanCutisTable
                 Action::make('cetak_pdf')
                     ->label('Cetak PDF')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->visible(fn ($record) => ($record->blangkoCuti && $record->blangkoCuti->status === 'disetujui' && ($record->blangkoCuti->file_blangko_path || $record->blangkoCuti->file_surat_izin_path)) || auth()->user()->hasRole(['super_admin', 'admin']))
+                    ->visible(fn ($record) => ($record->blangkoCuti && in_array($record->blangkoCuti->status, ['disetujui', 'ditolak'])) || auth()->user()->hasRole(['super_admin', 'admin']))
                     ->modalHeading('DOKUMEN CUTI')
                     ->modalSubmitAction(false)
                     ->modalCancelAction(fn ($action) => $action->label('Tutup'))
                     ->modalContent(function ($record) {
                         $blangko = $record->blangkoCuti;
+                        
+                        // Auto-recovery for missing Blangko Cuti PDF (e.g. historical records)
+                        if ($blangko && (!$blangko->file_blangko_path || !\Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_blangko_path))) {
+                            \App\Services\CutiService::generateAndSaveFinalDocuments($blangko);
+                            $blangko->refresh();
+                        }
                         
                         $suratIzinName = match($record->jenis_cuti) {
                             'cuti_tahunan' => 'Surat Izin Cuti Tahunan',
@@ -448,27 +454,29 @@ class PersetujuanCutisTable
                             </div>';
                         } else {
                             $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                                <h4 class="font-bold text-lg mb-1">Blangko Cuti Final</h4>
-                                <p class="text-sm text-red-500">Dokumen Blangko Cuti belum tersedia.</p>
+                                <h4 class="font-bold text-lg mb-1">Blangko Cuti</h4>
+                                <p class="text-sm text-yellow-600">Dokumen sedang dipersiapkan...</p>
                             </div>';
                         }
 
-                        if ($blangko && $blangko->file_surat_izin_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_surat_izin_path)) {
-                            $urlSurat = route('cetak-surat-izin-cuti', $record);
-                            $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                                <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Surat Izin Cuti sesuai kategori</p>
-                                <div class="flex gap-2">
-                                    <a href="'.$urlSurat.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">
-                                        Download / Preview Surat Izin Cuti
-                                    </a>
-                                </div>
-                            </div>';
-                        } else {
-                            $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                                <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
-                                <p class="text-sm text-red-500">Dokumen Surat Izin Cuti belum tersedia.</p>
-                            </div>';
+                        if ($blangko && $blangko->status === 'disetujui') {
+                            if ($blangko->file_surat_izin_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_surat_izin_path)) {
+                                $urlSurat = route('cetak-surat-izin-cuti', $record);
+                                $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                                    <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Surat Izin Cuti sesuai kategori</p>
+                                    <div class="flex gap-2">
+                                        <a href="'.$urlSurat.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">
+                                            Download / Preview Surat Izin Cuti
+                                        </a>
+                                    </div>
+                                </div>';
+                            } else {
+                                $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                                    <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
+                                    <p class="text-sm text-red-500">Dokumen Surat Izin Cuti belum tersedia.</p>
+                                </div>';
+                            }
                         }
                         
                         $html .= '</div>';

@@ -17,6 +17,12 @@ class PdfController extends Controller
 
         $blangko = $pengajuanCuti->blangkoCuti;
 
+        // Auto-recovery for missing Blangko Cuti PDF
+        if ($blangko && (!$blangko->file_blangko_path || !\Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_blangko_path))) {
+            \App\Services\CutiService::generateAndSaveFinalDocuments($blangko);
+            $blangko->refresh();
+        }
+
         // Serve from storage if generated
         if ($blangko && $blangko->file_blangko_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_blangko_path)) {
             $path = \Illuminate\Support\Facades\Storage::disk('local')->path($blangko->file_blangko_path);
@@ -36,6 +42,16 @@ class PdfController extends Controller
 
         $blangko = $pengajuanCuti->blangkoCuti;
         
+        if ($blangko && $blangko->status !== 'disetujui') {
+            abort(403, 'Surat Izin Cuti tidak tersedia karena pengajuan ditolak oleh Kabandara.');
+        }
+
+        // Auto-recovery for missing Surat Izin Cuti PDF
+        if ($blangko && (!$blangko->file_surat_izin_path || !\Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_surat_izin_path))) {
+            \App\Services\CutiService::generateAndSaveFinalDocuments($blangko);
+            $blangko->refresh();
+        }
+
         // Serve from storage if generated
         if ($blangko && $blangko->file_surat_izin_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_surat_izin_path)) {
             $path = \Illuminate\Support\Facades\Storage::disk('local')->path($blangko->file_surat_izin_path);

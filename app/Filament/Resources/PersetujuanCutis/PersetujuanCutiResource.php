@@ -25,6 +25,15 @@ class PersetujuanCutiResource extends Resource
         return 'heroicon-o-clipboard-document-check';
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+        return $user->hasRole([
+            'super_admin', 'admin', 'kanit', 'kasubag',
+            'kanit_kepegawaian', 'kasubag_tu',
+        ]);
+    }
+
     public static function canViewAny(): bool
     {
         $user = auth()->user();
