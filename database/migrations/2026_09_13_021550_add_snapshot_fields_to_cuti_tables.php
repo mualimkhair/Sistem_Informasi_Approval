@@ -12,18 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pengajuan_cutis', function (Blueprint $table) {
-            // Administrasi flow snapshots
-            $table->string('kanit_nama')->nullable();
-            $table->string('kanit_nip')->nullable();
-            $table->string('kanit_pangkat')->nullable();
-            $table->string('kanit_jabatan')->nullable();
-            $table->dateTime('kanit_tanggal_keputusan')->nullable();
 
-            $table->string('kasubag_nama')->nullable();
-            $table->string('kasubag_nip')->nullable();
-            $table->string('kasubag_pangkat')->nullable();
-            $table->string('kasubag_jabatan')->nullable();
-            $table->dateTime('kasubag_tanggal_keputusan')->nullable();
 
             // Operasional flow snapshots
             $table->string('kepala_unit_nama')->nullable();
@@ -63,8 +52,6 @@ return new class extends Migration
     {
         Schema::table('pengajuan_cutis', function (Blueprint $table) {
             $table->dropColumn([
-                'kanit_nama', 'kanit_nip', 'kanit_pangkat', 'kanit_jabatan', 'kanit_tanggal_keputusan',
-                'kasubag_nama', 'kasubag_nip', 'kasubag_pangkat', 'kasubag_jabatan', 'kasubag_tanggal_keputusan',
                 'kepala_unit_nama', 'kepala_unit_nip', 'kepala_unit_pangkat', 'kepala_unit_jabatan', 'kepala_unit_tanggal_keputusan',
                 'kepala_seksi_nama', 'kepala_seksi_nip', 'kepala_seksi_pangkat', 'kepala_seksi_jabatan', 'kepala_seksi_tanggal_keputusan',
                 'kanit_kepegawaian_nama', 'kanit_kepegawaian_nip', 'kanit_kepegawaian_pangkat', 'kanit_kepegawaian_jabatan', 'kanit_kepegawaian_tanggal_keputusan',
