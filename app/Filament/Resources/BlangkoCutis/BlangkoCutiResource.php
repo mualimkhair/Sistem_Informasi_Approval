@@ -141,15 +141,9 @@ class BlangkoCutiResource extends Resource
                     ])
                     ->action(function (BlangkoCuti $record, array $data) {
                         DB::transaction(function () use ($record, $data) {
-                            $user = auth()->user();
                             $record->update([
                                 'status' => $data['status'],
                                 'alasan' => $data['alasan'] ?? null,
-                                'tanggal_keputusan' => now(),
-                                'kabandara_id' => $user->id,
-                                'kabandara_nama' => $user->nama,
-                                'kabandara_nip' => $user->nip,
-                                'kabandara_pangkat' => $user->pangkat,
                             ]);
 
                             \App\Services\CutiService::generateAndSaveFinalDocuments($record);

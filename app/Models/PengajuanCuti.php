@@ -21,6 +21,12 @@ class PengajuanCuti extends Model
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
+        'kanit_tanggal_keputusan' => 'datetime',
+        'kasubag_tanggal_keputusan' => 'datetime',
+        'kepala_unit_tanggal_keputusan' => 'datetime',
+        'kepala_seksi_tanggal_keputusan' => 'datetime',
+        'kanit_kepegawaian_tanggal_keputusan' => 'datetime',
+        'kasubag_tu_tanggal_keputusan' => 'datetime',
     ];
 
     public function user()

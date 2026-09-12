@@ -106,8 +106,8 @@
     // --- Masa kerja (Tahun & Bulan) ---
     $masaKerja = '-';
     if ($pengajuanCuti->user->tanggal_masuk) {
-        $tglMasuk = is_string($pengajuanCuti->user->tanggal_masuk) 
-            ? \Carbon\Carbon::parse($pengajuanCuti->user->tanggal_masuk) 
+        $tglMasuk = is_string($pengajuanCuti->user->tanggal_masuk)
+            ? \Carbon\Carbon::parse($pengajuanCuti->user->tanggal_masuk)
             : $pengajuanCuti->user->tanggal_masuk;
         $diffMasaKerja = $tglMasuk->diff(now());
         $masaKerja = $diffMasaKerja->y . ' Tahun ' . $diffMasaKerja->m . ' Bulan';
@@ -142,13 +142,13 @@
     $kasubagApproved = strtolower($pengajuanCuti->keputusan_kasubag ?? '') === 'disetujui';
     $kasubagRejected = !empty($pengajuanCuti->keputusan_kasubag) && !in_array(strtolower($pengajuanCuti->keputusan_kasubag), ['disetujui', 'dilewati']);
 
-    $pejabatApproved = strtolower($pengajuanCuti->keputusan_pejabat ?? '') === 'disetujui';
-    $pejabatRejected = !empty($pengajuanCuti->keputusan_pejabat) && !in_array(strtolower($pengajuanCuti->keputusan_pejabat), ['disetujui', 'dilewati']);
+    $pejabatApproved = strtolower($pengajuanCuti->blangkoCuti?->status ?? '') === 'disetujui';
+    $pejabatRejected = strtolower($pengajuanCuti->blangkoCuti?->status ?? '') === 'ditolak';
 
     // --- Operasional flow: Kepala Unit, Kepala Seksi, Kanit Kepegawaian, Kasubag TU ---
     $isOperasional = ($pengajuanCuti->tipe_aliran ?? 'administrasi') === 'operasional';
 
-    $formatBox = function ($keputusan, $approver, $alasan, $canSign = true, $showRejectedReason = false) {
+    $formatBox = function ($keputusan, $approver, $alasan, $canSign = true, $showRejectedReason = false, $snapshot = []) {
         $kep = strtolower($keputusan ?? '');
         if ($kep === '' || $kep === 'dilewati') {
             return '';
@@ -158,16 +158,25 @@
 
         $out = '';
         $sig = $canSign && $approver ? getSignatureBase64($approver->signature_path) : null;
+
+        $nama = $snapshot['nama'] ?? $approver?->nama;
+        $nip = $snapshot['nip'] ?? $approver?->nip;
+        $pangkat = $snapshot['pangkat'] ?? $approver?->pangkat_gol ?? '-';
+
         if ($sig) {
             $out .= "<img src=\"{$sig}\" class=\"signature-img\"><br>";
-        } elseif ($approver) {
+        } elseif ($nama) {
             $out .= '<br><br>';
         }
-        if ($approver) {
-            $out .= "<u>{$approver->nama}</u><br>";
-            $out .= 'NIP. ' . $approver->nip . '<br>';
-            $out .= '<span style="font-size: 9pt;">' . ($approver->pangkat_gol ?? '-') . '</span>';
+
+        if ($nama) {
+            $out .= "<u>{$nama}</u><br>";
+            $out .= 'NIP. ' . $nip . '<br>';
+            $out .= '<span style="font-size: 9pt;">' . $pangkat . '</span>';
+        } elseif (!$approver) {
+            $out .= "V<br>{$alasan}";
         }
+
         if ($rejected && $showRejectedReason && $alasan) {
             $out .= '<br><i>(' . $alasan . ')</i>';
         }
@@ -333,14 +342,14 @@
     <tr>
         <td colspan="2" class="tc tall-box">
             @if($kanitApproved)
-                @if($pengajuanCuti->kanit)
+                @if($pengajuanCuti->kanit || $pengajuanCuti->kanit_nama)
                     @if($sig = getSignatureBase64($pengajuanCuti->kanit->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
-                    <u>{{ $pengajuanCuti->kanit->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kanit->nip }}<br>
+                    <u>{{ $pengajuanCuti->kanit_nama ?? $pengajuanCuti->kanit?->nama }}</u><br>
+                    NIP. {{ $pengajuanCuti->kanit_nip ?? $pengajuanCuti->kanit?->nip }}<br>
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kanit }}
                 @endif
@@ -348,14 +357,14 @@
         </td>
         <td colspan="2" class="tc tall-box">
             @if($kasubagApproved)
-                @if($pengajuanCuti->kasubag)
+                @if($pengajuanCuti->kasubag || $pengajuanCuti->kasubag_nama)
                     @if($sig = getSignatureBase64($pengajuanCuti->kasubag->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
-                    <u>{{ $pengajuanCuti->kasubag->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kasubag->nip }}<br>
+                    <u>{{ $pengajuanCuti->kasubag_nama ?? $pengajuanCuti->kasubag?->nama }}</u><br>
+                    NIP. {{ $pengajuanCuti->kasubag_nip ?? $pengajuanCuti->kasubag?->nip }}<br>
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kasubag }}
                 @endif
@@ -363,14 +372,14 @@
         </td>
         <td colspan="2" class="tc tall-box">
             @if($kanitRejected)
-                @if($pengajuanCuti->kanit)
+                @if($pengajuanCuti->kanit || $pengajuanCuti->kanit_nama)
                     @if($sig = getSignatureBase64($pengajuanCuti->kanit->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
-                    <u>{{ $pengajuanCuti->kanit->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kanit->nip }}<br>
+                    <u>{{ $pengajuanCuti->kanit_nama ?? $pengajuanCuti->kanit?->nama }}</u><br>
+                    NIP. {{ $pengajuanCuti->kanit_nip ?? $pengajuanCuti->kanit?->nip }}<br>
                     <i>({{ $pengajuanCuti->alasan_kanit }})</i>
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kanit }}
@@ -379,14 +388,14 @@
         </td>
         <td class="tc tall-box">
             @if($kasubagRejected)
-                @if($pengajuanCuti->kasubag)
+                @if($pengajuanCuti->kasubag || $pengajuanCuti->kasubag_nama)
                     @if($sig = getSignatureBase64($pengajuanCuti->kasubag->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
-                    <u>{{ $pengajuanCuti->kasubag->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->kasubag->nip }}<br>
+                    <u>{{ $pengajuanCuti->kasubag_nama ?? $pengajuanCuti->kasubag?->nama }}</u><br>
+                    NIP. {{ $pengajuanCuti->kasubag_nip ?? $pengajuanCuti->kasubag?->nip }}<br>
                     <i>({{ $pengajuanCuti->alasan_kasubag }})</i>
                 @else
                     V<br>{{ $pengajuanCuti->alasan_kasubag }}
@@ -404,33 +413,33 @@
     <tr>
         <td colspan="4" class="tc tall-box">
             @if($pejabatApproved)
-                @if($pengajuanCuti->pejabat)
-                    @if($sig = getSignatureBase64($pengajuanCuti->pejabat->signature_path))
+                @if($pengajuanCuti->blangkoCuti?->kabandara || $pengajuanCuti->blangkoCuti?->kabandara_nama)
+                    @if($sig = getSignatureBase64($pengajuanCuti->blangkoCuti?->kabandara?->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
-                    <u>{{ $pengajuanCuti->pejabat->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->pejabat->nip }}<br>
+                    <u>{{ $pengajuanCuti->blangkoCuti?->kabandara_nama ?? $pengajuanCuti->blangkoCuti?->kabandara?->nama }}</u><br>
+                    NIP. {{ $pengajuanCuti->blangkoCuti?->kabandara_nip ?? $pengajuanCuti->blangkoCuti?->kabandara?->nip }}<br>
                 @else
-                    V<br>{{ $pengajuanCuti->alasan_pejabat }}
+                    V<br>{{ $pengajuanCuti->blangkoCuti?->alasan }}
                 @endif
             @endif
         </td>
         <td colspan="3" class="tc tall-box">
             @if($pejabatRejected)
-                @if($pengajuanCuti->pejabat)
-                    @if($sig = getSignatureBase64($pengajuanCuti->pejabat->signature_path))
+                @if($pengajuanCuti->blangkoCuti?->kabandara || $pengajuanCuti->blangkoCuti?->kabandara_nama)
+                    @if($sig = getSignatureBase64($pengajuanCuti->blangkoCuti?->kabandara?->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
                     @endif
-                    <u>{{ $pengajuanCuti->pejabat->nama }}</u><br>
-                    NIP. {{ $pengajuanCuti->pejabat->nip }}<br>
-                    Pangkat/Gol. {{ $pengajuanCuti->pejabat->pangkat_gol ?? '-' }}<br>
-                    <i>({{ $pengajuanCuti->alasan_pejabat }})</i>
+                    <u>{{ $pengajuanCuti->blangkoCuti?->kabandara_nama ?? $pengajuanCuti->blangkoCuti?->kabandara?->nama }}</u><br>
+                    NIP. {{ $pengajuanCuti->blangkoCuti?->kabandara_nip ?? $pengajuanCuti->blangkoCuti?->kabandara?->nip }}<br>
+                    Pangkat/Gol. {{ $pengajuanCuti->blangkoCuti?->kabandara_pangkat ?? $pengajuanCuti->blangkoCuti?->kabandara?->pangkat_gol ?? '-' }}<br>
+                    <i>({{ $pengajuanCuti->blangkoCuti?->alasan }})</i>
                 @else
-                    V<br>{{ $pengajuanCuti->alasan_pejabat }}
+                    V<br>{{ $pengajuanCuti->blangkoCuti?->alasan }}
                 @endif
             @endif
         </td>
@@ -452,10 +461,10 @@
                     <td class="persetujuan-title">KASUBAG TU</td>
                 </tr>
                 <tr>
-                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kepala_unit, $pengajuanCuti->kepalaUnit, $pengajuanCuti->alasan_kepala_unit, false, true) !!}</td>
-                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kepala_seksi, $pengajuanCuti->kepalaSeksi, $pengajuanCuti->alasan_kepala_seksi, false, true) !!}</td>
-                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kanit_kepegawaian, $pengajuanCuti->kanitKepegawaian, $pengajuanCuti->alasan_kanit_kepegawaian, true, true) !!}</td>
-                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kasubag_tu, $pengajuanCuti->kasubagTu, $pengajuanCuti->alasan_kasubag_tu, true, true) !!}</td>
+                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kepala_unit, $pengajuanCuti->kepalaUnit, $pengajuanCuti->alasan_kepala_unit, false, true, ['nama' => $pengajuanCuti->kepala_unit_nama, 'nip' => $pengajuanCuti->kepala_unit_nip, 'pangkat' => $pengajuanCuti->kepala_unit_pangkat]) !!}</td>
+                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kepala_seksi, $pengajuanCuti->kepalaSeksi, $pengajuanCuti->alasan_kepala_seksi, false, true, ['nama' => $pengajuanCuti->kepala_seksi_nama, 'nip' => $pengajuanCuti->kepala_seksi_nip, 'pangkat' => $pengajuanCuti->kepala_seksi_pangkat]) !!}</td>
+                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kanit_kepegawaian, $pengajuanCuti->kanitKepegawaian, $pengajuanCuti->alasan_kanit_kepegawaian, true, true, ['nama' => $pengajuanCuti->kanit_kepegawaian_nama, 'nip' => $pengajuanCuti->kanit_kepegawaian_nip, 'pangkat' => $pengajuanCuti->kanit_kepegawaian_pangkat]) !!}</td>
+                    <td class="approval-cell">{!! $formatBox($pengajuanCuti->keputusan_kasubag_tu, $pengajuanCuti->kasubagTu, $pengajuanCuti->alasan_kasubag_tu, true, true, ['nama' => $pengajuanCuti->kasubag_tu_nama, 'nip' => $pengajuanCuti->kasubag_tu_nip, 'pangkat' => $pengajuanCuti->kasubag_tu_pangkat]) !!}</td>
                 </tr>
             </table>
         </td>

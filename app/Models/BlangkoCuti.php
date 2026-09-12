@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Observers\BlangkoCutiObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 
+#[ObservedBy(BlangkoCutiObserver::class)]
 class BlangkoCuti extends Model
 {
     use HasUlids;

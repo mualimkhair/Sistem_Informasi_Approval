@@ -184,8 +184,46 @@ class PengajuanCutiObserver
 
         $isResubmitUpdate = false;
 
+        // Snapshot Approver Identity on decision
+        $keputusanFields = [
+            'keputusan_kepala_unit' => 'kepala_unit',
+            'keputusan_kepala_seksi' => 'kepala_seksi',
+            'keputusan_kanit_kepegawaian' => 'kanit_kepegawaian',
+            'keputusan_kasubag_tu' => 'kasubag_tu',
+            'keputusan_kanit' => 'kanit',
+            'keputusan_kasubag' => 'kasubag',
+        ];
+
+        foreach ($keputusanFields as $field => $prefix) {
+            if ($pengajuanCuti->isDirty($field)) {
+                $newVal = $pengajuanCuti->{$field};
+                // Capture if not dilewati or null, and only if snapshot is not already taken
+                // Note: The statuses in database are generally disetujui, ditolak_*, or perubahan
+                // We capture snapshot whenever a decision is made.
+                if ($newVal && $newVal !== 'dilewati') {
+                    if (is_null($pengajuanCuti->{"{$prefix}_nama"}) && auth()->check()) {
+                        $user = auth()->user();
+                        $pengajuanCuti->{"{$prefix}_nama"} = $user->nama;
+                        $pengajuanCuti->{"{$prefix}_nip"} = $user->nip;
+                        $pengajuanCuti->{"{$prefix}_pangkat"} = $user->pangkat_gol;
+                        $pengajuanCuti->{"{$prefix}_jabatan"} = $user->jabatan;
+                        $pengajuanCuti->{"{$prefix}_tanggal_keputusan"} = now();
+                    }
+                }
+            }
+        }
+
         if (($isOwner || $isAdmin) && in_array($oldStatus, ['perubahan', 'ditangguhkan']) && $resubmitPossible) {
             $isResubmitUpdate = true;
+            // Reset snapshots if resubmitting
+            foreach ($keputusanFields as $prefix) {
+                $pengajuanCuti->{"{$prefix}_nama"} = null;
+                $pengajuanCuti->{"{$prefix}_nip"} = null;
+                $pengajuanCuti->{"{$prefix}_pangkat"} = null;
+                $pengajuanCuti->{"{$prefix}_jabatan"} = null;
+                $pengajuanCuti->{"{$prefix}_tanggal_keputusan"} = null;
+            }
+
             if ($isOperasional) {
                 $this->resetOperasionalForResubmit($pengajuanCuti);
             } else {
