@@ -27,7 +27,7 @@ class PengajuanCutiFormTest extends TestCase
     private function createUser($role) {
         $user = User::create([
             'nama' => 'Test User ' . $role,
-            'nip' => '12345678901234567' . rand(0,9),
+            'nip' => substr(uniqid('123'), 0, 18),
             'password' => bcrypt('password')
         ]);
         $user->assignRole($role);

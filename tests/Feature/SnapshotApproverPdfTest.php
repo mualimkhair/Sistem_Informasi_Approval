@@ -313,8 +313,7 @@ class SnapshotApproverPdfTest extends TestCase
             // no snapshot fields set
         ])->fresh();
         
-        BlangkoCuti::create([
-            'pengajuan_cuti_id' => $pengajuan->id,
+        BlangkoCuti::where('pengajuan_cuti_id', $pengajuan->id)->firstOrFail()->update([
             'status' => 'disetujui',
             'kabandara_id' => $this->pejabat->id,
             // no snapshot fields set
