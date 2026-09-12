@@ -3,7 +3,6 @@
 namespace App\Providers\Filament;
 
 use Filament\Http\Middleware\Authenticate;
-use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
@@ -60,19 +59,25 @@ class AdminPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
-                AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 PreventRequestForgery::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\ReferrerPolicyNoReferrer::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
+                \App\Http\Middleware\TabContextMiddleware::class,
+                \App\Http\Middleware\TabAuthMiddleware::class,
                 \App\Http\Middleware\EnforceProfileCompletion::class,
             ])
+            ->authGuard('tab')
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
-            ->globalSearch(false);
+            ->globalSearch(false)
+            ->renderHook(
+                \Filament\View\PanelsRenderHook::SCRIPTS_AFTER,
+                fn () => view('components.tab-session-script')
+            );
     }
 }

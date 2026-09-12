@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,5 +26,10 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\User::observe(\App\Observers\UserObserver::class);
 
         Gate::policy(\App\Models\PengajuanCuti::class, \App\Policies\PengajuanCutiPolicy::class);
+
+        Auth::extend('tab', function ($app, $name, array $config) {
+            $provider = $app['auth']->createUserProvider($config['provider'] ?? null);
+            return new \App\Auth\TabGuard($provider);
+        });
     }
 }

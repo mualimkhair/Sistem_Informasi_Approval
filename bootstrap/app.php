@@ -13,6 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(fn () => route('filament.admin.auth.login'));
+        $middleware->web(append: [
+            \App\Http\Middleware\TabContextMiddleware::class,
+            \App\Http\Middleware\ReferrerPolicyNoReferrer::class,
+            \App\Http\Middleware\SanitizeTokenLogs::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -37,18 +37,21 @@ class PengajuanCutiFormTest extends TestCase
     public function test_pegawai_edit_tanpa_ubah_tanggal_lulus()
     {
         $pegawai = $this->createUser('pegawai');
-        $this->actingAs($pegawai);
+        $this->actingAsTab($pegawai);
 
-        $yesterday = Carbon::yesterday()->format('Y-m-d');
-        $today = Carbon::today()->format('Y-m-d');
+        $workday = Carbon::today();
+        while ($workday->isWeekend()) {
+            $workday->subDay();
+        }
+        $workday = $workday->format('Y-m-d');
 
         $record = PengajuanCuti::create([
             'user_id' => $pegawai->id,
             'jenis_cuti' => 'tahunan',
             'alasan_cuti' => 'Test',
-            'tanggal_mulai' => $yesterday,
-            'tanggal_selesai' => $today,
-            'lama_cuti' => 2,
+            'tanggal_mulai' => $workday,
+            'tanggal_selesai' => $workday,
+            'lama_cuti' => 1,
             'status' => 'perubahan',
             'alamat_selama_cuti' => 'Test',
             'nomor_telp' => '123'
@@ -56,7 +59,7 @@ class PengajuanCutiFormTest extends TestCase
 
         $component = Livewire::test(EditPengajuanCuti::class, ['record' => $record->getKey()])
             ->fillForm([
-                'tanggal_mulai' => $yesterday, // tidak diubah
+                'tanggal_mulai' => $workday, // tidak diubah
                 'alasan_cuti' => 'Alasan baru' // diubah
             ])
             ->call('save');
@@ -67,7 +70,7 @@ class PengajuanCutiFormTest extends TestCase
     public function test_pegawai_edit_ubah_tanggal_ke_masa_lalu_ditolak()
     {
         $pegawai = $this->createUser('pegawai');
-        $this->actingAs($pegawai);
+        $this->actingAsTab($pegawai);
 
         $yesterday = Carbon::yesterday()->format('Y-m-d');
         $today = Carbon::today()->format('Y-m-d');
@@ -97,17 +100,20 @@ class PengajuanCutiFormTest extends TestCase
     {
         $admin = $this->createUser('admin');
         $pegawai = $this->createUser('pegawai');
-        $this->actingAs($admin);
+        $this->actingAsTab($admin);
 
-        $today = Carbon::today()->format('Y-m-d');
-        $pastWeek = Carbon::today()->subDays(7)->format('Y-m-d');
+        $today = Carbon::today();
+        while ($today->isWeekend()) {
+            $today->addDay();
+        }
+        $pastWeek = $today->copy()->subWeek();
 
         $record = PengajuanCuti::create([
             'user_id' => $pegawai->id,
             'jenis_cuti' => 'tahunan',
             'alasan_cuti' => 'Test',
-            'tanggal_mulai' => $today,
-            'tanggal_selesai' => $today,
+            'tanggal_mulai' => $today->format('Y-m-d'),
+            'tanggal_selesai' => $today->format('Y-m-d'),
             'lama_cuti' => 1,
             'status' => 'disetujui',
             'alamat_selama_cuti' => 'Test',
@@ -116,7 +122,7 @@ class PengajuanCutiFormTest extends TestCase
 
         Livewire::test(EditPengajuanCuti::class, ['record' => $record->getKey()])
             ->fillForm([
-                'tanggal_mulai' => $pastWeek, // Admin memundurkan tanggal mulai
+                'tanggal_mulai' => $pastWeek->format('Y-m-d'), // Admin memundurkan tanggal mulai
             ])
             ->call('save')
             ->assertHasNoFormErrors(['tanggal_mulai']);
@@ -125,7 +131,7 @@ class PengajuanCutiFormTest extends TestCase
     public function test_kanit_edit_diri_sendiri_dianggap_pegawai()
     {
         $kanit = $this->createUser('kanit');
-        $this->actingAs($kanit);
+        $this->actingAsTab($kanit);
 
         $yesterday = Carbon::yesterday()->format('Y-m-d');
         $today = Carbon::today()->format('Y-m-d');

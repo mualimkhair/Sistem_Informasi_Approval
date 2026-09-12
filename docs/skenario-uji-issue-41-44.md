@@ -94,18 +94,25 @@ $p?->user?->saldoCuti?->only(['saldo_n','saldo_n1','saldo_n2']);          // sal
 ```
 Kolom ledger: `aksi` = `hold | release | potong | koreksi`.
 
-### 1.4 Uji multi-user (3 window/akun sekaligus)
-Simulasi nyata memakai **3 browser/window terpisah** pada alur yang sama:
+### 1.4 Uji multi-user (3 tab/akun sekaligus)
+Simulasi nyata memakai **3 tab browser** pada alur yang sama — setiap tab memiliki
+session login independen berkat **Tab Context Token** (`?ctx=<token>`).
 
-- **Window A — Pegawai/Koordinator** (pemohon): mis. **Muhajir** (`197204211997031003`, Keuangan) sebagai pemohon.
-- **Window B — Kanit/Kasi/Kasubag** (Atasan Langsung / approver): mis. **Hastuty** (`197504211999032001`, Kasubag Keuangan & TU).
-- **Window C — Pejabat Berwenang**: **Prasetiyohadi** (`197804042002121003`).
+> Setelah login di suatu tab, token otomatis disimpan di `sessionStorage` dan
+> ditambahkan ke semua link/Fetch/XHR via client script. **Buka tab baru** → login
+> dengan akun berbeda → tab lama tetap pakai user sebelumnya. Tidak perlu
+> private browser/profil terpisah.
 
-> ⚠️ **Tab di browser/session yang sama berbagi session login** — jika Window A login
-> lalu Window B dibuka di tab lain browser yang sama, keduanya akan jadi pemohon yang
-> sama. **Wajib** memakai **jendela profil/private terpisah** (Window A = browser normal,
-> Window C = private window, Window B = profil berbeda) agar session tidak tertukar.
-> Tidak ada mekanisme session-isolation per-tab di aplikasi ini.
+- **Tab A — Pegawai/Koordinator** (pemohon): mis. **Muhajir** (`197204211997031003`, Keuangan) sebagai pemohon.
+- **Tab B — Kanit/Kasi/Kasubag** (Atasan Langsung / approver): mis. **Hastuty** (`197504211999032001`, Kasubag Keuangan & TU).
+- **Tab C — Pejabat Berwenang**: **Prasetiyohadi** (`197804042002121003`).
+
+Cara uji:
+1. Buka **Tab A** → login sebagai **Muhajir**.
+2. Buka **Tab B** (tab baru, bukan duplikat tab A) → login sebagai **Hastuty**.
+3. Buka **Tab C** (tab baru) → login sebagai **Prasetiyohadi**.
+4. Verifikasi: refresh Tab A → tetap login sebagai **Muhajir**. Refresh Tab C → tetap **Prasetiyohadi**.
+5. Logout di Tab C → Tab A dan Tab B **tidak terpengaruh**.
 
 Alur contoh (Window A → B, tanpa melibatkan Pejabat): ajukan di A → status `menunggu_atasan`
 → B melihat di menu **Persetujuan Cuti** → B **Disetujui** → status final **Disetujui**
@@ -114,10 +121,10 @@ task di Persetujuan Cuti; dashboard tetap menampilkan statistik "Pegawai Sedang 
 
 ### 1.5 Uji otomatis (PHPUnit)
 Bagian otorisasi/isolasi sudah dicakup otomatis (login, redirect guest, kelengkapan profil,
-scope approver, pemisahan unit, pejabat tidak bisa membuat pengajuan):
+scope approver, pemisahan unit, pejabat tidak bisa membuat pengajuan, **tab context isolation**):
 
 ```bash
-docker exec laravel-cuti-app php artisan test         # ≥ 47 test hijau
+docker exec laravel-cuti-app php artisan test         # ≥ 75 test hijau
 ```
 
 ---

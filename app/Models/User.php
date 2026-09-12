@@ -15,6 +15,8 @@ class User extends Authenticatable implements FilamentUser, HasName
 {
     use HasFactory, Notifiable, HasRoles;
 
+    protected string $guard_name = 'web';
+
     public function getFilamentName(): string
     {
         return $this->nama ?? '';
@@ -54,7 +56,7 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->roles()->exists();
     }
 
     public function unitKerja()

@@ -3,12 +3,15 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\TabLogoutController;
 
 // Route::get('/', function () {
 //     return view('welcome');
 // });
 
-Route::middleware(['auth'])->group(function () {
+Route::get('/auth/logout', [TabLogoutController::class, 'logout'])->name('filament.admin.auth.logout');
+
+Route::middleware([\App\Http\Middleware\TabContextMiddleware::class])->group(function () {
     Route::get('/pengajuan-cuti/{pengajuanCuti}/pdf', [PdfController::class, 'cetak'])->name('pengajuan-cuti.pdf');
     Route::get('/pengajuan-cuti/{pengajuanCuti}/surat-izin', [PdfController::class, 'cetakSuratIzinCuti'])->name('cetak-surat-izin-cuti');
     Route::get('/pengajuan-cuti/{pengajuanCuti}/blangko', [PdfController::class, 'cetakBlangko'])->name('cetak-blangko');

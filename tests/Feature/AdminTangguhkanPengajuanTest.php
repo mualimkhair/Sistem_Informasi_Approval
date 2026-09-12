@@ -308,7 +308,7 @@ class AdminTangguhkanPengajuanTest extends TestCase
     public function test_admin_sees_tangguhkan_action_on_disetujui_record(): void
     {
         $pengajuan = $this->approvedPengajuan();
-        $this->actingAs($this->admin);
+        $this->actingAsTab($this->admin);
 
         Livewire::test(ListPengajuanCutis::class)
             ->assertTableActionVisible('tangguhkan', $pengajuan);
@@ -317,7 +317,7 @@ class AdminTangguhkanPengajuanTest extends TestCase
     public function test_pegawai_does_not_see_tangguhkan_action(): void
     {
         $pengajuan = $this->approvedPengajuan();
-        $this->actingAs($this->pegawai);
+        $this->actingAsTab($this->pegawai);
 
         Livewire::test(ListPengajuanCutis::class)
             ->assertTableActionHidden('tangguhkan', $pengajuan);
