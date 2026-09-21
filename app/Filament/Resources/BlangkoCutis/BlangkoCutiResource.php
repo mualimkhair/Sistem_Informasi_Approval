@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Enums\FiltersLayout;
 
@@ -192,7 +193,7 @@ class BlangkoCutiResource extends Resource
                     ->label('Cetak PDF')
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('primary')
-                    ->visible(fn ($record) => in_array($record->status, ['disetujui', 'ditolak']) || auth()->user()->hasRole(['super_admin', 'admin']))
+                    ->visible(fn ($record) => in_array($record->status, ['menunggu', 'disetujui', 'ditolak']) || auth()->user()->hasRole(['super_admin', 'admin']))
                     ->modalHeading('DOKUMEN CUTI')
                     ->modalSubmitAction(false)
                     ->modalCancelAction(fn ($action) => $action->label('Tutup'))
@@ -220,8 +221,9 @@ class BlangkoCutiResource extends Resource
 
                         if ($blangko && $blangko->file_blangko_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_blangko_path)) {
                             $urlBlangko = route('cetak-blangko', $pengajuan->id);
+                            $blangkoTitle = $blangko->status === 'menunggu' ? 'Blangko Cuti (Pra-Kabandara)' : 'Blangko Cuti Final';
                             $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                                <h4 class="font-bold text-lg mb-1">Blangko Cuti Final</h4>
+                                <h4 class="font-bold text-lg mb-1">' . $blangkoTitle . '</h4>
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Formulir Permintaan dan Pemberian Cuti</p>
                                 <div class="flex gap-2">
                                     <a href="'.$urlBlangko.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">
@@ -262,6 +264,13 @@ class BlangkoCutiResource extends Resource
                     }),
             ])
             ->filters([
+                SelectFilter::make('status')
+                    ->label('Status Blangko')
+                    ->options([
+                        'menunggu' => 'Menunggu',
+                        'disetujui' => 'Disetujui',
+                        'ditolak' => 'Ditolak',
+                    ]),
                 Filter::make('tanggal')
                     ->form([
                         DatePicker::make('dari')->label('Dari Tanggal'),

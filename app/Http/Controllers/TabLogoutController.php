@@ -16,8 +16,6 @@ class TabLogoutController
             TabContext::where('token_hash', $hash)->delete();
         }
 
-        session()->forget('tab_login_token');
-
         return redirect()->route('filament.admin.auth.login');
     }
 }

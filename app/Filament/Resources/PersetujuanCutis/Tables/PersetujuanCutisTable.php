@@ -9,6 +9,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
@@ -46,38 +47,30 @@ class PersetujuanCutisTable
                 TextColumn::make('lama_cuti')->label('Lama (Hari)')->sortable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->label('Status')
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->getStateUsing(fn ($record) => $record->final_business_status)
+                    ->badge()
+                    ->sortable()
+                    ->color(fn ($record): string => $record->final_business_status_color),
+            ])
+            ->filters([
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
                         'menunggu_atasan' => 'Menunggu Atasan',
-                        'disetujui' => 'Disetujui',
-                        'ditolak_kanit' => 'Ditolak Kanit',
-                        'ditolak_kasubag' => 'Ditolak Kasubag',
                         'menunggu_kepala_unit' => 'Menunggu Kepala Unit',
                         'menunggu_kepala_seksi' => 'Menunggu Kepala Seksi',
                         'menunggu_kanit_kepegawaian' => 'Menunggu Kanit Kepegawaian',
                         'menunggu_kasubag_tu' => 'Menunggu Kasubag TU',
+                        'disetujui' => 'Disetujui',
+                        'ditolak_kanit' => 'Ditolak Kanit',
+                        'ditolak_kasubag' => 'Ditolak Kasubag',
                         'ditolak_kepala_unit' => 'Ditolak Kepala Unit',
                         'ditolak_kepala_seksi' => 'Ditolak Kepala Seksi',
                         'ditolak_kanit_kepegawaian' => 'Ditolak Kanit Kepegawaian',
                         'ditolak_kasubag_tu' => 'Ditolak Kasubag TU',
                         'perubahan' => 'Perlu Perubahan',
                         'ditangguhkan' => 'Ditangguhkan',
-                        default => ucwords(str_replace('_', ' ', $state)),
-                    })
-                    ->badge()
-                    ->sortable()
-                    ->color(fn (string $state): string => match ($state) {
-                        'menunggu_atasan',
-                        'menunggu_kepala_unit', 'menunggu_kepala_seksi',
-                        'menunggu_kanit_kepegawaian', 'menunggu_kasubag_tu' => 'warning',
-                        'disetujui' => 'success',
-                        'ditolak_kanit', 'ditolak_kasubag',
-                        'ditolak_kepala_unit', 'ditolak_kepala_seksi',
-                        'ditolak_kanit_kepegawaian', 'ditolak_kasubag_tu' => 'danger',
-                        'ditangguhkan', 'perubahan' => 'gray',
-                        default => 'gray',
-                    }),
-            ])
-            ->filters([
+                    ]),
                 Filter::make('tanggal')
                     ->form([
                         DatePicker::make('dari')->label('Dari Tanggal'),
@@ -414,7 +407,7 @@ class PersetujuanCutisTable
                 Action::make('cetak_pdf')
                     ->label('Cetak PDF')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->visible(fn ($record) => ($record->blangkoCuti && in_array($record->blangkoCuti->status, ['disetujui', 'ditolak'])) || auth()->user()->hasRole(['super_admin', 'admin']))
+                    ->visible(fn ($record) => ($record->blangkoCuti && in_array($record->blangkoCuti->status, ['menunggu', 'disetujui', 'ditolak'])) || auth()->user()->hasRole(['super_admin', 'admin']))
                     ->modalHeading('DOKUMEN CUTI')
                     ->modalSubmitAction(false)
                     ->modalCancelAction(fn ($action) => $action->label('Tutup'))
@@ -441,8 +434,9 @@ class PersetujuanCutisTable
                         
                         if ($blangko && $blangko->file_blangko_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_blangko_path)) {
                             $urlBlangko = route('cetak-blangko', $record);
+                            $blangkoTitle = $blangko->status === 'menunggu' ? 'Blangko Cuti (Pra-Kabandara)' : 'Blangko Cuti Final';
                             $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                                <h4 class="font-bold text-lg mb-1">Blangko Cuti Final</h4>
+                                <h4 class="font-bold text-lg mb-1">' . $blangkoTitle . '</h4>
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Formulir Permintaan dan Pemberian Cuti</p>
                                 <div class="flex gap-2">
                                     <a href="'.$urlBlangko.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">

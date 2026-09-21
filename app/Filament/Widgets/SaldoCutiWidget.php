@@ -10,8 +10,8 @@ class SaldoCutiWidget extends BaseWidget
 {
     protected function getStats(): array
     {
-        $saldo = Auth::user()->fresh()->saldoCuti;
-        $user = Auth::user();
+        $saldo = auth()->user()->fresh()->saldoCuti;
+        $user = auth()->user();
         
         if (!$saldo) return [];
 

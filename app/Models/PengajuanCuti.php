@@ -64,6 +64,72 @@ class PengajuanCuti extends Model
         return $this->tipe_aliran === 'operasional';
     }
 
+    public function getFinalBusinessStatusAttribute(): string
+    {
+        if ($this->status !== 'disetujui') {
+            return match ($this->status) {
+                'menunggu_atasan' => 'Menunggu Atasan',
+                'ditolak_kanit' => 'Ditolak Kanit',
+                'ditolak_kasubag' => 'Ditolak Kasubag',
+                'menunggu_kepala_unit' => 'Menunggu Kepala Unit',
+                'menunggu_kepala_seksi' => 'Menunggu Kepala Seksi',
+                'menunggu_kanit_kepegawaian' => 'Menunggu Kanit Kepegawaian',
+                'menunggu_kasubag_tu' => 'Menunggu Kasubag TU',
+                'ditolak_kepala_unit' => 'Ditolak Kepala Unit',
+                'ditolak_kepala_seksi' => 'Ditolak Kepala Seksi',
+                'ditolak_kanit_kepegawaian' => 'Ditolak Kanit Kepegawaian',
+                'ditolak_kasubag_tu' => 'Ditolak Kasubag TU',
+                'perubahan' => 'Perlu Perubahan',
+                'ditangguhkan' => 'Ditangguhkan',
+                default => ucwords(str_replace('_', ' ', $this->status)),
+            };
+        }
+
+        $blangko = $this->blangkoCuti;
+        
+        if (!$blangko || $blangko->status === 'menunggu') {
+            return 'Disetujui Kasubag TU';
+        }
+
+        if ($blangko->status === 'disetujui') {
+            return 'Disetujui Kabandara';
+        }
+
+        if ($blangko->status === 'ditolak') {
+            return 'Ditolak Kabandara';
+        }
+
+        return 'Disetujui Kasubag TU';
+    }
+
+    public function getFinalBusinessStatusColorAttribute(): string
+    {
+        if ($this->status !== 'disetujui') {
+            return match ($this->status) {
+                'menunggu_atasan', 'menunggu_kepala_unit', 'menunggu_kepala_seksi', 'menunggu_kanit_kepegawaian', 'menunggu_kasubag_tu' => 'warning',
+                'ditolak_kanit', 'ditolak_kasubag', 'ditolak_kepala_unit', 'ditolak_kepala_seksi', 'ditolak_kanit_kepegawaian', 'ditolak_kasubag_tu' => 'danger',
+                'ditangguhkan', 'perubahan' => 'gray',
+                default => 'gray',
+            };
+        }
+
+        $blangko = $this->blangkoCuti;
+        
+        if (!$blangko || $blangko->status === 'menunggu') {
+            return 'warning';
+        }
+
+        if ($blangko->status === 'disetujui') {
+            return 'success';
+        }
+
+        if ($blangko->status === 'ditolak') {
+            return 'danger';
+        }
+
+        return 'success';
+    }
+
     public function getKanitAttribute()
     {
         return $this->unitKerja?->kepalaUnit;

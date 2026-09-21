@@ -158,6 +158,13 @@ class PengajuanCutiObserver
                     ->title('Pengajuan Cuti Baru')
                     ->body('Pengajuan cuti dari '.$pengajuanCuti->user->nama.' menunggu persetujuan Anda.')
                     ->info()
+                    ->actions([
+                        \Filament\Actions\Action::make('lihat')
+                            ->button()
+                            ->label('Lihat')
+                            ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index'))
+                            ->markAsRead(),
+                    ])
                     ->sendToDatabase($approver);
             }
         }
@@ -262,6 +269,13 @@ class PengajuanCutiObserver
                                 ->title('Pengajuan Cuti Diperbarui')
                                 ->body('Pengajuan cuti dari '.$pengajuanCuti->user->nama.' telah diperbarui dan menunggu persetujuan Anda.')
                                 ->info()
+                                ->actions([
+                                    \Filament\Actions\Action::make('lihat')
+                                        ->button()
+                                        ->label('Lihat')
+                                        ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index'))
+                                        ->markAsRead(),
+                                ])
                                 ->sendToDatabase($user);
                         }
                     }
@@ -290,7 +304,7 @@ class PengajuanCutiObserver
             if ($isOperasional) {
                 $this->notifyOperasionalStatusChange($pengajuanCuti);
             } else {
-                $body = 'Status pengajuan cuti Anda menjadi: '.str_replace('_', ' ', strtoupper($pengajuanCuti->status));
+                $body = 'Status pengajuan cuti Anda menjadi: '.strtoupper($pengajuanCuti->final_business_status);
 
                 if (in_array($pengajuanCuti->status, ['ditolak_kanit', 'ditolak_kasubag', 'perubahan'])) {
                     $reason = $pengajuanCuti->alasan_kasubag ?? $pengajuanCuti->alasan_kanit;
@@ -303,6 +317,13 @@ class PengajuanCutiObserver
                     ->title('Status Pengajuan Cuti Berubah')
                     ->body($body)
                     ->info()
+                    ->actions([
+                        \Filament\Actions\Action::make('lihat')
+                            ->button()
+                            ->label('Lihat')
+                            ->url(\App\Filament\Resources\PengajuanCutis\PengajuanCutiResource::getUrl('index'))
+                            ->markAsRead(),
+                    ])
                     ->sendToDatabase($pengajuanCuti->user);
             }
         }
@@ -326,6 +347,13 @@ class PengajuanCutiObserver
                     ->title('Koreksi Data Administratif')
                     ->body('Tanggal pada pengajuan cuti Anda telah disesuaikan secara administratif. Saldo Anda telah dikoreksi menyesuaikan perubahan hari cuti.')
                     ->info()
+                    ->actions([
+                        \Filament\Actions\Action::make('lihat')
+                            ->button()
+                            ->label('Lihat')
+                            ->url(\App\Filament\Resources\PengajuanCutis\PengajuanCutiResource::getUrl('index'))
+                            ->markAsRead(),
+                    ])
                     ->sendToDatabase($pengajuanCuti->user);
             }
 
@@ -406,6 +434,13 @@ class PengajuanCutiObserver
                     ->title('Blangko Cuti Baru')
                     ->body('Terdapat blangko cuti baru dari '.$pengajuanCuti->user->nama.' yang menunggu persetujuan Anda.')
                     ->warning()
+                    ->actions([
+                        \Filament\Actions\Action::make('lihat')
+                            ->button()
+                            ->label('Lihat')
+                            ->url(\App\Filament\Resources\BlangkoCutis\BlangkoCutiResource::getUrl('index'))
+                            ->markAsRead(),
+                    ])
                     ->sendToDatabase($pejabat);
             }
         }
@@ -489,6 +524,13 @@ class PengajuanCutiObserver
                 ->title('Pengajuan Cuti Baru')
                 ->body('Pengajuan cuti dari '.$pengajuanCuti->user->nama.' menunggu persetujuan Anda.')
                 ->info()
+                ->actions([
+                    \Filament\Actions\Action::make('lihat')
+                        ->button()
+                        ->label('Lihat')
+                        ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index'))
+                        ->markAsRead(),
+                ])
                 ->sendToDatabase($approver);
         }
     }
@@ -517,7 +559,7 @@ class PengajuanCutiObserver
             return;
         }
 
-        $body = 'Status pengajuan cuti Anda menjadi: '.str_replace('_', ' ', strtoupper($pengajuanCuti->status));
+        $body = 'Status pengajuan cuti Anda menjadi: '.strtoupper($pengajuanCuti->final_business_status);
 
         if (in_array($pengajuanCuti->status, [
             'ditolak_kepala_unit', 'ditolak_kepala_seksi', 'ditolak_kanit_kepegawaian', 'ditolak_kasubag_tu', 'perubahan',
@@ -535,6 +577,13 @@ class PengajuanCutiObserver
             ->title('Status Pengajuan Cuti Berubah')
             ->body($body)
             ->info()
+            ->actions([
+                \Filament\Actions\Action::make('lihat')
+                    ->button()
+                    ->label('Lihat')
+                    ->url(\App\Filament\Resources\PengajuanCutis\PengajuanCutiResource::getUrl('index'))
+                    ->markAsRead(),
+            ])
             ->sendToDatabase($pengajuanCuti->user);
     }
 
@@ -552,6 +601,13 @@ class PengajuanCutiObserver
                 ->title('Pengajuan Cuti Menunggu Anda')
                 ->body('Pengajuan cuti dari '.$pengajuanCuti->user->nama.' kini menunggu persetujuan Anda.')
                 ->info()
+                ->actions([
+                    \Filament\Actions\Action::make('lihat')
+                        ->button()
+                        ->label('Lihat')
+                        ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index'))
+                        ->markAsRead(),
+                ])
                 ->sendToDatabase($approver);
         }
     }

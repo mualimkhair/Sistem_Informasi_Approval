@@ -18,17 +18,33 @@ class StatistikCutiWidget extends BaseWidget
 
     protected function getStats(): array
     {
+        $internalSelesaiMenungguKabandara = PengajuanCuti::where('status', 'disetujui')
+            ->where(function($q) {
+                $q->doesntHave('blangkoCuti')
+                  ->orWhereHas('blangkoCuti', fn($b) => $b->where('status', 'menunggu'));
+            })->count();
+
         return [
-            Stat::make('Total Pegawai', User::count()),
-            Stat::make('Total Pengajuan Cuti', PengajuanCuti::count()),
-            Stat::make('Pengajuan Disetujui', PengajuanCuti::where('status', 'disetujui')->count())
-                ->color('success'),
-            Stat::make('Pengajuan Menunggu', PengajuanCuti::whereIn('status', [
+            Stat::make('Total Pegawai', User::role('pegawai')->count())
+                ->url(\App\Filament\Resources\Users\UserResource::getUrl('index')),
+            Stat::make('Total Pengajuan Cuti', PengajuanCuti::count())
+                ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index')),
+            Stat::make('Menunggu Persetujuan Kabandara', $internalSelesaiMenungguKabandara)
+                ->color('warning')
+                ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'disetujui']]])),
+            Stat::make('Disetujui Kabandara (Final)', PengajuanCuti::whereHas('blangkoCuti', fn($q) => $q->where('status', 'disetujui'))->count())
+                ->color('success')
+                ->url(\App\Filament\Resources\BlangkoCutis\BlangkoCutiResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'disetujui']]])),
+            Stat::make('Ditolak Kabandara', PengajuanCuti::whereHas('blangkoCuti', fn($q) => $q->where('status', 'ditolak'))->count())
+                ->color('danger')
+                ->url(\App\Filament\Resources\BlangkoCutis\BlangkoCutiResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'ditolak']]])),
+            Stat::make('Menunggu Approval Internal', PengajuanCuti::whereIn('status', [
                 'menunggu_atasan',
                 'menunggu_kepala_unit', 'menunggu_kepala_seksi',
                 'menunggu_kanit_kepegawaian', 'menunggu_kasubag_tu',
             ])->count())
-                ->color('warning'),
+                ->color('warning')
+                ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index')),
         ];
     }
 }

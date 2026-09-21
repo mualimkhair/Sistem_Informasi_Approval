@@ -23,9 +23,11 @@ class PegawaiSedangCutiWidget extends BaseWidget
         return $table
             ->query(
                 PengajuanCuti::query()
-                    ->where('status', 'disetujui')
-                    ->whereDate('tanggal_mulai', '<=', Carbon::now())
-                    ->whereDate('tanggal_selesai', '>=', Carbon::now())
+                    ->whereHas('blangkoCuti', function ($query) {
+                        $query->where('status', 'disetujui');
+                    })
+                    ->whereDate('tanggal_mulai', '<=', today())
+                    ->whereDate('tanggal_selesai', '>=', today())
             )
             ->columns([
                 Tables\Columns\TextColumn::make('user.nama')->label('Pegawai'),

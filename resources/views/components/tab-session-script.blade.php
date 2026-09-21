@@ -1,7 +1,3 @@
-@php
-    $token = session('tab_login_token');
-@endphp
-
 <script>
 (function() {
     'use strict';
@@ -93,7 +89,7 @@
 
     function patchFetch() {
         var originalFetch = window.fetch;
-        window.fetch = function(input, init) {
+        window.fetch = async function(input, init) {
             init = init || {};
             init.headers = init.headers || {};
             var token = getStoredToken();
@@ -104,7 +100,39 @@
                     init.headers[HEADER_NAME] = token;
                 }
             }
-            return originalFetch.call(this, input, init);
+            
+            var response = await originalFetch.call(this, input, init);
+            
+            var contentType = response.headers.get('content-type');
+            if (response.ok && contentType && contentType.includes('application/json')) {
+                try {
+                    var cloned = response.clone();
+                    var text = await cloned.text();
+                    var json = JSON.parse(text);
+                    var modified = false;
+                    
+                    if (json && json.components && Array.isArray(json.components)) {
+                        json.components.forEach(function(comp) {
+                            if (comp.effects && comp.effects.redirect) {
+                                comp.effects.redirect = rewriteUrl(comp.effects.redirect);
+                                modified = true;
+                            }
+                        });
+                    }
+                    
+                    if (modified) {
+                        return new Response(JSON.stringify(json), {
+                            status: response.status,
+                            statusText: response.statusText,
+                            headers: response.headers
+                        });
+                    }
+                } catch (e) {
+                    // Ignore parsing errors and fallback to original response
+                }
+            }
+            
+            return response;
         };
     }
 
@@ -112,12 +140,15 @@
         if (!window.Livewire || window.__tabContextRedirectsPatched) return;
 
         window.__tabContextRedirectsPatched = true;
-        window.Livewire.interceptRequest(function({ onRedirect }) {
-            onRedirect(function({ url, preventDefault }) {
-                preventDefault();
-                window.location.href = rewriteUrl(url);
-            });
+
+        window.Livewire.hook('request', function({ options }) {
+            var token = getStoredToken();
+            if (token) {
+                options.headers = options.headers || {};
+                options.headers[HEADER_NAME] = token;
+            }
         });
+
         window.Livewire.hook('morph.updated', function({ el }) {
             rewriteNodeLinks(el);
             addCtxToForms();
@@ -145,11 +176,6 @@
                 clearToken();
             }
         });
-    }
-
-    var initToken = @json($token);
-    if (initToken) {
-        setToken(initToken);
     }
 
     var currentToken = getToken();

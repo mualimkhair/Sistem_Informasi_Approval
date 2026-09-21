@@ -96,7 +96,7 @@ class Login extends BaseAuth
             (int) config('session.lifetime', 120)
         );
 
-        session()->put('tab_login_token', $result['token']);
+        app()->instance('tab_login_token', $result['token']);
 
         return app(TabLoginResponse::class);
     }

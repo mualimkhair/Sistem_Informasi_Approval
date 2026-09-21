@@ -49,5 +49,10 @@ class CreatePengajuanCuti extends CreateRecord
     {
         \App\Services\CutiService::holdSaldo($this->record);
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
 

@@ -9,10 +9,9 @@ class TabLoginResponse implements LoginResponseContract
 {
     public function toResponse($request)
     {
-        $token = session('tab_login_token');
+        $token = app()->has('tab_login_token') ? app('tab_login_token') : null;
 
         if ($token) {
-            session()->forget('tab_login_token');
             return redirect()->to(Filament::getUrl() . '?ctx=' . $token);
         }
 

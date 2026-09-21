@@ -12,14 +12,9 @@ class MenungguKeputusanWidget extends BaseWidget
     protected function getStats(): array
     {
         $stats = [];
-        $user = Auth::user();
+        $user = auth()->user();
 
-        $isApprover = $user->hasRole(['kanit', 'kasubag', 'pejabat_berwenang', 'kanit_kepegawaian', 'kasubag_tu']);
-        if (! $isApprover) {
-            return $stats;
-        }
-
-        // --- Administrasi flow: kanit / kasubag (approval level 1) ---
+        // 1. Administrasi flow: kanit / kasubag (approval level 1)
         if ($user->hasRole(['kanit', 'kasubag'])) {
             $query = PengajuanCuti::forApprover($user)
                 ->where('status', 'menunggu_atasan');
@@ -34,69 +29,78 @@ class MenungguKeputusanWidget extends BaseWidget
             });
 
             $menungguLevel1 = $query->count();
-
-            $stats[] = Stat::make('Menunggu Keputusan Anda', $menungguLevel1)
-                ->icon('heroicon-o-clock')
-                ->color('warning');
-
-            // --- Operasional flow: Kepala Unit (stage 1) ---
-            if ($user->hasRole('kanit')) {
-                $menungguOperasional = PengajuanCuti::where('tipe_aliran', 'operasional')
-                    ->where('status', 'menunggu_kepala_unit')
-                    ->where('kepala_unit_id', $user->id)
-                    ->where('user_id', '!=', $user->id)
-                    ->whereNull('keputusan_kepala_unit')
-                    ->count();
-                if ($menungguOperasional > 0) {
-                    $stats[] = Stat::make('Menunggu Persetujuan (Kepala Unit)', $menungguOperasional)
-                        ->icon('heroicon-o-clipboard-document')
-                        ->color('warning');
-                }
-            }
-
-            // --- Operasional flow: Kepala Seksi (stage 2) ---
-            if ($user->hasRole('kasubag')) {
-                $menungguOperasional = PengajuanCuti::where('tipe_aliran', 'operasional')
-                    ->where('status', 'menunggu_kepala_seksi')
-                    ->where('kepala_seksi_id', $user->id)
-                    ->where('user_id', '!=', $user->id)
-                    ->whereNull('keputusan_kepala_seksi')
-                    ->count();
-                if ($menungguOperasional > 0) {
-                    $stats[] = Stat::make('Menunggu Persetujuan (Kepala Seksi)', $menungguOperasional)
-                        ->icon('heroicon-o-clipboard-document')
-                        ->color('warning');
-                }
+            if ($menungguLevel1 > 0) {
+                $stats[] = Stat::make('Menunggu Keputusan Anda', $menungguLevel1)
+                    ->icon('heroicon-o-clock')
+                    ->color('warning')
+                    ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'menunggu_atasan']]]));
             }
         }
 
-        // --- Operasional flow: Kanit Kepegawaian (stage 3) ---
+        // 2. Operasional flow: Kepala Unit (stage 1)
+        $menungguKepalaUnit = PengajuanCuti::where('tipe_aliran', 'operasional')
+            ->where('status', 'menunggu_kepala_unit')
+            ->where('kepala_unit_id', $user->id)
+            ->where('user_id', '!=', $user->id)
+            ->whereNull('keputusan_kepala_unit')
+            ->count();
+        if ($menungguKepalaUnit > 0) {
+            $stats[] = Stat::make('Menunggu Persetujuan (Kepala Unit)', $menungguKepalaUnit)
+                ->icon('heroicon-o-clipboard-document')
+                ->color('warning')
+                ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'menunggu_kepala_unit']]]));
+        }
+
+        // 3. Operasional flow: Kepala Seksi (stage 2)
+        $menungguKepalaSeksi = PengajuanCuti::where('tipe_aliran', 'operasional')
+            ->where('status', 'menunggu_kepala_seksi')
+            ->where('kepala_seksi_id', $user->id)
+            ->where('user_id', '!=', $user->id)
+            ->whereNull('keputusan_kepala_seksi')
+            ->count();
+        if ($menungguKepalaSeksi > 0) {
+            $stats[] = Stat::make('Menunggu Persetujuan (Kepala Seksi)', $menungguKepalaSeksi)
+                ->icon('heroicon-o-clipboard-document')
+                ->color('warning')
+                ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'menunggu_kepala_seksi']]]));
+        }
+
+        // 4. Operasional flow: Kanit Kepegawaian (stage 3)
         if ($user->hasRole('kanit_kepegawaian')) {
             $menungguStage3 = PengajuanCuti::forApprover($user)
                 ->where('status', 'menunggu_kanit_kepegawaian')
                 ->where('user_id', '!=', $user->id)
                 ->count();
-            $stats[] = Stat::make('Menunggu Keputusan Anda', $menungguStage3)
-                ->icon('heroicon-o-clock')
-                ->color('warning');
+            if ($menungguStage3 > 0) {
+                $stats[] = Stat::make('Menunggu Persetujuan (Kanit Kepegawaian)', $menungguStage3)
+                    ->icon('heroicon-o-clock')
+                    ->color('warning')
+                    ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'menunggu_kanit_kepegawaian']]]));
+            }
         }
 
-        // --- Operasional flow: Kasubag TU (stage 4 / final) ---
+        // 5. Operasional flow: Kasubag TU (stage 4 / final)
         if ($user->hasRole('kasubag_tu')) {
             $kasubagTuFinal = PengajuanCuti::forApprover($user)
                 ->where('status', 'menunggu_kasubag_tu')
                 ->where('user_id', '!=', $user->id)
                 ->count();
-            $stats[] = Stat::make('Menunggu Keputusan Final', $kasubagTuFinal)
-                ->icon('heroicon-o-clipboard-document-check')
-                ->color('warning');
+            if ($kasubagTuFinal > 0) {
+                $stats[] = Stat::make('Menunggu Keputusan Final', $kasubagTuFinal)
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->color('warning')
+                    ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index', ['tableFilters' => ['status' => ['value' => 'menunggu_kasubag_tu']]]));
+            }
         }
 
-        // --- Sedang cuti (visible to final approvers) ---
+        // 6. Sedang cuti (visible to final approvers)
         if ($user->hasRole(['kasubag_tu', 'pejabat_berwenang'])) {
-            $sedangCuti = PengajuanCuti::where('status', 'disetujui')
-                ->where('tanggal_mulai', '<=', now())
-                ->where('tanggal_selesai', '>=', now())
+            $sedangCuti = PengajuanCuti::query()
+                ->whereHas('blangkoCuti', function ($query) {
+                    $query->where('status', 'disetujui');
+                })
+                ->whereDate('tanggal_mulai', '<=', today())
+                ->whereDate('tanggal_selesai', '>=', today())
                 ->count();
             $stats[] = Stat::make('Pegawai Sedang Cuti', $sedangCuti)
                 ->icon('heroicon-o-users')

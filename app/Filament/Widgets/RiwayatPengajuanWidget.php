@@ -17,21 +17,17 @@ class RiwayatPengajuanWidget extends BaseWidget
             ->query(
                 PengajuanCuti::where('user_id', auth()->id())->latest()->limit(5)
             )
+            ->recordUrl(
+                fn (PengajuanCuti $record): string => \App\Filament\Resources\PengajuanCutis\PengajuanCutiResource::getUrl('index')
+            )
             ->columns([
                 TextColumn::make('jenis_cuti')->label('Jenis')->badge()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('tanggal_mulai')->label('Mulai')->date(),
                 TextColumn::make('tanggal_selesai')->label('Selesai')->date(),
-                TextColumn::make('status')->badge()->color(fn (string $state): string => match ($state) {
-                    'menunggu_atasan',
-                    'menunggu_kepala_unit', 'menunggu_kepala_seksi',
-                    'menunggu_kanit_kepegawaian', 'menunggu_kasubag_tu' => 'warning',
-                    'disetujui' => 'success',
-                    'ditolak_kanit', 'ditolak_kasubag',
-                    'ditolak_kepala_unit', 'ditolak_kepala_seksi',
-                    'ditolak_kanit_kepegawaian', 'ditolak_kasubag_tu' => 'danger',
-                    'ditangguhkan', 'perubahan' => 'gray',
-                    default => 'gray',
-                }),
+                TextColumn::make('status')
+                    ->badge()
+                    ->getStateUsing(fn ($record) => $record->final_business_status)
+                    ->color(fn ($record): string => $record->final_business_status_color),
             ]);
     }
 }

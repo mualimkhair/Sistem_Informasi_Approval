@@ -23,4 +23,28 @@ class BlangkoCutiObserver
             }
         }
     }
+
+    public function updated(BlangkoCuti $blangkoCuti)
+    {
+        if ($blangkoCuti->wasChanged('status')) {
+            $status = $blangkoCuti->status;
+            if (in_array($status, ['disetujui', 'ditolak'])) {
+                $statusLabel = $status === 'disetujui' ? 'Disetujui Kabandara' : 'Ditolak Kabandara';
+                $color = $status === 'disetujui' ? 'success' : 'danger';
+                
+                \Filament\Notifications\Notification::make()
+                    ->title('Keputusan Final Kabandara')
+                    ->body("Pengajuan cuti Anda telah {$statusLabel}.")
+                    ->$color()
+                    ->actions([
+                        \Filament\Actions\Action::make('lihat')
+                            ->button()
+                            ->label('Lihat')
+                            ->url(\App\Filament\Resources\PengajuanCutis\PengajuanCutiResource::getUrl('index'))
+                            ->markAsRead(),
+                    ])
+                    ->sendToDatabase($blangkoCuti->pengajuanCuti->user);
+            }
+        }
+    }
 }
