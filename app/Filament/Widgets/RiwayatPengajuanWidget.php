@@ -14,6 +14,7 @@ class RiwayatPengajuanWidget extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
+            ->poll('10s')
             ->query(
                 PengajuanCuti::where('user_id', auth()->id())->latest()->limit(5)
             )

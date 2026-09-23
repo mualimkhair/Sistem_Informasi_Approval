@@ -8,6 +8,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class MenungguKabandaraWidget extends BaseWidget
 {
+    protected ?string $pollingInterval = '10s';
     protected static ?int $sort = 3;
 
     public static function canView(): bool

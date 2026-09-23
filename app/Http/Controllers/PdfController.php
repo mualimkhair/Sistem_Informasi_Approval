@@ -53,6 +53,11 @@ class PdfController extends Controller
         }
 
         $blangko = $pengajuanCuti->blangkoCuti;
+
+        if ($pengajuanCuti->status === 'ditangguhkan') {
+            abort(403, 'Surat Izin Cuti sudah tidak berlaku karena pengajuan telah ditangguhkan.');
+        }
+
         if ($blangko && $blangko->status !== 'disetujui') {
             abort(403, 'Surat Izin Cuti tidak tersedia karena pengajuan ditolak oleh Kabandara.');
         }

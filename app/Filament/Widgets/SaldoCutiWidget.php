@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 
 class SaldoCutiWidget extends BaseWidget
 {
+    protected ?string $pollingInterval = '30s';
+
     protected function getStats(): array
     {
         $saldo = auth()->user()->fresh()->saldoCuti;

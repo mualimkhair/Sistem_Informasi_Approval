@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 
 class MenungguKeputusanWidget extends BaseWidget
 {
+    protected ?string $pollingInterval = '10s';
+
     protected function getStats(): array
     {
         $stats = [];

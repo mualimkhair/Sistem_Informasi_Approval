@@ -75,7 +75,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authGuard('tab')
             ->databaseNotifications()
-            ->databaseNotificationsPolling('30s')
+            ->databaseNotificationsPolling('10s')
             ->globalSearch(false)
             ->renderHook(
                 \Filament\View\PanelsRenderHook::SCRIPTS_AFTER,

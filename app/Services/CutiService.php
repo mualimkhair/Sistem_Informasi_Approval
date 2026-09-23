@@ -450,6 +450,19 @@ class CutiService
             $pengajuan->status_log_keterangan = 'Ditangguhkan oleh Admin: '.$alasan;
         }
         $pengajuan->save();
+
+        \Filament\Notifications\Notification::make()
+            ->title('Pengajuan Cuti Ditangguhkan')
+            ->body('Pengajuan cuti Anda telah ditangguhkan oleh Admin.' . ($alasan ? ' Alasan: '.$alasan : ''))
+            ->warning()
+            ->actions([
+                \Filament\Actions\Action::make('lihat')
+                    ->button()
+                    ->label('Lihat')
+                    ->url(\App\Filament\Resources\PengajuanCutis\PengajuanCutiResource::getUrl('index'))
+                    ->markAsRead(),
+            ])
+            ->sendToDatabase($pengajuan->user);
     }
 
     public static function koreksiSaldo(PengajuanCuti $pengajuan, int $lamaLama, int $lamaBaru, bool $dryRun = false): ?array

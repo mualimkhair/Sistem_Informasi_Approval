@@ -21,6 +21,7 @@ class PegawaiSedangCutiWidget extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
+            ->poll('60s')
             ->query(
                 PengajuanCuti::query()
                     ->whereHas('blangkoCuti', function ($query) {

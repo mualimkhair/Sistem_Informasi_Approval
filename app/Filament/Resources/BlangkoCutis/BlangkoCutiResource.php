@@ -59,6 +59,7 @@ class BlangkoCutiResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->poll('10s')
             ->columns([
                 TextColumn::make('pengajuanCuti.user.nama')
                     ->label('Pegawai')

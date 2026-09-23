@@ -26,6 +26,7 @@ class PersetujuanCutisTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->poll('10s')
             ->headerActions([
                 Action::make('export')
                     ->label('Export Excel')
@@ -452,28 +453,70 @@ class PersetujuanCutisTable
                         }
 
                         if ($blangko && $blangko->status === 'disetujui') {
-                            if ($blangko->file_surat_izin_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_surat_izin_path)) {
-                                $urlSurat = route('cetak-surat-izin-cuti', $record);
+                            if ($record->status === 'ditangguhkan') {
                                 $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
                                     <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Surat Izin Cuti sesuai kategori</p>
-                                    <div class="flex gap-2">
-                                        <a href="'.$urlSurat.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">
-                                            Download / Preview Surat Izin Cuti
-                                        </a>
-                                    </div>
+                                    <p class="text-sm text-red-600 dark:text-red-400 font-medium">Surat Izin Cuti sudah tidak berlaku karena pengajuan telah ditangguhkan.</p>
                                 </div>';
                             } else {
-                                $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                                    <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
-                                    <p class="text-sm text-red-500">Dokumen Surat Izin Cuti belum tersedia.</p>
-                                </div>';
+                                if ($blangko->file_surat_izin_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_surat_izin_path)) {
+                                    $urlSurat = route('cetak-surat-izin-cuti', $record);
+                                    $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                                        <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Surat Izin Cuti sesuai kategori</p>
+                                        <div class="flex gap-2">
+                                            <a href="'.$urlSurat.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">
+                                                Download / Preview Surat Izin Cuti
+                                            </a>
+                                        </div>
+                                    </div>';
+                                } else {
+                                    $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                                        <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
+                                        <p class="text-sm text-red-500">Dokumen Surat Izin Cuti belum tersedia.</p>
+                                    </div>';
+                                }
                             }
                         }
                         
                         $html .= '</div>';
                         
                         return new \Illuminate\Support\HtmlString($html);
+                    }),
+
+                Action::make('tangguhkan')
+                    ->label('Tangguhkan')
+                    ->icon('heroicon-o-pause-circle')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Tangguhkan Pengajuan Cuti')
+                    ->modalDescription('Pengajuan cuti berstatus Disetujui akan ditangguhkan dan saldo cuti pegawai akan dikembalikan. Keputusan para pejabat pada PDF tetap tervalidasi sebagai riwayat.')
+                    ->form([
+                        Textarea::make('alasan')
+                            ->label('Alasan Penangguhan')
+                            ->placeholder('Opsional')
+                            ->rows(3),
+                    ])
+                    ->visible(fn (PengajuanCuti $record) => $record->status === 'disetujui' && auth()->user()->hasRole(['super_admin', 'admin']))
+                    ->action(function (PengajuanCuti $record, array $data): void {
+                        try {
+                            DB::transaction(fn () => \App\Services\CutiService::tangguhkanPengajuan(
+                                $record,
+                                filled($data['alasan'] ?? null) ? $data['alasan'] : null
+                            ));
+
+                            Notification::make()
+                                ->title('Pengajuan Cuti Ditangguhkan')
+                                ->body('Saldo cuti pegawai telah dikembalikan.')
+                                ->success()
+                                ->send();
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->title('Gagal Menangguhkan Pengajuan')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
                     }),
 
                 DeleteAction::make()

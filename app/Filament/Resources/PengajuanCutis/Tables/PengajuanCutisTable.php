@@ -142,22 +142,29 @@ class PengajuanCutisTable
                         }
 
                         if ($blangko && $blangko->status === 'disetujui') {
-                            if ($blangko->file_surat_izin_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_surat_izin_path)) {
-                                $urlSurat = route('cetak-surat-izin-cuti', $record);
+                            if ($record->status === 'ditangguhkan') {
                                 $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
                                     <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Surat Izin Cuti sesuai kategori</p>
-                                    <div class="flex gap-2">
-                                        <a href="'.$urlSurat.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">
-                                            Download / Preview Surat Izin Cuti
-                                        </a>
-                                    </div>
+                                    <p class="text-sm text-red-600 dark:text-red-400 font-medium">Surat Izin Cuti sudah tidak berlaku karena pengajuan telah ditangguhkan.</p>
                                 </div>';
                             } else {
-                                $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                                    <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
-                                    <p class="text-sm text-red-500">Dokumen Surat Izin Cuti belum tersedia.</p>
-                                </div>';
+                                if ($blangko->file_surat_izin_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_surat_izin_path)) {
+                                    $urlSurat = route('cetak-surat-izin-cuti', $record);
+                                    $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                                        <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Surat Izin Cuti sesuai kategori</p>
+                                        <div class="flex gap-2">
+                                            <a href="'.$urlSurat.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">
+                                                Download / Preview Surat Izin Cuti
+                                            </a>
+                                        </div>
+                                    </div>';
+                                } else {
+                                    $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                                        <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
+                                        <p class="text-sm text-red-500">Dokumen Surat Izin Cuti belum tersedia.</p>
+                                    </div>';
+                                }
                             }
                         }
                         
