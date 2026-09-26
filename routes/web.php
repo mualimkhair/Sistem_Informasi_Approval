@@ -9,7 +9,7 @@ use App\Http\Controllers\TabLogoutController;
 //     return view('welcome');
 // });
 
-Route::get('/auth/logout', [TabLogoutController::class, 'logout'])->name('filament.admin.auth.logout');
+Route::get('/auth/logout', [TabLogoutController::class, 'logout'])->name('tab.auth.logout');
 
 Route::middleware([\App\Http\Middleware\TabContextMiddleware::class])->group(function () {
     Route::get('/pengajuan-cuti/{pengajuanCuti}/pdf', [PdfController::class, 'cetak'])->name('pengajuan-cuti.pdf');

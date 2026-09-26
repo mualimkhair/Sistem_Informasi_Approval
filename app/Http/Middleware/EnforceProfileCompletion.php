@@ -13,7 +13,7 @@ class EnforceProfileCompletion
         $user = auth()->user();
 
         if ($user && !$user->is_profile_completed) {
-            if (!$request->routeIs('filament.admin.pages.lengkapi-profil') && !$request->routeIs('filament.admin.auth.logout')) {
+            if (!$request->routeIs('filament.admin.pages.lengkapi-profil') && !$request->routeIs('filament.admin.auth.logout') && !$request->routeIs('tab.auth.logout')) {
                 return redirect()->route('filament.admin.pages.lengkapi-profil');
             }
         }
