@@ -58,8 +58,12 @@ class PdfController extends Controller
             abort(403, 'Surat Izin Cuti sudah tidak berlaku karena pengajuan telah ditangguhkan.');
         }
 
-        if ($blangko && $blangko->status !== 'disetujui') {
+        if ($blangko && $blangko->status === 'ditolak') {
             abort(403, 'Surat Izin Cuti tidak tersedia karena pengajuan ditolak oleh Kabandara.');
+        }
+
+        if (empty($pengajuanCuti->nomor_surat)) {
+            abort(403, 'Surat Izin Cuti belum dapat dicetak karena Admin belum menginput Nomor Surat.');
         }
 
         // Auto-recovery for missing Surat Izin Cuti PDF

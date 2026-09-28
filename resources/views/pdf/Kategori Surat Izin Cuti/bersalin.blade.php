@@ -56,29 +56,19 @@
         $kasubag_nama = $kasubag ? $kasubag->nama : '.......................';
         $kanit_tanggal = $pengajuanCuti->keputusan_kanit_kepegawaian ? $pengajuanCuti->updated_at->translatedFormat('d F Y') : '.............';
         $kasubag_tanggal = $pengajuanCuti->keputusan_kasubag_tu ? $pengajuanCuti->updated_at->translatedFormat('d F Y') : '.............';
-        $kanit_paraf = $kanit ? getSignatureBase64($kanit->signature_path) : null;
-        $kasubag_paraf = $kasubag ? getSignatureBase64($kasubag->signature_path) : null;
+        $kanit_paraf = $kanit ? \App\Services\CutiService::getSignatureBase64($kanit->signature_path) : null;
+        $kasubag_paraf = $kasubag ? \App\Services\CutiService::getSignatureBase64($kasubag->signature_path) : null;
     
+        $admin_nama = $pengajuanCuti->admin_nama ?? '';
+        $admin_jabatan = $pengajuanCuti->admin_jabatan ?? 'Kepegawaian';
+        $admin_tanggal = $pengajuanCuti->admin_proses_at ? \Carbon\Carbon::parse($pengajuanCuti->admin_proses_at)->translatedFormat('d F Y') : '';
+        $admin_paraf = $pengajuanCuti->admin_signature_path ? \App\Services\CutiService::getSignatureBase64($pengajuanCuti->admin_signature_path) : null;
         
-        if (!function_exists('getSignatureBase64')) {
-            function getSignatureBase64($path) {
-                if ($path && \Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
-                    try {
-                        $content = \Illuminate\Support\Facades\Storage::disk('public')->get($path);
-                        $mime = \Illuminate\Support\Facades\Storage::disk('public')->mimeType($path);
-                        return 'data:'.$mime.';base64,'.base64_encode($content);
-                    } catch (\Exception $e) {
-                        return null;
-                    }
-                }
-                return null;
-            }
-        }
     @endphp
 
     <div class="text-center">
         <div class="title text-bold">SURAT IZIN CUTI BERSALIN</div>
-        <div class="subtitle">Nomor : SI. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tahun {{ $tahun }}</div>
+        <div class="subtitle">Nomor : {{ $pengajuanCuti->nomor_surat ?? 'SI. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tahun ' . $tahun }}</div>
     </div>
 
     <div class="content">
@@ -131,7 +121,7 @@
         <br>
         <div>{{ $kabandara_jabatan }}</div>
         <br><br>
-        @if($kabandara_signature_path && $sig = getSignatureBase64($kabandara_signature_path))
+        @if($kabandara_signature_path && $sig = \App\Services\CutiService::getSignatureBase64($kabandara_signature_path))
             <img src="{{ $sig }}" class="signature-img"><br>
         @else
             <br><br>
@@ -156,10 +146,14 @@
             <tr>
                 <td>1.</td>
                 <td>Dibuat</td>
-                <td></td>
-                <td>Kepegawaian</td>
-                <td></td>
-                <td></td>
+                <td>{{ $admin_nama }}</td>
+                <td>{{ $admin_jabatan }}</td>
+                <td>{{ $admin_tanggal }}</td>
+                <td style="text-align: center; vertical-align: middle; padding: 2px;">
+                    @if($admin_paraf)
+                        <img src="{{ $admin_paraf }}" style="max-height: 35px;">
+                    @endif
+                </td>
             </tr>
             <tr>
                 <td>2.</td>

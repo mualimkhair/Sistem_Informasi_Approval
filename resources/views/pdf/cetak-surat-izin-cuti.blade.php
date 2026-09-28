@@ -78,20 +78,6 @@
 @php
     \Carbon\Carbon::setLocale('id');
 
-    if (!function_exists('getSignatureBase64')) {
-        function getSignatureBase64($path) {
-            if ($path && \Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
-                try {
-                    $content = \Illuminate\Support\Facades\Storage::disk('public')->get($path);
-                    $mime = \Illuminate\Support\Facades\Storage::disk('public')->mimeType($path);
-                    return 'data:'.$mime.';base64,'.base64_encode($content);
-                } catch (\Exception $e) {
-                    return null;
-                }
-            }
-            return null;
-        }
-    }
 
     // --- Bagian tujuan surat (Kepada Yth.) ---
     $pemohonAdalahPejabat = method_exists($pengajuanCuti->user, 'hasRole')
@@ -117,7 +103,7 @@
     $tandaJenis = fn ($tipe) => $pengajuanCuti->jenis_cuti === $tipe ? '&#10003;' : '-';
 
     // --- Saldo cuti (N-2, N-1, N) ---
-    $tahunN  = $pengajuanCuti->user->saldoCuti?->tahun_berjalan ?? now()->year;
+    $tahunN  = now()->year;
     $tahunN1 = $tahunN - 1;
     $tahunN2 = $tahunN - 2;
 
@@ -127,22 +113,13 @@
 
     $fmtSaldo = fn ($nilai) => $nilai > 0 ? $nilai . ' Hari' : '-';
 
-    $sisaArr = [];
-    if ($saldoN2 > 0) {
-        $sisaArr[] = "Tahun {$tahunN2} {$saldoN2} Hari";
-    }
-    if ($saldoN1 > 0) {
-        $sisaArr[] = "Tahun {$tahunN1} {$saldoN1} Hari";
-    }
-    if ($saldoN > 0) {
-        $sisaArr[] = "Tahun {$tahunN} {$saldoN} Hari";
-    }
-
-    if (empty($sisaArr)) {
-        $teksSisaCuti = "Tahun {$tahunN1} 0 Hari, {$tahunN} 0 Hari";
-    } else {
-        $teksSisaCuti = implode(', ', $sisaArr);
-    }
+    // Sisa cuti setelah pengajuan ini (asumsi sederhana: potong N-1 dulu, baru N)
+    $sisaDipotong = $pengajuanCuti->lama_cuti ?? 0;
+    $potongN1 = min($sisaDipotong, $saldoN1);
+    $sisaDipotong -= $potongN1;
+    $potongN = min($sisaDipotong, $saldoN);
+    $sisaN1 = $saldoN1 - $potongN1;
+    $sisaN  = $saldoN - $potongN;
 
     // --- Keputusan atasan langsung & pejabat ---
     $kanitApproved = strtolower($pengajuanCuti->keputusan_kanit ?? '') === 'disetujui';
@@ -166,7 +143,7 @@
         $rejected = ! in_array($kep, ['disetujui', 'dilewati'], true);
 
         $out = '';
-        $sig = $canSign && $approver ? getSignatureBase64($approver->signature_path) : null;
+        $sig = $canSign && $approver ? \App\Services\CutiService::getSignatureBase64($approver->signature_path) : null;
         if ($sig) {
             $out .= "<img src=\"{$sig}\" class=\"signature-img\"><br>";
         } elseif ($approver) {
@@ -302,7 +279,7 @@
         <td class="tc">-</td>
     </tr>
     <tr>
-        <td colspan="7">Sisa Cuti : {{ $teksSisaCuti }}</td>
+        <td colspan="7">Sisa Cuti : Tahun {{ $tahunN1 }} {{ $sisaN1 }} Hari, {{ $tahunN }} {{ $sisaN }} Hari</td>
     </tr>
     <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== VI. ALAMAT SELAMA MENJALANKAN CUTI ===================== --}}
@@ -316,7 +293,7 @@
         <td colspan="4" class="top tall-box-lg">{{ $pengajuanCuti->alamat_selama_cuti }}</td>
         <td colspan="3" class="top">
             Hormat Saya,<br><br>
-            @if($sig = getSignatureBase64($pengajuanCuti->user->signature_path))
+            @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->user->signature_path))
                 <img src="{{ $sig }}" class="signature-img"><br>
             @else
                 <br><br><br>
@@ -343,7 +320,7 @@
         <td colspan="2" class="tc tall-box">
             @if($kanitApproved)
                 @if($pengajuanCuti->kanit)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kanit->signature_path))
+                    @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->kanit->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
@@ -358,7 +335,7 @@
         <td colspan="2" class="tc tall-box">
             @if($kasubagApproved)
                 @if($pengajuanCuti->kasubag)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kasubag->signature_path))
+                    @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->kasubag->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
@@ -373,7 +350,7 @@
         <td colspan="2" class="tc tall-box">
             @if($kanitRejected)
                 @if($pengajuanCuti->kanit)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kanit->signature_path))
+                    @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->kanit->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
@@ -389,7 +366,7 @@
         <td class="tc tall-box">
             @if($kasubagRejected)
                 @if($pengajuanCuti->kasubag)
-                    @if($sig = getSignatureBase64($pengajuanCuti->kasubag->signature_path))
+                    @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->kasubag->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
@@ -414,7 +391,7 @@
         <td colspan="4" class="tc tall-box">
             @if($pejabatApproved)
                 @if($pengajuanCuti->pejabat)
-                    @if($sig = getSignatureBase64($pengajuanCuti->pejabat->signature_path))
+                    @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->pejabat->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>
@@ -429,7 +406,7 @@
         <td colspan="3" class="tc tall-box">
             @if($pejabatRejected)
                 @if($pengajuanCuti->pejabat)
-                    @if($sig = getSignatureBase64($pengajuanCuti->pejabat->signature_path))
+                    @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->pejabat->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @else
                         <br><br><br>

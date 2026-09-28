@@ -27,6 +27,7 @@ class PengajuanCuti extends Model
         'kepala_seksi_tanggal_keputusan' => 'datetime',
         'kanit_kepegawaian_tanggal_keputusan' => 'datetime',
         'kasubag_tu_tanggal_keputusan' => 'datetime',
+        'admin_proses_at' => 'datetime',
     ];
 
     public function user()
@@ -92,6 +93,12 @@ class PengajuanCuti extends Model
         }
 
         if ($blangko->status === 'disetujui') {
+            // Kabandara sudah menyetujui, tetapi Admin belum menerbitkan
+            // Surat Izin Cuti. Proses belum final sampai nomor surat diisi.
+            if (empty($this->nomor_surat)) {
+                return 'Disetujui Kabandara dan menunggu admin untuk pembuatan surat izin cuti';
+            }
+
             return 'Disetujui Kabandara';
         }
 
@@ -120,6 +127,11 @@ class PengajuanCuti extends Model
         }
 
         if ($blangko->status === 'disetujui') {
+            // Sabar: masih menunggu Admin sampai Surat Izin Cuti terbit.
+            if (empty($this->nomor_surat)) {
+                return 'warning';
+            }
+
             return 'success';
         }
 
@@ -320,3 +332,4 @@ class PengajuanCuti extends Model
         return $this->hasMany(PengajuanCutiAuditLog::class);
     }
 }
+

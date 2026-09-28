@@ -422,28 +422,10 @@ class PengajuanCutiObserver
 
     private function ensureBlangkoForApproved(PengajuanCuti $pengajuanCuti): void
     {
-        $blangko = \App\Models\BlangkoCuti::firstOrCreate(
+        \App\Models\BlangkoCuti::firstOrCreate(
             ['pengajuan_cuti_id' => $pengajuanCuti->id],
             ['status' => 'menunggu']
         );
-
-        if ($blangko->wasRecentlyCreated) {
-            $pejabats = User::role('pejabat_berwenang')->get();
-            foreach ($pejabats as $pejabat) {
-                Notification::make()
-                    ->title('Blangko Cuti Baru')
-                    ->body('Terdapat blangko cuti baru dari '.$pengajuanCuti->user->nama.' yang menunggu persetujuan Anda.')
-                    ->warning()
-                    ->actions([
-                        \Filament\Actions\Action::make('lihat')
-                            ->button()
-                            ->label('Lihat')
-                            ->url(\App\Filament\Resources\BlangkoCutis\BlangkoCutiResource::getUrl('index'))
-                            ->markAsRead(),
-                    ])
-                    ->sendToDatabase($pejabat);
-            }
-        }
     }
 
     private function logStatus(PengajuanCuti $pengajuanCuti, ?string $from, string $to, ?string $keterangan = null): void

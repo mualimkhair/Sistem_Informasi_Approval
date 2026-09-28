@@ -56,6 +56,12 @@ class BlangkoCutiResource extends Resource
         return $user->hasRole(['super_admin', 'admin', 'pejabat_berwenang']);
     }
 
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery();
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -146,6 +152,11 @@ class BlangkoCutiResource extends Resource
                             $record->update([
                                 'status' => $data['status'],
                                 'alasan' => $data['alasan'] ?? null,
+                                'kabandara_id' => auth()->id(),
+                                'tanggal_keputusan' => now(),
+                                'kabandara_nama' => auth()->user()->nama,
+                                'kabandara_nip' => auth()->user()->nip,
+                                'kabandara_pangkat' => auth()->user()->pangkat ?? null,
                             ]);
 
                             \App\Services\CutiService::generateAndSaveFinalDocuments($record);
@@ -218,6 +229,8 @@ class BlangkoCutiResource extends Resource
                             default => 'Surat Izin Cuti'
                         };
 
+                        $token = request()->header('X-Tab-Token') ?? request()->header('X-Tab-ID') ?? request()->query('ctx');
+                        $ctxQuery = $token ? '?ctx=' . rawurlencode($token) : '';
                         $html = '<div class="space-y-4">';
 
                         if ($blangko && $blangko->file_blangko_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_blangko_path)) {
@@ -239,24 +252,17 @@ class BlangkoCutiResource extends Resource
                             </div>';
                         }
 
-                        if ($blangko && $blangko->status === 'disetujui') {
-                            if ($blangko->file_surat_izin_path && \Illuminate\Support\Facades\Storage::disk('local')->exists($blangko->file_surat_izin_path)) {
-                                $urlSurat = route('cetak-surat-izin-cuti', $pengajuan->id);
-                                $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                                    <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Surat Izin Cuti sesuai kategori</p>
-                                    <div class="flex gap-2">
-                                        <a href="'.$urlSurat.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">
-                                            Download / Preview Surat Izin Cuti
-                                        </a>
-                                    </div>
-                                </div>';
-                            } else {
-                                $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                                    <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
-                                    <p class="text-sm text-red-500">Dokumen Surat Izin Cuti belum tersedia.</p>
-                                </div>';
-                            }
+                        if ($blangko && !empty($pengajuan->nomor_surat)) {
+                              $urlSurat = route('cetak-surat-izin-cuti', $pengajuan->id);
+                            $html .= '<div class="p-4 bg-gray-50 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                                <h4 class="font-bold text-lg mb-1">'.$suratIzinName.'</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Surat Izin Cuti sesuai kategori</p>
+                                <div class="flex gap-2">
+                                    <a href="'.$urlSurat.'" target="_blank" style="background-color: rgb(217 119 6); padding: 0.5rem 1rem; border-radius: 0.5rem; color: white; font-weight: bold; text-decoration: none; display: inline-block;">
+                                        Download / Preview Surat Izin Cuti
+                                    </a>
+                                </div>
+                            </div>';
                         }
 
                         $html .= '</div>';
@@ -299,3 +305,6 @@ class BlangkoCutiResource extends Resource
         ];
     }
 }
+
+
+

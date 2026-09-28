@@ -44,6 +44,24 @@ class BlangkoCutiObserver
                             ->markAsRead(),
                     ])
                     ->sendToDatabase($blangkoCuti->pengajuanCuti->user);
+
+                if ($status === 'disetujui') {
+                    $admins = \App\Models\User::role(['admin', 'super_admin'])->get();
+                    foreach ($admins as $admin) {
+                        \Filament\Notifications\Notification::make()
+                            ->title('Input Nomor Surat Diperlukan')
+                            ->body('Blangko Cuti dari '.$blangkoCuti->pengajuanCuti->user->nama.' telah disetujui Kabandara. Harap input Nomor Surat untuk menerbitkan Surat Izin Cuti.')
+                            ->info()
+                            ->actions([
+                                \Filament\Actions\Action::make('lihat')
+                                    ->button()
+                                    ->label('Input Nomor Surat')
+                                    ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index'))
+                                    ->markAsRead(),
+                            ])
+                            ->sendToDatabase($admin);
+                    }
+                }
             }
         }
     }

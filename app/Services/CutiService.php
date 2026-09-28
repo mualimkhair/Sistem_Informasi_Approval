@@ -14,6 +14,19 @@ use Carbon\CarbonPeriod;
 
 class CutiService
 {
+    public static function getSignatureBase64($path) {
+        if ($path && \Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+            try {
+                $content = \Illuminate\Support\Facades\Storage::disk('public')->get($path);
+                $mime = \Illuminate\Support\Facades\Storage::disk('public')->mimeType($path);
+                return 'data:'.$mime.';base64,'.base64_encode($content);
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
     public static function validasiTanggal(Carbon $tanggal, string $konteks): bool
     {
         return match ($konteks) {
@@ -660,14 +673,24 @@ class CutiService
 
     public static function generateAndSaveFinalDocuments(\App\Models\BlangkoCuti $blangko): void
     {
+        self::generateBlangkoCutiPdf($blangko);
+        
+        $pengajuan = $blangko->pengajuanCuti;
+        if ($pengajuan && !empty($pengajuan->nomor_surat)) {
+            self::generateSuratIzinCutiPdf($pengajuan);
+        }
+    }
+
+    public static function generateBlangkoCutiPdf(\App\Models\BlangkoCuti $blangko): void
+    {
         $pengajuan = $blangko->pengajuanCuti;
         if (!$pengajuan) {
             return;
         }
-
+        
+        $pengajuan->refresh();
         $pengajuan->load(['user.unitKerja', 'kelompokKerja']);
 
-        // 1. Generate Blangko Cuti PDF
         $pdfBlangko = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.cetak-blangko', ['pengajuanCuti' => $pengajuan])
             ->setPaper('legal', 'portrait');
 
@@ -675,36 +698,46 @@ class CutiService
         $blangkoPath = 'documents/blangko-cuti/' . $blangkoFilename;
         \Illuminate\Support\Facades\Storage::disk('local')->put($blangkoPath, $pdfBlangko->output());
 
-        $suratIzinPath = null;
-
-        // 2. Generate Surat Izin Cuti PDF ONLY if approved
-        if ($blangko->status === 'disetujui') {
-            $templateMap = [
-                'tahunan' => 'pdf.Kategori Surat Izin Cuti.tahunan',
-                'besar' => 'pdf.Kategori Surat Izin Cuti.besar',
-                'sakit' => 'pdf.Kategori Surat Izin Cuti.sakit',
-                'melahirkan' => 'pdf.Kategori Surat Izin Cuti.bersalin',
-                'alasan_penting' => 'pdf.Kategori Surat Izin Cuti.alasan-penting',
-                'diluar_tanggungan_negara' => 'pdf.Kategori Surat Izin Cuti.diluar-tanggungan-negara',
-            ];
-
-            $jenisCuti = $pengajuan->jenis_cuti;
-            $viewName = $templateMap[$jenisCuti] ?? null;
-
-            if ($viewName && view()->exists($viewName)) {
-                $pdfSuratIzin = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, ['pengajuanCuti' => $pengajuan])
-                    ->setPaper('legal', 'portrait');
-
-                $suratIzinFilename = $pengajuan->id . '_surat-izin-' . $jenisCuti . '.pdf';
-                $suratIzinPath = 'documents/surat-izin/' . $suratIzinFilename;
-                \Illuminate\Support\Facades\Storage::disk('local')->put($suratIzinPath, $pdfSuratIzin->output());
-            }
-        }
-
-        // 3. Save paths to BlangkoCuti
         $blangko->update([
             'file_blangko_path' => $blangkoPath,
+        ]);
+    }
+
+    public static function generateSuratIzinCutiPdf(\App\Models\PengajuanCuti $pengajuan): void
+    {
+        $blangko = $pengajuan->blangkoCuti;
+        if (!$blangko) {
+            return;
+        }
+
+        $pengajuan->refresh();
+        $pengajuan->load(['user.unitKerja', 'kelompokKerja']);
+
+        $templateMap = [
+            'tahunan' => 'pdf.Kategori Surat Izin Cuti.tahunan',
+            'besar' => 'pdf.Kategori Surat Izin Cuti.besar',
+            'sakit' => 'pdf.Kategori Surat Izin Cuti.sakit',
+            'melahirkan' => 'pdf.Kategori Surat Izin Cuti.bersalin',
+            'alasan_penting' => 'pdf.Kategori Surat Izin Cuti.alasan-penting',
+            'diluar_tanggungan_negara' => 'pdf.Kategori Surat Izin Cuti.diluar-tanggungan-negara',
+        ];
+
+        $jenisCuti = $pengajuan->jenis_cuti;
+        $viewName = $templateMap[$jenisCuti] ?? null;
+
+        $suratIzinPath = null;
+        if ($viewName && view()->exists($viewName)) {
+            $pdfSuratIzin = \Barryvdh\DomPDF\Facade\Pdf::loadView($viewName, ['pengajuanCuti' => $pengajuan])
+                ->setPaper('legal', 'portrait');
+
+            $suratIzinFilename = $pengajuan->id . '_surat-izin-' . $jenisCuti . '.pdf';
+            $suratIzinPath = 'documents/surat-izin/' . $suratIzinFilename;
+            \Illuminate\Support\Facades\Storage::disk('local')->put($suratIzinPath, $pdfSuratIzin->output());
+        }
+
+        $blangko->update([
             'file_surat_izin_path' => $suratIzinPath,
         ]);
     }
 }
+

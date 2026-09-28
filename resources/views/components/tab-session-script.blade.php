@@ -6,6 +6,10 @@
     var CTX_PARAM = 'ctx';
     var HEADER_NAME = 'X-Tab-Token';
 
+    if (window.location.pathname === '/login') {
+        sessionStorage.removeItem(TOKEN_KEY);
+    }
+
     function getToken() {
         var urlParams = new URLSearchParams(window.location.search);
         var urlToken = urlParams.get(CTX_PARAM);
