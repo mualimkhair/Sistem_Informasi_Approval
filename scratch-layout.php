@@ -1,3 +1,5 @@
+<?php
+$html = <<<'HTML'
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,7 +29,7 @@
         /* HEADER AREA */
         .header-container {
             position: absolute;
-            top: 10mm; /* Moved up from 25mm */
+            top: 25mm; /* Estimated from image 2 */
             left: 115mm;
             width: 75mm;
         }
@@ -47,7 +49,7 @@
 
         .judul-formulir {
             position: absolute;
-            top: 37mm; /* Moved up from 52mm */
+            top: 52mm;
             left: 18.5mm;
             width: 173mm;
             text-align: center;
@@ -59,7 +61,7 @@
         .form-container {
             position: absolute;
             left: 18.5mm;
-            top: 45.5mm; /* Moved up from 60.5mm */
+            top: 60.5mm;
             width: 173mm;
         }
 
@@ -111,7 +113,7 @@
         .row-persetujuan-sig td { height: 18mm; vertical-align: bottom; padding-bottom: 2mm; text-align: center; }
         
         .row-keputusan-header td { height: 4mm; }
-        .row-keputusan-sig td { height: 18mm; vertical-align: bottom; padding-bottom: 2mm; text-align: center; } /* Reduced from 25mm to 18mm */
+        .row-keputusan-sig td { height: 25mm; vertical-align: bottom; padding-bottom: 3mm; text-align: center; }
 
         /* Gaps */
         .gap-1 { height: 2.6mm; }
@@ -120,7 +122,7 @@
         .gap-4 { height: 2.6mm; }
         .gap-5 { height: 2.3mm; }
         .gap-6 { height: 2.6mm; }
-        .gap-7 { height: 1.5mm; } /* Reduced from 3.1mm to 1.5mm */
+        .gap-7 { height: 3.1mm; }
 
     </style>
 </head>
@@ -262,10 +264,10 @@
         {{-- I. DATA PEGAWAI --}}
         <table class="form-table">
             <colgroup>
-                <col style="width:14%">
-                <col style="width:43%">
-                <col style="width:14%">
-                <col style="width:29%">
+                <col style="width:24.5mm">
+                <col style="width:73.5mm">
+                <col style="width:24.5mm">
+                <col style="width:50.5mm">
             </colgroup>
             <tr><td colspan="4" class="section-title">I. DATA PEGAWAI</td></tr>
             <tr class="row-data">
@@ -293,10 +295,10 @@
         {{-- II. JENIS CUTI YANG DIAMBIL --}}
         <table class="form-table">
             <colgroup>
-                <col style="width:29%">
-                <col style="width:14%">
-                <col style="width:42%">
-                <col style="width:15%">
+                <col style="width:49mm">
+                <col style="width:25mm">
+                <col style="width:74mm">
+                <col style="width:25mm">
             </colgroup>
             <tr><td colspan="4" class="section-title">II. JENIS CUTI YANG DIAMBIL</td></tr>
             <tr class="row-jenis">
@@ -507,3 +509,5 @@
 </div>
 </body>
 </html>
+HTML;
+file_put_contents('/tmp/cetak-blangko-exact.blade.php', $html);
