@@ -156,4 +156,83 @@ class PengajuanCutiFormTest extends TestCase
             ->call('save')
             ->assertHasFormErrors(['tanggal_mulai']); // Harus error karena statusnya bukan admin, melainkan self-edit (edit_pegawai)
     }
+    public function test_form_cuti_mengharuskan_pegawai_operasional_mengisi_kelompok_kerja()
+    {
+        $seksi = \App\Models\Seksi::create(['nama_seksi' => 'Seksi Operasional']);
+        $unit = \App\Models\UnitKerja::create([
+            'nama_unit' => 'Unit Operasional',
+            'jenis' => 'operasional',
+            'seksi_id' => $seksi->id,
+        ]);
+        $kelompok = \App\Models\KelompokKerja::create([
+            'unit_kerja_id' => $unit->id,
+            'nama_kelompok' => 'Shift 1',
+            'hari_libur_1' => 'Selasa',
+            'hari_libur_2' => 'Rabu',
+        ]);
+
+        $pegawai = $this->createUser('pegawai');
+        $pegawai->update([
+            'unit_kerja_id' => $unit->id,
+            'seksi_id' => $seksi->id,
+        ]);
+        $this->actingAsTab($pegawai);
+
+        // Operasional harus isi kelompok kerja
+        Livewire::test(\App\Filament\Resources\PengajuanCutis\Pages\CreatePengajuanCuti::class)
+            ->fillForm([
+                'jenis_cuti' => 'tahunan',
+                'alasan_cuti' => 'Test',
+                'tanggal_mulai' => Carbon::now()->addDays(2)->format('Y-m-d'),
+                'tanggal_selesai' => Carbon::now()->addDays(4)->format('Y-m-d'),
+                'alamat_selama_cuti' => 'Rumah',
+                'nomor_telp' => '123'
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['kelompok_kerja_id' => 'required']);
+
+        // Jika kelompok_kerja_id diisi, tidak error
+        Livewire::test(\App\Filament\Resources\PengajuanCutis\Pages\CreatePengajuanCuti::class)
+            ->fillForm([
+                'jenis_cuti' => 'tahunan',
+                'alasan_cuti' => 'Test',
+                'kelompok_kerja_id' => $kelompok->id,
+                'tanggal_mulai' => Carbon::now()->addDays(2)->format('Y-m-d'),
+                'tanggal_selesai' => Carbon::now()->addDays(4)->format('Y-m-d'),
+                'alamat_selama_cuti' => 'Rumah',
+                'nomor_telp' => '123'
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors(['kelompok_kerja_id']);
+    }
+
+    public function test_form_cuti_tidak_membutuhkan_kelompok_kerja_untuk_non_operasional()
+    {
+        $seksi = \App\Models\Seksi::create(['nama_seksi' => 'Seksi IT']);
+        $unit = \App\Models\UnitKerja::create([
+            'nama_unit' => 'Unit IT',
+            'jenis' => 'non-operasional',
+            'seksi_id' => $seksi->id,
+        ]);
+
+        $pegawai = $this->createUser('pegawai');
+        $pegawai->update([
+            'unit_kerja_id' => $unit->id,
+            'seksi_id' => $seksi->id,
+        ]);
+        $this->actingAsTab($pegawai);
+
+        Livewire::test(\App\Filament\Resources\PengajuanCutis\Pages\CreatePengajuanCuti::class)
+            ->fillForm([
+                'jenis_cuti' => 'tahunan',
+                'alasan_cuti' => 'Test',
+                'tanggal_mulai' => Carbon::now()->addDays(2)->format('Y-m-d'),
+                'tanggal_selesai' => Carbon::now()->addDays(4)->format('Y-m-d'),
+                'alamat_selama_cuti' => 'Rumah',
+                'nomor_telp' => '123'
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors(['kelompok_kerja_id']);
+    }
 }
+

@@ -43,7 +43,7 @@
         $tanggal_mulai = $pengajuanCuti->tanggal_mulai ? $pengajuanCuti->tanggal_mulai->translatedFormat('d F Y') : '................';
         $tanggal_selesai = $pengajuanCuti->tanggal_selesai ? $pengajuanCuti->tanggal_selesai->translatedFormat('d F Y') : '................';
         
-        $bulan_tahun_surat = $blangko?->tanggal_keputusan ? $blangko->tanggal_keputusan->translatedFormat('F Y') : '................';
+        $bulan_tahun_surat = $blangko?->tanggal_keputusan ? $blangko->tanggal_keputusan->translatedFormat('d F Y') : '................';
         
         $kabandara_nama = $blangko?->kabandara_nama ?? $blangko?->kabandara?->nama ?? '..........................';
         $kabandara_nip = $blangko?->kabandara_nip ?? $blangko?->kabandara?->nip ?? '..........................';

@@ -164,7 +164,7 @@
 {{-- ===================== KOP SURAT ===================== --}}
 <div class="surat-header">
     <table>
-        <tr><td>Palu, {{ $pengajuanCuti->created_at?->translatedFormat('d F Y') }}</td></tr>
+        <tr><td>Palu, {{ $pengajuanCuti->blangkoCuti?->tanggal_keputusan ? $pengajuanCuti->blangkoCuti->tanggal_keputusan->translatedFormat('d F Y') : $pengajuanCuti->created_at?->translatedFormat('d F Y') }}</td></tr>
         <tr><td>Kepada</td></tr>
         <tr>
             <td class="label-yth">Yth.</td>
