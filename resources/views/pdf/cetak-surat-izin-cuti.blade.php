@@ -117,7 +117,7 @@
     $tandaJenis = fn ($tipe) => $pengajuanCuti->jenis_cuti === $tipe ? '&#10003;' : '-';
 
     // --- Saldo cuti (N-2, N-1, N) ---
-    $tahunN  = now()->year;
+    $tahunN  = $pengajuanCuti->user->saldoCuti?->tahun_berjalan ?? now()->year;
     $tahunN1 = $tahunN - 1;
     $tahunN2 = $tahunN - 2;
 
@@ -127,13 +127,22 @@
 
     $fmtSaldo = fn ($nilai) => $nilai > 0 ? $nilai . ' Hari' : '-';
 
-    // Sisa cuti setelah pengajuan ini (asumsi sederhana: potong N-1 dulu, baru N)
-    $sisaDipotong = $pengajuanCuti->lama_cuti ?? 0;
-    $potongN1 = min($sisaDipotong, $saldoN1);
-    $sisaDipotong -= $potongN1;
-    $potongN = min($sisaDipotong, $saldoN);
-    $sisaN1 = $saldoN1 - $potongN1;
-    $sisaN  = $saldoN - $potongN;
+    $sisaArr = [];
+    if ($saldoN2 > 0) {
+        $sisaArr[] = "Tahun {$tahunN2} {$saldoN2} Hari";
+    }
+    if ($saldoN1 > 0) {
+        $sisaArr[] = "Tahun {$tahunN1} {$saldoN1} Hari";
+    }
+    if ($saldoN > 0) {
+        $sisaArr[] = "Tahun {$tahunN} {$saldoN} Hari";
+    }
+
+    if (empty($sisaArr)) {
+        $teksSisaCuti = "Tahun {$tahunN1} 0 Hari, {$tahunN} 0 Hari";
+    } else {
+        $teksSisaCuti = implode(', ', $sisaArr);
+    }
 
     // --- Keputusan atasan langsung & pejabat ---
     $kanitApproved = strtolower($pengajuanCuti->keputusan_kanit ?? '') === 'disetujui';
@@ -293,7 +302,7 @@
         <td class="tc">-</td>
     </tr>
     <tr>
-        <td colspan="7">Sisa Cuti : Tahun {{ $tahunN1 }} {{ $sisaN1 }} Hari, {{ $tahunN }} {{ $sisaN }} Hari</td>
+        <td colspan="7">Sisa Cuti : {{ $teksSisaCuti }}</td>
     </tr>
     <tr><td colspan="7" style="border:none; padding:4px 0;"></td></tr>
     {{-- ===================== VI. ALAMAT SELAMA MENJALANKAN CUTI ===================== --}}
