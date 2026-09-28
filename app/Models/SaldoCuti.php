@@ -8,6 +8,17 @@ class SaldoCuti extends Model
 {
     protected $guarded = ['id'];
 
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::saving(function ($saldo) {
+            if ($saldo->user && $saldo->user->jenis_kelamin === 'laki-laki') {
+                $saldo->saldo_cuti_melahirkan = 0;
+            }
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -24,7 +24,11 @@
             this.resizeCanvas();
             
             if (this.state) {
-                this.signaturePad.fromDataURL(this.state);
+                let imgUrl = this.state;
+                if (!imgUrl.startsWith('data:image') && !imgUrl.startsWith('http')) {
+                    imgUrl = '/storage/' + imgUrl;
+                }
+                this.signaturePad.fromDataURL(imgUrl);
             }
 
             this.signaturePad.addEventListener('endStroke', () => {
@@ -49,7 +53,11 @@
             
             this.signaturePad.clear();
             if (data) {
-                this.signaturePad.fromDataURL(data);
+                let imgUrl = data;
+                if (!imgUrl.startsWith('data:image') && !imgUrl.startsWith('http')) {
+                    imgUrl = '/storage/' + imgUrl;
+                }
+                this.signaturePad.fromDataURL(imgUrl);
             }
         },
         clear() {

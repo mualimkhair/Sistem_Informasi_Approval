@@ -44,7 +44,11 @@ class LengkapiProfil extends Page
 
     public function mount(): void
     {
-        $this->form->fill(auth()->user()->toArray());
+        $data = auth()->user()->toArray();
+        if (!empty($data['signature_path'])) {
+            $data['signature_upload'] = $data['signature_path'];
+        }
+        $this->form->fill($data);
     }
 
     public function form(Schema $form): Schema
@@ -59,6 +63,10 @@ class LengkapiProfil extends Page
                             ->required(),
                         TextInput::make('nama')
                             ->label('Nama Lengkap')
+                            ->required(),
+                        \Filament\Forms\Components\Select::make('jenis_kelamin')
+                            ->label('Jenis Kelamin')
+                            ->options(\App\Models\User::JENIS_KELAMIN)
                             ->required(),
                         Textarea::make('alamat')
                             ->label('Alamat')
@@ -202,6 +210,7 @@ class LengkapiProfil extends Page
 
         auth()->user()->update([
             'nama' => $data['nama'],
+            'jenis_kelamin' => $data['jenis_kelamin'],
             'alamat' => $data['alamat'],
             'tanggal_masuk' => $data['tanggal_masuk'],
             'jabatan' => $data['jabatan'],

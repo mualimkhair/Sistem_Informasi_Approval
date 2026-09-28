@@ -12,7 +12,8 @@ class EnforceProfileCompletion
     {
         $user = auth()->user();
 
-        if ($user && !$user->is_profile_completed) {
+        $isExempt = $user->hasRole(['super_admin', 'admin']);
+        if ($user && !$isExempt && (!$user->is_profile_completed || is_null($user->jenis_kelamin))) {
             if (!$request->routeIs('filament.admin.pages.lengkapi-profil') && !$request->routeIs('filament.admin.auth.logout') && !$request->routeIs('tab.auth.logout')) {
                 return redirect()->route('filament.admin.pages.lengkapi-profil');
             }

@@ -32,6 +32,7 @@ class TabContextTest extends TestCase
             'nip' => '123456789012345678',
             'password' => bcrypt('password'),
             'is_profile_completed' => true,
+            'jenis_kelamin' => 'laki-laki',
         ], $extra));
 
         $user->assignRole('pegawai');

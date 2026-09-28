@@ -27,6 +27,10 @@ class UserForm
                             ->label('Nama Lengkap')
                             ->required()
                             ->maxLength(255),
+                        Select::make('jenis_kelamin')
+                            ->label('Jenis Kelamin')
+                            ->options(\App\Models\User::JENIS_KELAMIN)
+                            ->required(),
                         TextInput::make('password')
                             ->password()
                             ->dehydrateStateUsing(fn($state) => Hash::make($state))
@@ -102,7 +106,14 @@ class UserForm
                                     ->label('Saldo Cuti Melahirkan')
                                     ->numeric()
                                     ->minValue(0)
-                                    ->default(90),
+                                    ->default(90)
+                                    ->rules([
+                                        fn (\Filament\Forms\Get $get) => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                            if ($get('../../jenis_kelamin') === 'laki-laki' && (int)$value > 0) {
+                                                $fail('Pegawai laki-laki tidak boleh memiliki saldo Cuti Melahirkan.');
+                                            }
+                                        }
+                                    ]),
                                 TextInput::make('saldo_cuti_alasan_penting')
                                     ->label('Saldo Cuti Alasan Penting')
                                     ->numeric()
@@ -135,3 +146,4 @@ class UserForm
             ]);
     }
 }
+

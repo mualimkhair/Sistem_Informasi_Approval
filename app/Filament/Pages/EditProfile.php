@@ -35,6 +35,10 @@ class EditProfile extends BaseEditProfile
                         TextInput::make('nama')
                             ->label('Nama Lengkap')
                             ->required(),
+                        \Filament\Forms\Components\Select::make('jenis_kelamin')
+                            ->label('Jenis Kelamin')
+                            ->options(\App\Models\User::JENIS_KELAMIN)
+                            ->required(),
                         Textarea::make('alamat')
                             ->label('Alamat')
                             ->required(),
@@ -120,6 +124,14 @@ class EditProfile extends BaseEditProfile
                         $this->getPasswordConfirmationFormComponent(),
                     ])->columns(1),
             ]);
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        if (!empty($data['signature_path'])) {
+            $data['signature_upload'] = $data['signature_path'];
+        }
+        return $data;
     }
 
     protected function mutateFormDataBeforeSave(array $data): array

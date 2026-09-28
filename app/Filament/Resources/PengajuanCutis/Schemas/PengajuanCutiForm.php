@@ -85,13 +85,28 @@ class PengajuanCutiForm
 
                         Select::make('jenis_cuti')
                             ->label('Jenis Cuti')
-                            ->options([
-                                'tahunan' => 'Cuti Tahunan',
-                                'besar' => 'Cuti Besar',
-                                'sakit' => 'Cuti Sakit',
-                                'melahirkan' => 'Cuti Melahirkan',
-                                'alasan_penting' => 'Cuti Alasan Penting',
-                                'diluar_tanggungan_negara' => 'Cuti Diluar Tanggungan Negara',
+                            ->options(function (?PengajuanCuti $record) {
+                                $owner = $record ? $record->user : Auth::user();
+                                $options = [
+                                    'tahunan' => 'Cuti Tahunan',
+                                    'besar' => 'Cuti Besar',
+                                    'sakit' => 'Cuti Sakit',
+                                    'melahirkan' => 'Cuti Melahirkan',
+                                    'alasan_penting' => 'Cuti Alasan Penting',
+                                    'diluar_tanggungan_negara' => 'Cuti Diluar Tanggungan Negara',
+                                ];
+                                if ($owner && $owner->jenis_kelamin !== 'perempuan') {
+                                    unset($options['melahirkan']);
+                                }
+                                return $options;
+                            })
+                            ->rules([
+                                fn (?PengajuanCuti $record) => function (string $attribute, $value, \Closure $fail) use ($record) {
+                                    $owner = $record ? $record->user : Auth::user();
+                                    if ($value === 'melahirkan' && $owner && $owner->jenis_kelamin !== 'perempuan') {
+                                        $fail('Cuti Melahirkan hanya tersedia untuk pegawai perempuan.');
+                                    }
+                                }
                             ])
                             ->searchable()
                             ->required()
@@ -474,3 +489,4 @@ class PengajuanCutiForm
         ];
     }
 }
+

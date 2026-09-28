@@ -169,7 +169,10 @@ class AuthenticationTest extends TestCase
 
     public function test_setelah_profil_lengkap_dashboard_dapat_diakses(): void
     {
-        $user = $this->makeUser(['is_profile_completed' => true]);
+        $user = $this->makeUser([
+            'is_profile_completed' => true,
+            'jenis_kelamin' => 'laki-laki'
+        ]);
 
         $this->actingAsTab($user)->get('/')->assertOk();
     }

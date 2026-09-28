@@ -14,6 +14,18 @@ class PengajuanCuti extends Model
 {
     use HasUlids, SoftDeletes;
 
+    protected static function booted()
+    {
+        static::saving(function ($pengajuan) {
+            if ($pengajuan->jenis_cuti === 'melahirkan') {
+                $user = $pengajuan->user ?? \App\Models\User::find($pengajuan->user_id);
+                if ($user && $user->jenis_kelamin !== 'perempuan') {
+                    abort(422, 'Cuti Melahirkan hanya tersedia untuk pegawai perempuan.');
+                }
+            }
+        });
+    }
+
     public ?string $status_log_keterangan = null;
 
     protected $guarded = ['id'];

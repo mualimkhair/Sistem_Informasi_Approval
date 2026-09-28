@@ -44,6 +44,20 @@ class User extends Authenticatable implements FilamentUser, HasName
         'Pembina Utama (IV/e)' => 'Pembina Utama (IV/e)',
     ];
 
+    public const JENIS_KELAMIN = [
+        'laki-laki' => 'Laki-laki',
+        'perempuan' => 'Perempuan',
+    ];
+
+    protected static function booted()
+    {
+        static::saved(function ($user) {
+            if ($user->jenis_kelamin === 'laki-laki' && $user->saldoCuti && $user->saldoCuti->saldo_cuti_melahirkan > 0) {
+                $user->saldoCuti->updateQuietly(['saldo_cuti_melahirkan' => 0]);
+            }
+        });
+    }
+
     protected $hidden = [
         'password',
         'remember_token',

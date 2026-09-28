@@ -74,6 +74,8 @@ class OperasionalApprovalFlowTest extends TestCase
             'nama' => $nama,
             'nip' => $nip,
             'password' => bcrypt('password'),
+            'jenis_kelamin' => 'laki-laki',
+            'is_profile_completed' => true,
         ], $extra));
     }
 
@@ -356,6 +358,9 @@ class OperasionalApprovalFlowTest extends TestCase
 
     public function test_widget_merges_stats_for_dual_role_user(): void
     {
+        $this->submit();
+        $p2 = $this->submit();
+        $p2->updateQuietly(['status' => 'menunggu_kanit_kepegawaian', 'keputusan_kepala_unit' => 'disetujui', 'keputusan_kepala_seksi' => 'disetujui']);
         $this->kepalaUnit->assignRole('kanit_kepegawaian');
         $this->actingAs($this->kepalaUnit);
 
