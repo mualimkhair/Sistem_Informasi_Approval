@@ -31,18 +31,21 @@
             left: 115mm;
             width: 75mm;
         }
+
         .header-container table {
             width: 100%;
             border-collapse: collapse;
         }
+
         .header-container td {
-            padding: 1px 0;
+            padding: 2px 0;
             vertical-align: top;
             border: none;
             font-size: 7.5pt;
         }
+
         .header-container .label-yth {
-            width: 8mm;
+            width: 10mm;
         }
 
         .judul-formulir {
@@ -244,8 +247,8 @@
             <tr><td style="white-space: nowrap;">Palu, {{ $pengajuanCuti->created_at?->translatedFormat('d F Y') ?? '' }}</td></tr>
             <tr><td>Kepada</td></tr>
             <tr>
-                <td class="label-yth">Yth.</td>
-                <td>{{ $tujuanJabatan }}</td>
+                <td class="label-yth">Yth. {{ $tujuanJabatan }}</td>
+                <!-- <td>{{ $tujuanJabatan }}</td> -->
             </tr>
             <tr><td>di</td></tr>
             <tr><td class="kota-tujuan">{{ $tujuanKota }}</td></tr>
