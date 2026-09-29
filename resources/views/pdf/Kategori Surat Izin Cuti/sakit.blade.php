@@ -50,7 +50,7 @@
         $kabandara_pangkat = $blangko?->kabandara_pangkat ?? $blangko?->kabandara?->pangkat_gol ?? '';
         $kabandara_jabatan = $blangko?->kabandara?->jabatan ?? 'KEPALA KANTOR,';
         
-        $kabandara_signature_path = $blangko?->kabandara_signature_path;
+        $kabandara_signature_path = $blangko?->kabandara_signature_path ?? $blangko?->kabandara?->signature_path;
 
         $kanit = $pengajuanCuti->kanitKepegawaian;
         $kasubag = $pengajuanCuti->kasubagTu;

@@ -173,7 +173,7 @@ class PersetujuanCutisTable
                                 ->broadcast($pejabat);
                         }
 
-                        Notification::make()->title('Nomor Surat berhasil disimpan. Pengajuan diteruskan ke Kabandara.')->success()->send();
+                        Notification::make()->title('Nomor Surat berhasil disimpan')->success()->send();
                     }),
 
                 Action::make('keputusan_kanit')
