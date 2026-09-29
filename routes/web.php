@@ -52,3 +52,13 @@ Route::middleware([\App\Http\Middleware\TabContextMiddleware::class])->group(fun
         return \Maatwebsite\Excel\Facades\Excel::download($export, 'Template-Pegawai.xlsx');
     })->name('users.template');
 });
+
+
+if (app()->environment('local')) {
+    Route::get('/dev/preview/blangko/{pengajuanCuti}', function (\App\Models\PengajuanCuti $pengajuanCuti) {
+        $pengajuanCuti->load(['user.unitKerja', 'kelompokKerja']);
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.cetak-blangko', ['pengajuanCuti' => $pengajuanCuti])
+            ->setPaper('a4', 'portrait');
+        return $pdf->stream('preview-blangko.pdf');
+    });
+}
