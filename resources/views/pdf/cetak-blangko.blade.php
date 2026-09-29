@@ -260,59 +260,65 @@
         {{-- I. DATA PEGAWAI --}}
         <table class="form-table">
             <colgroup>
-                <col style="width:24.5mm">
-                <col style="width:62.0mm">
-                <col style="width:24.5mm">
-                <col style="width:62.0mm">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
             </colgroup>
-            <tr><td colspan="4" class="section-title">I. DATA PEGAWAI</td></tr>
+            <tr><td colspan="7" class="section-title">I. DATA PEGAWAI</td></tr>
             <tr class="row-data">
                 <td>Nama</td>
-                <td>{{ $pengajuanCuti->user->nama ?? '' }}</td>
+                <td colspan="3">{{ $pengajuanCuti->user->nama ?? '' }}</td>
                 <td>NIP.</td>
-                <td>{{ $pengajuanCuti->user->nip ?? '' }}</td>
+                <td colspan="2">{{ $pengajuanCuti->user->nip ?? '' }}</td>
             </tr>
             <tr class="row-data">
                 <td>Jabatan</td>
-                <td>{{ $pengajuanCuti->user->jabatan ?? '' }}</td>
+                <td colspan="3">{{ $pengajuanCuti->user->jabatan ?? '' }}</td>
                 <td>Pangkat /Gol.</td>
-                <td>{{ $pengajuanCuti->user->pangkat_golongan ?? '-' }}</td>
+                <td colspan="2">{{ $pengajuanCuti->user->pangkat_golongan ?? '-' }}</td>
             </tr>
             <tr class="row-data">
                 <td>Unit Kerja</td>
-                <td>{{ $pengajuanCuti->user->unitKerja?->nama_unit ?? '' }}</td>
+                <td colspan="3">{{ $pengajuanCuti->user->unitKerja?->nama_unit ?? '' }}</td>
                 <td>Masa Kerja</td>
-                <td>{{ $masaKerja }}</td>
+                <td colspan="2">{{ $masaKerja }}</td>
             </tr>
         </table>
-        
+
         <div class="gap-section"></div>
 
         {{-- II. JENIS CUTI YANG DIAMBIL --}}
         <table class="form-table">
             <colgroup>
-                <col style="width:66.5mm">
-                <col style="width:20.0mm">
-                <col style="width:66.5mm">
-                <col style="width:20.0mm">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
             </colgroup>
-            <tr><td colspan="4" class="section-title">II. JENIS CUTI YANG DIAMBIL</td></tr>
+            <tr><td colspan="7" class="section-title">II. JENIS CUTI YANG DIAMBIL</td></tr>
             <tr class="row-jenis">
-                <td>1. Cuti Tahunan / Bersama</td>
+                <td colspan="2">1. Cuti Tahunan / Bersama</td>
                 <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('tahunan') !!}</span></td>
-                <td>2. Cuti Besar</td>
+                <td colspan="3">2. Cuti Besar</td>
                 <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('besar') !!}</span></td>
             </tr>
             <tr class="row-jenis">
-                <td>3. Cuti Sakit</td>
+                <td colspan="2">3. Cuti Sakit</td>
                 <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('sakit') !!}</span></td>
-                <td>4. Cuti Melahirkan</td>
+                <td colspan="3">4. Cuti Melahirkan</td>
                 <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('melahirkan') !!}</span></td>
             </tr>
             <tr class="row-jenis">
-                <td>5. Cuti Karena Alasan Penting</td>
+                <td colspan="2">5. Cuti Karena Alasan Penting</td>
                 <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('alasan_penting') !!}</span></td>
-                <td>6. Cuti di luar Tanggungan Negara</td>
+                <td colspan="3">6. Cuti di luar Tanggungan Negara</td>
                 <td class="tc"><span style="font-family:&quot;DejaVu Sans&quot;, sans-serif;">{!! $tandaJenis('diluar_tanggungan_negara') !!}</span></td>
             </tr>
         </table>
@@ -321,8 +327,17 @@
 
         {{-- III. ALASAN CUTI --}}
         <table class="form-table">
-            <tr><td class="section-title">III. ALASAN CUTI</td></tr>
-            <tr class="row-alasan"><td class="top">{{ $pengajuanCuti->alasan_cuti ?? '' }}</td></tr>
+            <colgroup>
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+            </colgroup>
+            <tr><td colspan="7" class="section-title">III. ALASAN CUTI</td></tr>
+            <tr class="row-alasan"><td colspan="7" class="top">{{ $pengajuanCuti->alasan_cuti ?? '' }}</td></tr>
         </table>
 
         <div class="gap-section"></div>
@@ -330,17 +345,20 @@
         {{-- IV. LAMANYA CUTI --}}
         <table class="form-table">
             <colgroup>
-                <col style="width:24.5mm">
-                <col style="width:62.0mm">
-                <col style="width:24.5mm">
-                <col style="width:62.0mm">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
             </colgroup>
-            <tr><td colspan="4" class="section-title">IV. LAMANYA CUTI</td></tr>
+            <tr><td colspan="7" class="section-title">IV. LAMANYA CUTI</td></tr>
             <tr class="row-lama">
                 <td>Selama</td>
-                <td class="tc">{{ $pengajuanCuti->lama_cuti ?? '' }} Hari</td>
+                <td colspan="2" class="tc">{{ $pengajuanCuti->lama_cuti ?? '' }} Hari</td>
                 <td class="tc">Mulai Tanggal</td>
-                <td class="tc">{{ $pengajuanCuti->tanggal_mulai?->translatedFormat('d F Y') ?? '' }} s/d {{ $pengajuanCuti->tanggal_selesai?->translatedFormat('d F Y') ?? '' }}</td>
+                <td colspan="3" class="tc">{{ $pengajuanCuti->tanggal_mulai?->translatedFormat('d F Y') ?? '' }} s/d {{ $pengajuanCuti->tanggal_selesai?->translatedFormat('d F Y') ?? '' }}</td>
             </tr>
         </table>
 
@@ -349,44 +367,46 @@
         {{-- V. CATATAN CUTI --}}
         <table class="form-table">
             <colgroup>
-                <col style="width:17.5mm">
-                <col style="width:39.5mm">
-                <col style="width:29.5mm">
-                <col style="width:64.5mm">
-                <col style="width:22.0mm">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
             </colgroup>
-            <tr><td colspan="5" class="section-title">V. CATATAN CUTI</td></tr>
+            <tr><td colspan="7" class="section-title">V. CATATAN CUTI</td></tr>
             <tr class="row-catatan">
                 <td colspan="3">1. CUTI TAHUNAN</td>
-                <td>2. CUTI BESAR</td>
+                <td colspan="3">2. CUTI BESAR</td>
                 <td class="tc">{{ $fmtSaldo($pengajuanCuti->user->saldoCuti?->saldo_cuti_besar ?? 0) }}</td>
             </tr>
             <tr class="row-catatan">
                 <td colspan="2">Tahun :</td>
                 <td class="tc">Keterangan</td>
-                <td>3. CUTI SAKIT</td>
+                <td colspan="3">3. CUTI SAKIT</td>
                 <td class="tc">{{ $fmtSaldo($pengajuanCuti->user->saldoCuti?->saldo_cuti_sakit ?? 0) }}</td>
             </tr>
             <tr class="row-catatan">
                 <td colspan="2">N-2 : {{ $tahunN2 }}</td>
                 <td class="tc">{{ $fmtSaldo($saldoN2) }}</td>
-                <td>4. CUTI MELAHIRKAN</td>
+                <td colspan="3">4. CUTI MELAHIRKAN</td>
                 <td class="tc">{{ $fmtSaldo($pengajuanCuti->user->saldoCuti?->saldo_cuti_melahirkan ?? 0) }}</td>
             </tr>
             <tr class="row-catatan">
                 <td colspan="2">N-1 : {{ $tahunN1 }}</td>
                 <td class="tc">{{ $fmtSaldo($saldoN1) }}</td>
-                <td>5. CUTI KARENA ALASAN PENTING</td>
+                <td colspan="3">5. CUTI KARENA ALASAN PENTING</td>
                 <td class="tc">{{ $fmtSaldo($pengajuanCuti->user->saldoCuti?->saldo_cuti_alasan_penting ?? 0) }}</td>
             </tr>
             <tr class="row-catatan">
                 <td colspan="2">N : {{ $tahunN }}</td>
                 <td class="tc">{{ $fmtSaldo($saldoN) }}</td>
-                <td>6. CUTI DILUAR TANGGUNGAN NEGARA</td>
+                <td colspan="3">6. CUTI DILUAR TANGGUNGAN NEGARA</td>
                 <td class="tc">-</td>
             </tr>
             <tr class="row-catatan">
-                <td colspan="5">Sisa Cuti : {{ $teksSisaCuti }}</td>
+                <td colspan="7">Sisa Cuti : {{ $teksSisaCuti }}</td>
             </tr>
         </table>
 
@@ -395,21 +415,25 @@
         {{-- VI. ALAMAT SELAMA MENJALANKAN CUTI --}}
         <table class="form-table">
             <colgroup>
-                <col style="width:86.5mm">
-                <col style="width:43.25mm">
-                <col style="width:43.25mm">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
             </colgroup>
-            <tr><td colspan="3" class="section-title">VI. ALAMAT SELAMA MENJALANKAN CUTI</td></tr>
+            <tr><td colspan="7" class="section-title">VI. ALAMAT SELAMA MENJALANKAN CUTI</td></tr>
             <tr class="row-alamat-1">
-                <td rowspan="3" class="top">{{ $pengajuanCuti->alamat_selama_cuti ?? '' }}</td>
+                <td rowspan="3" colspan="4" class="top">{{ $pengajuanCuti->alamat_selama_cuti ?? '' }}</td>
                 <td>TELP / HP</td>
-                <td>{{ $pengajuanCuti->user->nomor_telp ?? '-' }}</td>
+                <td colspan="2">{{ $pengajuanCuti->user->nomor_telp ?? '-' }}</td>
             </tr>
             <tr class="row-alamat-2">
-                <td colspan="2" class="tc" style="border-bottom: none;">Hormat Saya,</td>
+                <td colspan="3" class="tc" style="border-bottom: none;">Hormat Saya,</td>
             </tr>
             <tr class="row-alamat-3">
-                <td colspan="2" class="tc" style="border-top: none;">
+                <td colspan="3" class="tc" style="border-top: none;">
                     @if(isset($pengajuanCuti->user) && $sig = getSignatureBase64($pengajuanCuti->user->signature_path))
                         <img src="{{ $sig }}" class="signature-img"><br>
                     @endif
@@ -474,16 +498,21 @@
         @endphp
         <table class="form-table">
             <colgroup>
-                <col style="width:86.5mm">
-                <col style="width:86.5mm">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
+                <col style="width:14.2857%">
             </colgroup>
-            <tr><td colspan="2" class="section-title">VIII. KEPUTUSAN PEJABAT YANG BERWENANG MEMBERIKAN CUTI</td></tr>
+            <tr><td colspan="7" class="section-title">VIII. KEPUTUSAN PEJABAT YANG BERWENANG MEMBERIKAN CUTI</td></tr>
             <tr class="row-keputusan-header">
-                <td class="tc persetujuan-title">DISETUJUI</td>
-                <td class="tc persetujuan-title">DITANGGUHKAN / TIDAK DISETUJUI</td>
+                <td colspan="4" class="tc persetujuan-title">DISETUJUI</td>
+                <td colspan="3" class="tc persetujuan-title">DITANGGUHKAN / TIDAK DISETUJUI</td>
             </tr>
             <tr class="row-keputusan-sig">
-                <td>
+                <td colspan="4">
                     @if($kabandaraApproved)
                         @if($signaturePath && $sig = getSignatureBase64($signaturePath))
                             <img src="{{ $sig }}" class="signature-img"><br>
@@ -491,7 +520,7 @@
                         <u>{{ $kabandaraNama ?? '...................' }}</u>
                     @endif
                 </td>
-                <td>
+                <td colspan="3">
                     @if($kabandaraRejected)
                         @if($signaturePath && $sig = getSignatureBase64($signaturePath))
                             <img src="{{ $sig }}" class="signature-img"><br>
