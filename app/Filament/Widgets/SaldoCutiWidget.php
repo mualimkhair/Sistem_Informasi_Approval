@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class SaldoCutiWidget extends BaseWidget
 {
     protected ?string $pollingInterval = '30s';
+    protected static ?int $sort = 3;
 
     protected function getStats(): array
     {
@@ -66,3 +67,4 @@ class SaldoCutiWidget extends BaseWidget
         ];
     }
 }
+

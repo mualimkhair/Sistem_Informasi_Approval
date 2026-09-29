@@ -8,9 +8,9 @@ Dokumen ini mencatat task yang masih perlu dikerjakan, diverifikasi, atau disele
 
 | Task | Deskripsi | Status |
 |---|---|---|
-| TASK-03 | Tanda tangan elektronik Kabandara | ⏳ Ditunda |
+| TASK-03 | Tanda tangan elektronik Kabandara | 🟢 SELESAI |
 | TASK-06 | Jenis kelamin & pembatasan Cuti Melahirkan | 🔴 Belum dikerjakan |
-| TASK-09 | Perubahan untuk Unit Operasional | 🟡 Belum diverifikasi |
+| TASK-09 | Perubahan untuk Unit Operasional | 🟢 SELESAI |
 
 ---
 
@@ -18,7 +18,7 @@ Dokumen ini mencatat task yang masih perlu dikerjakan, diverifikasi, atau disele
 
 ## Status
 
-⏳ **DITUNDA**
+🟢 **SELESAI**
 
 ## Deskripsi
 
@@ -41,16 +41,16 @@ Memastikan tanda tangan elektronik Kabandara dapat digunakan secara tepat pada d
 
 ## Kriteria Keberhasilan
 
-- [ ] Tanda tangan elektronik Kabandara tersedia pada sistem.
-- [ ] Tanda tangan Kabandara digunakan pada tahap persetujuan yang benar.
-- [ ] Tanda tangan tidak muncul sebelum Kabandara menyetujui.
-- [ ] Tanda tangan muncul pada dokumen setelah Kabandara menyetujui.
-- [ ] Dokumen PDF dapat menampilkan tanda tangan dengan benar.
-- [ ] Tidak mengganggu workflow persetujuan cuti yang sudah berjalan.
+- [x] Tanda tangan elektronik Kabandara tersedia pada sistem.
+- [x] Tanda tangan Kabandara digunakan pada tahap persetujuan yang benar.
+- [x] Tanda tangan tidak muncul sebelum Kabandara menyetujui.
+- [x] Tanda tangan muncul pada dokumen setelah Kabandara menyetujui.
+- [x] Dokumen PDF dapat menampilkan tanda tangan dengan benar.
+- [x] Tidak mengganggu workflow persetujuan cuti yang sudah berjalan.
 
 ## Catatan
 
-Task ini **belum dikerjakan sekarang** dan akan dilakukan setelah task lain yang lebih prioritas selesai.
+Task ini telah diimplementasikan menggunakan mekanisme snapshot signature.
 
 ---
 
@@ -176,9 +176,9 @@ Task dianggap selesai apabila:
 
 ---
 
-# TASK-09 — Perubahan untuk Unit Operasional
+# TASK-09 — Verifikasi Unit Operasional
 
-## Status Belum Diinvestigasi
+## Status
 
 🟢 **SELESAI**
 

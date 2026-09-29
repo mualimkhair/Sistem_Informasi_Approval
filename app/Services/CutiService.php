@@ -692,7 +692,7 @@ class CutiService
         $pengajuan->load(['user.unitKerja', 'kelompokKerja']);
 
         $pdfBlangko = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.cetak-blangko', ['pengajuanCuti' => $pengajuan])
-            ->setPaper('legal', 'portrait');
+            ->setPaper('a4', 'portrait');
 
         $blangkoFilename = $pengajuan->id . '_blangko-cuti.pdf';
         $blangkoPath = 'documents/blangko-cuti/' . $blangkoFilename;

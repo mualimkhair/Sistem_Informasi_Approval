@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 class MenungguKeputusanWidget extends BaseWidget
 {
     protected ?string $pollingInterval = '10s';
+    protected static ?int $sort = 2;
 
     protected function getStats(): array
     {
@@ -109,6 +110,16 @@ class MenungguKeputusanWidget extends BaseWidget
                 ->color('success');
         }
 
+        if ($user->hasRole("pejabat_berwenang")) {
+            $menungguBlangko = \App\Models\BlangkoCuti::where("status", "menunggu")->count();
+            $stats[] = Stat::make("Blangko Menunggu Persetujuan", $menungguBlangko)
+                ->icon("heroicon-o-document-check")
+                ->color("warning")
+                ->url(\App\Filament\Resources\BlangkoCutis\BlangkoCutiResource::getUrl("index", ["tableFilters" => ["status" => ["value" => "menunggu"]]]));
+        }
+
         return $stats;
     }
 }
+
+

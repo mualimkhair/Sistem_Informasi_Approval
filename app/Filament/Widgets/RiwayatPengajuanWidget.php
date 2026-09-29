@@ -10,6 +10,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 class RiwayatPengajuanWidget extends BaseWidget
 {
     protected int|string|array $columnSpan = 'full';
+    protected static ?int $sort = 4;
 
     public function table(Table $table): Table
     {
@@ -32,3 +33,4 @@ class RiwayatPengajuanWidget extends BaseWidget
             ]);
     }
 }
+

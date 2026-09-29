@@ -63,6 +63,9 @@
             width: 173mm;
         }
 
+        .form-table, .form-table td, .form-table th, .form-table col {
+            box-sizing: border-box;
+        }
         table.form-table {
             width: 173mm;
             border-collapse: collapse;
@@ -114,13 +117,8 @@
         .row-keputusan-sig td { height: 18mm; vertical-align: bottom; padding-bottom: 2mm; text-align: center; } /* Reduced from 25mm to 18mm */
 
         /* Gaps */
-        .gap-1 { height: 2.6mm; }
-        .gap-2 { height: 4.5mm; }
-        .gap-3 { height: 2.7mm; }
-        .gap-4 { height: 2.6mm; }
-        .gap-5 { height: 2.3mm; }
-        .gap-6 { height: 2.6mm; }
-        .gap-7 { height: 1.5mm; } /* Reduced from 3.1mm to 1.5mm */
+        .gap-section { height: 2.5mm; }
+
 
     </style>
 </head>
@@ -262,10 +260,10 @@
         {{-- I. DATA PEGAWAI --}}
         <table class="form-table">
             <colgroup>
-                <col style="width:14%">
-                <col style="width:43%">
-                <col style="width:14%">
-                <col style="width:29%">
+                <col style="width:24.5mm">
+                <col style="width:62.0mm">
+                <col style="width:24.5mm">
+                <col style="width:62.0mm">
             </colgroup>
             <tr><td colspan="4" class="section-title">I. DATA PEGAWAI</td></tr>
             <tr class="row-data">
@@ -288,15 +286,15 @@
             </tr>
         </table>
         
-        <div class="gap-1"></div>
+        <div class="gap-section"></div>
 
         {{-- II. JENIS CUTI YANG DIAMBIL --}}
         <table class="form-table">
             <colgroup>
-                <col style="width:29%">
-                <col style="width:14%">
-                <col style="width:42%">
-                <col style="width:15%">
+                <col style="width:66.5mm">
+                <col style="width:20.0mm">
+                <col style="width:66.5mm">
+                <col style="width:20.0mm">
             </colgroup>
             <tr><td colspan="4" class="section-title">II. JENIS CUTI YANG DIAMBIL</td></tr>
             <tr class="row-jenis">
@@ -319,7 +317,7 @@
             </tr>
         </table>
 
-        <div class="gap-2"></div>
+        <div class="gap-section"></div>
 
         {{-- III. ALASAN CUTI --}}
         <table class="form-table">
@@ -327,15 +325,15 @@
             <tr class="row-alasan"><td class="top">{{ $pengajuanCuti->alasan_cuti ?? '' }}</td></tr>
         </table>
 
-        <div class="gap-3"></div>
+        <div class="gap-section"></div>
 
         {{-- IV. LAMANYA CUTI --}}
         <table class="form-table">
             <colgroup>
                 <col style="width:24.5mm">
-                <col style="width:73.5mm">
+                <col style="width:62.0mm">
                 <col style="width:24.5mm">
-                <col style="width:50.5mm">
+                <col style="width:62.0mm">
             </colgroup>
             <tr><td colspan="4" class="section-title">IV. LAMANYA CUTI</td></tr>
             <tr class="row-lama">
@@ -346,16 +344,16 @@
             </tr>
         </table>
 
-        <div class="gap-4"></div>
+        <div class="gap-section"></div>
 
         {{-- V. CATATAN CUTI --}}
         <table class="form-table">
             <colgroup>
-                <col style="width:15mm">
-                <col style="width:34mm">
-                <col style="width:25mm">
-                <col style="width:74mm">
-                <col style="width:25mm">
+                <col style="width:17.5mm">
+                <col style="width:39.5mm">
+                <col style="width:29.5mm">
+                <col style="width:64.5mm">
+                <col style="width:22.0mm">
             </colgroup>
             <tr><td colspan="5" class="section-title">V. CATATAN CUTI</td></tr>
             <tr class="row-catatan">
@@ -392,14 +390,14 @@
             </tr>
         </table>
 
-        <div class="gap-5"></div>
+        <div class="gap-section"></div>
 
         {{-- VI. ALAMAT SELAMA MENJALANKAN CUTI --}}
         <table class="form-table">
             <colgroup>
-                <col style="width:98.5mm">
-                <col style="width:24.5mm">
-                <col style="width:50mm">
+                <col style="width:86.5mm">
+                <col style="width:43.25mm">
+                <col style="width:43.25mm">
             </colgroup>
             <tr><td colspan="3" class="section-title">VI. ALAMAT SELAMA MENJALANKAN CUTI</td></tr>
             <tr class="row-alamat-1">
@@ -421,7 +419,7 @@
             </tr>
         </table>
 
-        <div class="gap-6"></div>
+        <div class="gap-section"></div>
 
         {{-- VII. PERTIMBANGAN ATASAN LANGSUNG --}}
         <table class="form-table">
@@ -459,7 +457,7 @@
             </tr>
         </table>
 
-        <div class="gap-7"></div>
+        <div class="gap-section"></div>
 
         {{-- VIII. KEPUTUSAN PEJABAT YANG BERWENANG --}}
         @php

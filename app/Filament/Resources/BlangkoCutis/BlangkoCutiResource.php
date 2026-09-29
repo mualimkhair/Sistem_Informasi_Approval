@@ -157,6 +157,7 @@ class BlangkoCutiResource extends Resource
                                 'kabandara_nama' => auth()->user()->nama,
                                 'kabandara_nip' => auth()->user()->nip,
                                 'kabandara_pangkat' => auth()->user()->pangkat ?? null,
+                                'kabandara_signature_path' => auth()->user()->signature_path,
                             ]);
 
                             \App\Services\CutiService::generateAndSaveFinalDocuments($record);

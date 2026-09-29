@@ -20,7 +20,7 @@ class BlangkoCuti extends Model
 
     public function pengajuanCuti()
     {
-        return $this->belongsTo(PengajuanCuti::class);
+        return $this->belongsTo(PengajuanCuti::class)->withTrashed();
     }
 
     public function kabandara()

@@ -204,6 +204,13 @@ class EditProfile extends BaseEditProfile
             }
         }
 
+        // Cek apakah masih dirujuk oleh blangko_cutis.kabandara_signature_path
+        if (DbSchema::hasTable('blangko_cutis') && DbSchema::hasColumn('blangko_cutis', 'kabandara_signature_path')) {
+            if (\App\Models\BlangkoCuti::where('kabandara_signature_path', $oldPath)->exists()) {
+                return;
+            }
+        }
+
         Storage::disk('public')->delete($oldPath);
     }
 }

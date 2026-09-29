@@ -53,7 +53,7 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Widgets\SaldoCutiWidget::class,
                 \App\Filament\Widgets\StatistikCutiWidget::class,
                 \App\Filament\Widgets\MenungguKeputusanWidget::class,
-                \App\Filament\Widgets\MenungguKabandaraWidget::class,
+                
                 \App\Filament\Widgets\PegawaiSedangCutiWidget::class,
                 \App\Filament\Widgets\RiwayatPengajuanWidget::class,
             ])
@@ -83,3 +83,5 @@ class AdminPanelProvider extends PanelProvider
             );
     }
 }
+
+

@@ -108,7 +108,7 @@ class UserForm
                                     ->minValue(0)
                                     ->default(90)
                                     ->rules([
-                                        fn (\Filament\Forms\Get $get) => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                        fn (\Filament\Schemas\Components\Utilities\Get $get) => function (string $attribute, $value, \Closure $fail) use ($get) {
                                             if ($get('../../jenis_kelamin') === 'laki-laki' && (int)$value > 0) {
                                                 $fail('Pegawai laki-laki tidak boleh memiliki saldo Cuti Melahirkan.');
                                             }

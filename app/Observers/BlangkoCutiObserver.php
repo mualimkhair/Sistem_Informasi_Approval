@@ -18,6 +18,7 @@ class BlangkoCutiObserver
                     $blangkoCuti->kabandara_nip = $user->nip;
                     $blangkoCuti->kabandara_pangkat = $user->pangkat_gol;
                     $blangkoCuti->kabandara_jabatan = $user->jabatan;
+                    $blangkoCuti->kabandara_signature_path = $user->signature_path;
                     $blangkoCuti->tanggal_keputusan = now();
                 }
             }

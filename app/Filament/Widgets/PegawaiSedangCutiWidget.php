@@ -11,7 +11,7 @@ use Carbon\Carbon;
 class PegawaiSedangCutiWidget extends BaseWidget
 {
     protected static ?string $heading = 'Pegawai Sedang Cuti Saat Ini';
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 5;
 
     public static function canView(): bool
     {
@@ -39,3 +39,4 @@ class PegawaiSedangCutiWidget extends BaseWidget
             ->paginated(false);
     }
 }
+

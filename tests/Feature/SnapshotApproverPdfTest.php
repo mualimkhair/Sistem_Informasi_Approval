@@ -297,6 +297,31 @@ class SnapshotApproverPdfTest extends TestCase
         $this->assertStringNotContainsString('<u>KanitKep Baru</u>', $html);
     }
 
+    public function test_snapshot_signature_kabandara_tersimpan_dan_digunakan_di_pdf(): void
+    {
+        $pengajuan = $this->submitAdministrasi();
+
+        $this->pejabat->update(['signature_path' => 'signatures/old_kabandara_sig.png']);
+        
+        $this->actingAs($this->kanitAdm);
+        $pengajuan->update(['keputusan_kanit' => 'disetujui']);
+        $this->actingAs($this->kasubagAdm);
+        $pengajuan->update(['keputusan_kasubag' => 'disetujui']);
+        
+        $blangko = BlangkoCuti::where('pengajuan_cuti_id', $pengajuan->id)->first();
+        
+        $this->actingAs($this->pejabat);
+        $blangko->update(['status' => 'disetujui']);
+        $blangko = $blangko->fresh();
+        
+        $this->assertEquals('signatures/old_kabandara_sig.png', $blangko->kabandara_signature_path);
+        
+        $this->pejabat->update(['signature_path' => 'signatures/new_kabandara_sig.png']);
+        
+        $blangko = $blangko->fresh();
+        $this->assertEquals('signatures/old_kabandara_sig.png', $blangko->kabandara_signature_path);
+    }
+
     public function test_record_legacy_tanpa_snapshot_pdf_tetap_berhasil(): void
     {
         $pengajuan = PengajuanCuti::create([

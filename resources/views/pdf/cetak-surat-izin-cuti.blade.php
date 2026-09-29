@@ -70,7 +70,7 @@
             word-wrap: break-word;
         }
         .persetujuan-title { font-weight: bold; }
-        .persetujuan-table td.approval-cell { height: 82px; padding: 30px 6px 6px; }
+        .persetujuan-table td.approval-cell { height: 82px; padding: 6px; vertical-align: bottom; }
     </style>
 </head>
 <body>
@@ -291,8 +291,8 @@
     </tr>
     <tr>
         <td colspan="4" class="top tall-box-lg">{{ $pengajuanCuti->alamat_selama_cuti }}</td>
-        <td colspan="3" class="top">
-            Hormat Saya,<br><br>
+        <td colspan="3" style="vertical-align: bottom; text-align: left;">
+              Hormat Saya,<br><br>
             @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->user->signature_path))
                 <img src="{{ $sig }}" class="signature-img"><br>
             @else
@@ -317,7 +317,7 @@
         <td class="tc">KASI / KASUBAG</td>
     </tr>
     <tr>
-        <td colspan="2" class="tc tall-box">
+        <td colspan="2" class="tc tall-box" style="vertical-align: bottom;">
             @if($kanitApproved)
                 @if($pengajuanCuti->kanit)
                     @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->kanit->signature_path))
@@ -332,7 +332,7 @@
                 @endif
             @endif
         </td>
-        <td colspan="2" class="tc tall-box">
+        <td colspan="2" class="tc tall-box" style="vertical-align: bottom;">
             @if($kasubagApproved)
                 @if($pengajuanCuti->kasubag)
                     @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->kasubag->signature_path))
@@ -347,7 +347,7 @@
                 @endif
             @endif
         </td>
-        <td colspan="2" class="tc tall-box">
+        <td colspan="2" class="tc tall-box" style="vertical-align: bottom;">
             @if($kanitRejected)
                 @if($pengajuanCuti->kanit)
                     @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->kanit->signature_path))
@@ -363,7 +363,7 @@
                 @endif
             @endif
         </td>
-        <td class="tc tall-box">
+        <td class="tc tall-box" style="vertical-align: bottom;">
             @if($kasubagRejected)
                 @if($pengajuanCuti->kasubag)
                     @if($sig = \App\Services\CutiService::getSignatureBase64($pengajuanCuti->kasubag->signature_path))
@@ -453,3 +453,5 @@
 
 </body>
 </html>
+
+

@@ -48,7 +48,7 @@
         $kabandara_nip = $blangko?->kabandara_nip ?? $blangko?->kabandara?->nip ?? '..........................';
         $kabandara_jabatan = $blangko?->kabandara?->jabatan ?? 'Kepala Kantor';
         
-        $kabandara_signature_path = $blangko?->kabandara?->signature_path;
+        $kabandara_signature_path = $blangko?->kabandara_signature_path;
 
         $kanit = $pengajuanCuti->kanitKepegawaian;
         $kasubag = $pengajuanCuti->kasubagTu;
