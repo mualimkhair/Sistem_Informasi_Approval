@@ -30,3 +30,6 @@ AGENTS.md
 
 /.agents/
 /docs/TASK.md
+
+Dockerfile
+docker-compose.yml  
