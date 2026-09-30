@@ -18,6 +18,21 @@ use SensitiveParameter;
 
 class Login extends BaseAuth
 {
+    public function hasLogo(): bool
+    {
+        return false;
+    }
+
+    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
+    {
+        return 'Sistem Informasi Pengajuan dan Manajemen Cuti Pegawai';
+    }
+
+    public function getSubheading(): string|\Illuminate\Contracts\Support\Htmlable|null
+    {
+        return 'BLU UPBU Mutiara Sis Al-Jufri';
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema

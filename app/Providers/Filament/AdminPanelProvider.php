@@ -27,6 +27,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('/')
+            ->brandName('Sistem Cuti Pegawai')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login(\App\Filament\Pages\Auth\Login::class)
             ->profile(\App\Filament\Pages\EditProfile::class, isSimple: false)
