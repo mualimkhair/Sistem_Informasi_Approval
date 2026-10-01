@@ -62,3 +62,4 @@ if (app()->environment('local')) {
         return $pdf->stream('preview-blangko.pdf');
     });
 }
+

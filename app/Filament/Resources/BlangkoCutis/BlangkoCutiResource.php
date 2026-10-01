@@ -59,7 +59,7 @@ class BlangkoCutiResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery();
+        return parent::getEloquentQuery()->whereHas('pengajuanCuti', function ($query) { $query->whereNull('deleted_at'); });
     }
 
     public static function table(Table $table): Table

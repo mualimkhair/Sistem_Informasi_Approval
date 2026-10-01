@@ -111,7 +111,7 @@ class MenungguKeputusanWidget extends BaseWidget
         }
 
         if ($user->hasRole("pejabat_berwenang")) {
-            $menungguBlangko = \App\Models\BlangkoCuti::where("status", "menunggu")->count();
+            $menungguBlangko = \App\Models\BlangkoCuti::where("status", "menunggu")->whereHas('pengajuanCuti', function ($q) { $q->whereNull('deleted_at'); })->count();
             $stats[] = Stat::make("Blangko Menunggu Persetujuan", $menungguBlangko)
                 ->icon("heroicon-o-document-check")
                 ->color("warning")
