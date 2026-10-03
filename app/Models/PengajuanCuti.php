@@ -219,27 +219,30 @@ class PengajuanCuti extends Model
 
             // ============ ADMINISTRASI FLOW (existing) ============
 
-            if ($user->hasRole('kasubag')) {
+            if ($user->hasRole('kasubag_tu') || $user->hasRole('kasubag')) {
                 // By snapshot
                 $q->orWhere(function (Builder $q2) use ($user) {
                     $q2->where('tipe_aliran', 'administrasi')
                         ->where(function (Builder $q3) use ($user) {
-                            $q3->whereHas('seksi', fn (Builder $q4) => $q4->where('kepala_seksi_id', $user->id))
-                                ->orWhereHas(
-                                    'unitKerja',
-                                    fn (Builder $q4) => $q4->whereHas('seksi', fn (Builder $q5) => $q5->where('kepala_seksi_id', $user->id))
-                                );
-
-                            // Fallback by current profile (if snapshot is null)
-                            $q3->orWhere(function (Builder $q4) use ($user) {
-                                $q4->whereNull('seksi_id')
-                                    ->whereHas('user', fn (Builder $q5) => $q5
-                                        ->whereHas('seksi', fn (Builder $q6) => $q6->where('kepala_seksi_id', $user->id))
-                                        ->orWhereHas(
-                                            'unitKerja',
-                                            fn (Builder $q6) => $q6->whereHas('seksi', fn (Builder $q7) => $q7->where('kepala_seksi_id', $user->id))
-                                        ));
-                            });
+                            $q3->where('kasubag_tu_id', $user->id)
+                               ->orWhere(function (Builder $q4) use ($user) {
+                                   $q4->whereNull('kasubag_tu_id')
+                                      ->where(function (Builder $q5) use ($user) {
+                                          $q5->whereHas('seksi', fn (Builder $q6) => $q6->where('kepala_seksi_id', $user->id))
+                                             ->orWhereHas('unitKerja', fn (Builder $q6) => $q6->whereHas('seksi', fn (Builder $q7) => $q7->where('kepala_seksi_id', $user->id)));
+                                          $q5->orWhere(function (Builder $q6) use ($user) {
+                                              $q6->whereNull('seksi_id')
+                                                 ->whereHas('user', fn (Builder $q7) => $q7
+                                                     ->whereHas('seksi', fn (Builder $q8) => $q8->where('kepala_seksi_id', $user->id))
+                                                     ->orWhereHas('unitKerja', fn (Builder $q8) => $q8->whereHas('seksi', fn (Builder $q9) => $q9->where('kepala_seksi_id', $user->id)))
+                                                 );
+                                          });
+                                      });
+                               });
+                        })
+                        ->where(function (Builder $q3) {
+                            $q3->where('keputusan_kanit_kepegawaian', 'disetujui')
+                               ->orWhere('keputusan_kanit_kepegawaian', 'dilewati');
                         });
                 });
             }
@@ -249,14 +252,29 @@ class PengajuanCuti extends Model
                 $q->orWhere(function (Builder $q2) use ($user) {
                     $q2->where('tipe_aliran', 'administrasi')
                         ->where(function (Builder $q3) use ($user) {
-                            $q3->whereHas('unitKerja', fn (Builder $q4) => $q4->where('kepala_unit_id', $user->id));
+                            $q3->where('kepala_unit_id', $user->id)
+                               ->orWhere(function (Builder $q4) use ($user) {
+                                   $q4->whereNull('kepala_unit_id')
+                                      ->where(function (Builder $q5) use ($user) {
+                                          $q5->whereHas('unitKerja', fn (Builder $q6) => $q6->where('kepala_unit_id', $user->id))
+                                             ->orWhere(function (Builder $q6) use ($user) {
+                                                 $q6->whereNull('unit_kerja_id')
+                                                    ->whereHas('user', fn (Builder $q7) => $q7
+                                                        ->whereHas('unitKerja', fn (Builder $q8) => $q8->where('kepala_unit_id', $user->id)));
+                                             });
+                                      });
+                               });
+                        });
+                });
+            }
 
-                            // Fallback by current profile (if snapshot is null)
-                            $q3->orWhere(function (Builder $q4) use ($user) {
-                                $q4->whereNull('unit_kerja_id')
-                                    ->whereHas('user', fn (Builder $q5) => $q5
-                                        ->whereHas('unitKerja', fn (Builder $q6) => $q6->where('kepala_unit_id', $user->id)));
-                            });
+            if ($user->hasRole('kanit_kepegawaian')) {
+                $q->orWhere(function (Builder $q2) use ($user) {
+                    $q2->where('tipe_aliran', 'administrasi')
+                        ->where('kanit_kepegawaian_id', $user->id)
+                        ->where(function (Builder $q3) {
+                            $q3->where('keputusan_kanit', 'disetujui')
+                               ->orWhere('keputusan_kanit', 'dilewati');
                         });
                 });
             }

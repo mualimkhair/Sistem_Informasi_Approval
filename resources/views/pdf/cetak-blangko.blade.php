@@ -215,9 +215,9 @@
     $kasiReject = $isOperasional ? (in_array($pengajuanCuti->keputusan_kepala_seksi, ['ditolak_kepala_seksi', 'ditolak', 'perubahan'])) : false;
     $kasiApprover = $isOperasional ? $pengajuanCuti->kepalaSeksi : null;
 
-    $kanitPegApprove = $isOperasional ? ($pengajuanCuti->keputusan_kanit_kepegawaian === 'disetujui') : ($isAdministrasiKanitIsKepegawaian ? $kanitApproved : false);
-    $kanitPegReject = false; 
-    $kanitPegApprover = $isOperasional ? $pengajuanCuti->kanitKepegawaian : ($isAdministrasiKanitIsKepegawaian ? $pengajuanCuti->kanit : null);
+    $kanitPegApprove = $isOperasional ? ($pengajuanCuti->keputusan_kanit_kepegawaian === 'disetujui') : ($isAdministrasiKanitIsKepegawaian ? $kanitApproved : ($pengajuanCuti->keputusan_kanit_kepegawaian === 'disetujui'));
+    $kanitPegReject = $isOperasional ? (in_array($pengajuanCuti->keputusan_kanit_kepegawaian, ['ditolak_kanit_kepegawaian', 'ditolak', 'perubahan'])) : ($isAdministrasiKanitIsKepegawaian ? $kanitRejected : in_array($pengajuanCuti->keputusan_kanit_kepegawaian, ['ditolak_kanit_kepegawaian', 'ditolak', 'perubahan'])); 
+    $kanitPegApprover = $isOperasional ? $pengajuanCuti->kanitKepegawaian : ($isAdministrasiKanitIsKepegawaian ? $pengajuanCuti->kanit : $pengajuanCuti->kanitKepegawaian);
 
     $kasubagApprove = $isOperasional ? ($pengajuanCuti->keputusan_kasubag_tu === 'disetujui') : ($kasubagApproved);
     $kasubagReject = $isOperasional ? (in_array($pengajuanCuti->keputusan_kasubag_tu, ['ditolak_kasubag_tu', 'ditolak', 'perubahan'])) : ($kasubagRejected);

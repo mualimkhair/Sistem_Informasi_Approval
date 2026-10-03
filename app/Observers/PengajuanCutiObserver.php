@@ -31,7 +31,7 @@ class PengajuanCutiObserver
             ? 'operasional'
             : 'administrasi';
 
-        // Snapshot the four operasional approvers at submission time
+        // Snapshot the approvers at submission time
         if ($pengajuanCuti->tipe_aliran === 'operasional') {
             $seksiRecord = $pengajuanCuti->seksi_id ? Seksi::find($pengajuanCuti->seksi_id) : null;
             $pengajuanCuti->kepala_unit_id = $unitKerjaRecord?->kepala_unit_id;
@@ -81,24 +81,60 @@ class PengajuanCutiObserver
 
             // Promote through any stages that are already 'dilewati'
             CutiService::handleApprovalStatus($pengajuanCuti);
-        } elseif ($submitter?->hasRole('kasubag')) {
-            $pengajuanCuti->keputusan_kanit = 'dilewati';
-            $pengajuanCuti->keputusan_kasubag = 'dilewati';
-            $pengajuanCuti->status = 'menunggu_atasan';
-            CutiService::handleApprovalStatus($pengajuanCuti);
-        } elseif ($submitter?->hasRole('kanit')) {
-            $pengajuanCuti->keputusan_kanit = 'dilewati';
-        } elseif ($unitKerjaRecord && is_null($unitKerjaRecord->kepala_unit_id)) {
-            $pengajuanCuti->keputusan_kanit = 'dilewati';
-        }
+        } else {
+            // ALIRAN ADMINISTRASI
+            $pengajuanCuti->kepala_unit_id = $unitKerjaRecord?->kepala_unit_id;
+            
+            $roleKanitKepegawaian = \Spatie\Permission\Models\Role::where('name', 'kanit_kepegawaian')->first();
+            $pengajuanCuti->kanit_kepegawaian_id = $roleKanitKepegawaian ? User::role($roleKanitKepegawaian)->first()?->id : null;
+            
+            $roleKasubagTu = \Spatie\Permission\Models\Role::where('name', 'kasubag_tu')->first();
+            $pengajuanCuti->kasubag_tu_id = $roleKasubagTu ? User::role($roleKasubagTu)->first()?->id : null;
 
-        if ($pengajuanCuti->tanggal_mulai && $pengajuanCuti->tanggal_selesai) {
-            $pengajuanCuti->lama_cuti = CutiService::hitungLamaCuti(
-                Carbon::parse($pengajuanCuti->tanggal_mulai),
-                Carbon::parse($pengajuanCuti->tanggal_selesai),
-                $pengajuanCuti->user->unitKerja ?? null,
-                $pengajuanCuti->kelompokKerja ?? null
-            );
+            $pengajuanCuti->status = 'menunggu_kepala_unit';
+
+            if ($unitKerjaRecord && is_null($unitKerjaRecord->kepala_unit_id)) {
+                $pengajuanCuti->keputusan_kanit = 'dilewati';
+            } elseif ($unitKerjaRecord && $unitKerjaRecord->kepala_unit_id == $pengajuanCuti->user_id) {
+                $pengajuanCuti->keputusan_kanit = 'dilewati';
+            }
+
+            if (is_null($pengajuanCuti->kanit_kepegawaian_id)) {
+                $pengajuanCuti->keputusan_kanit_kepegawaian = 'dilewati';
+            } elseif ($pengajuanCuti->kanit_kepegawaian_id == $pengajuanCuti->user_id) {
+                $pengajuanCuti->keputusan_kanit_kepegawaian = 'dilewati';
+            }
+            
+            if (is_null($pengajuanCuti->kasubag_tu_id)) {
+                $pengajuanCuti->keputusan_kasubag = 'dilewati';
+            } elseif ($pengajuanCuti->kasubag_tu_id == $pengajuanCuti->user_id) {
+                $pengajuanCuti->keputusan_kasubag = 'dilewati';
+            }
+
+            if ($submitter?->hasRole('kasubag_tu')) {
+                $pengajuanCuti->keputusan_kanit = 'dilewati';
+                $pengajuanCuti->keputusan_kanit_kepegawaian = 'dilewati';
+                $pengajuanCuti->keputusan_kasubag = 'dilewati';
+            }
+
+            // DUPLICATE APPROVAL PREVENTION
+            // If the Kepala Unit is ALSO the Kanit Kepegawaian (like Unit Kepegawaian - Asmaul Husna Sabil)
+            if ($pengajuanCuti->kepala_unit_id && $pengajuanCuti->kepala_unit_id == $pengajuanCuti->kanit_kepegawaian_id) {
+                // If the submitter is NOT the Kepala Unit/Kanit Kepegawaian, they only need to approve once.
+                // We let the Kanit Kepegawaian stage be 'dilewati', so Asmaul approves as Kanit.
+                $pengajuanCuti->keputusan_kanit_kepegawaian = 'dilewati';
+            }
+
+            if ($pengajuanCuti->tanggal_mulai && $pengajuanCuti->tanggal_selesai) {
+                $pengajuanCuti->lama_cuti = CutiService::hitungLamaCuti(
+                    Carbon::parse($pengajuanCuti->tanggal_mulai),
+                    Carbon::parse($pengajuanCuti->tanggal_selesai),
+                    $pengajuanCuti->user->unitKerja ?? null,
+                    $pengajuanCuti->kelompokKerja ?? null
+                );
+            }
+
+            CutiService::handleApprovalStatus($pengajuanCuti);
         }
 
         // Validasi server-side
@@ -143,31 +179,9 @@ class PengajuanCutiObserver
         if ($pengajuanCuti->tipe_aliran === 'operasional') {
             $this->notifyOperasionalFirstApprover($pengajuanCuti);
         } else {
-            $kanits = User::role('kanit')
-                ->where('unit_kerja_id', $pengajuanCuti->user->unit_kerja_id)
-                ->where('id', '!=', $pengajuanCuti->user_id)
-                ->get();
-            $seksiId = $pengajuanCuti->seksi_id ?? $pengajuanCuti->user->seksi_id;
-            $kasubags = User::role('kasubag')
-                ->where('seksi_id', $seksiId)
-                ->where('id', '!=', $pengajuanCuti->user_id)
-                ->get();
-
-            foreach ($kanits->merge($kasubags) as $approver) {
-                Notification::make()
-                    ->title('Pengajuan Cuti Baru')
-                    ->body('Pengajuan cuti dari '.$pengajuanCuti->user->nama.' menunggu persetujuan Anda.')
-                    ->info()
-                    ->actions([
-                        \Filament\Actions\Action::make('lihat')
-                            ->button()
-                            ->label('Lihat')
-                            ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index'))
-                            ->markAsRead(),
-                    ])
-                    ->sendToDatabase($approver);
-            }
+            $this->notifyAdministrasiNextApprover($pengajuanCuti);
         }
+        
         if ($pengajuanCuti->status) {
             $this->logStatus($pengajuanCuti, null, $pengajuanCuti->status, 'Pengajuan dibuat');
         }
@@ -183,10 +197,10 @@ class PengajuanCutiObserver
         $isOperasional = $pengajuanCuti->tipe_aliran === 'operasional';
 
         $operasionalKeputusan = ['keputusan_kepala_unit', 'keputusan_kepala_seksi', 'keputusan_kanit_kepegawaian', 'keputusan_kasubag_tu'];
-        $administrasiKeputusan = ['keputusan_kanit', 'keputusan_kasubag'];
+        $administrasiKeputusan = ['keputusan_kanit', 'keputusan_kanit_kepegawaian', 'keputusan_kasubag'];
 
         $resubmitPossible = $isOperasional
-            ? ! $pengajuanCuti->isDirty(array_merge($operasionalKeputusan, $administrasiKeputusan))
+            ? ! $pengajuanCuti->isDirty(array_merge($operasionalKeputusan, ['keputusan_kanit', 'keputusan_kasubag']))
             : ! $pengajuanCuti->isDirty($administrasiKeputusan);
 
         $isResubmitUpdate = false;
@@ -234,52 +248,7 @@ class PengajuanCutiObserver
             if ($isOperasional) {
                 $this->resetOperasionalForResubmit($pengajuanCuti);
             } else {
-                $submitter = $pengajuanCuti->user;
-                $kanitValue = $pengajuanCuti->getOriginal('keputusan_kanit') === 'dilewati' ? 'dilewati' : null;
-                $kasubagValue = $pengajuanCuti->getOriginal('keputusan_kasubag') === 'dilewati' ? 'dilewati' : null;
-
-                if ($submitter->hasRole('kasubag')) {
-                    $pengajuanCuti->status = 'menunggu_atasan';
-                } else {
-                    $pengajuanCuti->status = 'menunggu_atasan';
-                }
-
-                $pengajuanCuti->keputusan_kanit = $kanitValue;
-                $pengajuanCuti->keputusan_kasubag = $kasubagValue;
-                $pengajuanCuti->alasan_kanit = null;
-                $pengajuanCuti->alasan_kasubag = null;
-
-                if (! $submitter->hasRole('kasubag')) {
-                    // Only notify approvers whose stage is still open (was not skipped)
-                    $rolesToNotify = [];
-                    if ($kanitValue !== 'dilewati') {
-                        $rolesToNotify[] = 'kanit';
-                    }
-                    if ($kasubagValue !== 'dilewati') {
-                        $rolesToNotify[] = 'kasubag';
-                    }
-
-                    if (! empty($rolesToNotify)) {
-                        $kanitKasubags = User::role($rolesToNotify)
-                            ->where('unit_kerja_id', $pengajuanCuti->user->unit_kerja_id)
-                            ->where('id', '!=', $pengajuanCuti->user_id)
-                            ->get();
-                        foreach ($kanitKasubags as $user) {
-                            Notification::make()
-                                ->title('Pengajuan Cuti Diperbarui')
-                                ->body('Pengajuan cuti dari '.$pengajuanCuti->user->nama.' telah diperbarui dan menunggu persetujuan Anda.')
-                                ->info()
-                                ->actions([
-                                    \Filament\Actions\Action::make('lihat')
-                                        ->button()
-                                        ->label('Lihat')
-                                        ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index'))
-                                        ->markAsRead(),
-                                ])
-                                ->sendToDatabase($user);
-                        }
-                    }
-                }
+                $this->resetAdministrasiForResubmit($pengajuanCuti);
             }
         }
 
@@ -304,27 +273,7 @@ class PengajuanCutiObserver
             if ($isOperasional) {
                 $this->notifyOperasionalStatusChange($pengajuanCuti);
             } else {
-                $body = 'Status pengajuan cuti Anda menjadi: '.strtoupper($pengajuanCuti->final_business_status);
-
-                if (in_array($pengajuanCuti->status, ['ditolak_kanit', 'ditolak_kasubag', 'perubahan'])) {
-                    $reason = $pengajuanCuti->alasan_kasubag ?? $pengajuanCuti->alasan_kanit;
-                    if ($reason) {
-                        $body .= ' (Alasan: '.$reason.')';
-                    }
-                }
-
-                Notification::make()
-                    ->title('Status Pengajuan Cuti Berubah')
-                    ->body($body)
-                    ->info()
-                    ->actions([
-                        \Filament\Actions\Action::make('lihat')
-                            ->button()
-                            ->label('Lihat')
-                            ->url(\App\Filament\Resources\PengajuanCutis\PengajuanCutiResource::getUrl('index'))
-                            ->markAsRead(),
-                    ])
-                    ->sendToDatabase($pengajuanCuti->user);
+                $this->notifyAdministrasiStatusChange($pengajuanCuti);
             }
         }
 
@@ -611,5 +560,94 @@ class PengajuanCutiObserver
             }
         }
         $pengajuanCuti->status = 'menunggu_kasubag_tu';
+    }
+
+    private function resetAdministrasiForResubmit(PengajuanCuti $pengajuanCuti): void
+    {
+        $kept = fn (string $field) => $pengajuanCuti->getOriginal($field) === 'dilewati' ? 'dilewati' : null;
+
+        $pengajuanCuti->keputusan_kanit = $kept('keputusan_kanit');
+        $pengajuanCuti->keputusan_kanit_kepegawaian = $kept('keputusan_kanit_kepegawaian');
+        $pengajuanCuti->keputusan_kasubag = $kept('keputusan_kasubag');
+        
+        $pengajuanCuti->alasan_kanit = null;
+        $pengajuanCuti->alasan_kanit_kepegawaian = null;
+        $pengajuanCuti->alasan_kasubag = null;
+
+        $stages = [
+            'menunggu_kepala_unit' => 'keputusan_kanit',
+            'menunggu_kanit_kepegawaian' => 'keputusan_kanit_kepegawaian',
+            'menunggu_kasubag_tu' => 'keputusan_kasubag',
+        ];
+        
+        foreach ($stages as $status => $field) {
+            if (is_null($pengajuanCuti->$field)) {
+                $pengajuanCuti->status = $status;
+                return;
+            }
+        }
+        
+        $pengajuanCuti->status = 'menunggu_kasubag_tu';
+    }
+
+    private function notifyAdministrasiStatusChange(PengajuanCuti $pengajuanCuti): void
+    {
+        if (str_starts_with($pengajuanCuti->status, 'menunggu_')) {
+            $this->notifyAdministrasiNextApprover($pengajuanCuti);
+            return;
+        }
+
+        $body = 'Status pengajuan cuti Anda menjadi: '.strtoupper($pengajuanCuti->final_business_status);
+
+        if (in_array($pengajuanCuti->status, [
+            'ditolak_kanit', 'ditolak_kanit_kepegawaian', 'ditolak_kasubag', 'perubahan',
+        ])) {
+            $reason = $pengajuanCuti->alasan_kasubag
+                ?? $pengajuanCuti->alasan_kanit_kepegawaian
+                ?? $pengajuanCuti->alasan_kanit;
+            if ($reason) {
+                $body .= ' (Alasan: '.$reason.')';
+            }
+        }
+
+        Notification::make()
+            ->title('Status Pengajuan Cuti Berubah')
+            ->body($body)
+            ->info()
+            ->actions([
+                \Filament\Actions\Action::make('lihat')
+                    ->button()
+                    ->label('Lihat')
+                    ->url(\App\Filament\Resources\PengajuanCutis\PengajuanCutiResource::getUrl('index'))
+                    ->markAsRead(),
+            ])
+            ->sendToDatabase($pengajuanCuti->user);
+    }
+
+    private function notifyAdministrasiNextApprover(PengajuanCuti $pengajuanCuti): void
+    {
+        $approverId = null;
+        if ($pengajuanCuti->status === 'menunggu_kepala_unit' || $pengajuanCuti->status === 'menunggu_atasan') {
+            $approverId = $pengajuanCuti->kepala_unit_id;
+        } elseif ($pengajuanCuti->status === 'menunggu_kanit_kepegawaian') {
+            $approverId = $pengajuanCuti->kanit_kepegawaian_id;
+        } elseif ($pengajuanCuti->status === 'menunggu_kasubag_tu') {
+            $approverId = $pengajuanCuti->kasubag_tu_id;
+        }
+        
+        if ($approverId && ($approver = User::find($approverId))) {
+            Notification::make()
+                ->title('Pengajuan Cuti Menunggu Anda')
+                ->body('Pengajuan cuti dari '.$pengajuanCuti->user->nama.' kini menunggu persetujuan Anda.')
+                ->info()
+                ->actions([
+                    \Filament\Actions\Action::make('lihat')
+                        ->button()
+                        ->label('Lihat')
+                        ->url(\App\Filament\Resources\PersetujuanCutis\PersetujuanCutiResource::getUrl('index'))
+                        ->markAsRead(),
+                ])
+                ->sendToDatabase($approver);
+        }
     }
 }

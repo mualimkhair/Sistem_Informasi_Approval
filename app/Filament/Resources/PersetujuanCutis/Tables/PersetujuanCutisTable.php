@@ -183,8 +183,9 @@ class PersetujuanCutisTable
                     ->visible(
                         fn ($record) => $record->tipe_aliran === 'administrasi'
                         && auth()->user()->hasRole('kanit')
-                        && $record->status === 'menunggu_atasan'
+                        && in_array($record->status, ['menunggu_atasan', 'menunggu_kepala_unit'])
                         && is_null($record->keputusan_kanit)
+                        && $record->kepala_unit_id == auth()->id()
                         && $record->user_id != auth()->id()
                     )
                     ->form([
@@ -218,7 +219,7 @@ class PersetujuanCutisTable
                         if ($record->user_id == $user->id) {
                             abort(403, 'Anda tidak dapat menyetujui pengajuan cuti Anda sendiri.');
                         }
-                        if ($record->unitKerja?->kepala_unit_id != $user->id && ! $user->hasRole(['super_admin', 'admin'])) {
+                        if ($record->kepala_unit_id != $user->id && ! $user->hasRole(['super_admin', 'admin'])) {
                             abort(403, 'Anda bukan supervisor Kanit untuk unit pegawai ini.');
                         }
 
@@ -239,9 +240,10 @@ class PersetujuanCutisTable
                     ->color('info')
                     ->visible(
                         fn ($record) => $record->tipe_aliran === 'administrasi'
-                        && auth()->user()->hasRole('kasubag')
-                        && $record->status === 'menunggu_atasan'
+                        && auth()->user()->hasRole(['kasubag', 'kasubag_tu'])
+                        && $record->status === 'menunggu_kasubag_tu'
                         && is_null($record->keputusan_kasubag)
+                        && $record->kasubag_tu_id == auth()->id()
                         && $record->user_id != auth()->id()
                     )
                     ->form([
@@ -276,8 +278,8 @@ class PersetujuanCutisTable
                         if ($record->user_id == $user->id) {
                             abort(403, 'Anda tidak dapat menyetujui pengajuan cuti Anda sendiri.');
                         }
-                        if ($record->seksi?->kepala_seksi_id != $user->id && ! $user->hasRole(['super_admin', 'admin'])) {
-                            abort(403, 'Anda bukan supervisor Kasubag untuk unit pegawai ini.');
+                        if ($record->kasubag_tu_id != $user->id && ! $user->hasRole(['super_admin', 'admin'])) {
+                            abort(403, 'Anda bukan supervisor Kasubag TU untuk unit pegawai ini.');
                         }
 
                         DB::transaction(function () use ($record, $data) {
@@ -396,7 +398,7 @@ class PersetujuanCutisTable
                     ->icon('heroicon-o-clipboard-document-check')
                     ->color('info')
                     ->visible(
-                        fn ($record) => $record->tipe_aliran === 'operasional'
+                        fn ($record) => in_array($record->tipe_aliran, ['operasional', 'administrasi'])
                         && auth()->user()->hasRole('kanit_kepegawaian')
                         && $record->status === 'menunggu_kanit_kepegawaian'
                         && is_null($record->keputusan_kanit_kepegawaian)

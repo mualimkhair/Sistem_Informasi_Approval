@@ -66,6 +66,14 @@ class PengajuanCutiPolicy
             return true;
         }
 
+        if ($user->hasRole('kasubag_tu') && $pengajuanCuti->kasubag_tu_id == $user->id) {
+            return true;
+        }
+
+        if ($user->hasRole('kanit_kepegawaian') && $pengajuanCuti->kanit_kepegawaian_id == $user->id) {
+            return true;
+        }
+
         return false;
     }
 

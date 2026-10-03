@@ -123,32 +123,45 @@ class CutiService
 
     private static function handleAdministrasiApprovalStatus(PengajuanCuti $pengajuan)
     {
+        $approvedOrSkipped = fn ($val) => in_array($val, ['disetujui', 'dilewati']);
+
+        // --- Stage 1: Kepala Unit (Kanit) ---
         if (in_array($pengajuan->keputusan_kanit, ['tidak_disetujui', 'ditangguhkan', 'perubahan'])) {
-            if ($pengajuan->keputusan_kanit === 'tidak_disetujui') {
-                $pengajuan->status = 'ditolak_kanit';
-            } elseif ($pengajuan->keputusan_kanit === 'ditangguhkan') {
-                $pengajuan->status = 'ditangguhkan';
-            } else {
-                $pengajuan->status = 'perubahan';
-            }
-        } elseif (in_array($pengajuan->keputusan_kasubag, ['tidak_disetujui', 'ditangguhkan', 'perubahan'])) {
-            if ($pengajuan->keputusan_kasubag === 'tidak_disetujui') {
-                $pengajuan->status = 'ditolak_kasubag';
-            } elseif ($pengajuan->keputusan_kasubag === 'ditangguhkan') {
-                $pengajuan->status = 'ditangguhkan';
-            } else {
-                $pengajuan->status = 'perubahan';
-            }
-        } elseif (
-            in_array($pengajuan->keputusan_kanit, ['disetujui', 'dilewati']) &&
-            in_array($pengajuan->keputusan_kasubag, ['disetujui', 'dilewati'])
-        ) {
-            if ($pengajuan->status === 'menunggu_atasan') {
-                // Pejabat stage was removed: kanit + kasubag approval finalizes the
-                // administrasi flow. The Blangko (signed by pejabat_berwenang) is
-                // created by the observer when status becomes 'disetujui'.
+            $pengajuan->status = $pengajuan->keputusan_kanit === 'tidak_disetujui'
+                ? 'ditolak_kanit'
+                : ($pengajuan->keputusan_kanit === 'ditangguhkan' ? 'ditangguhkan' : 'perubahan');
+            return;
+        }
+
+        if ($approvedOrSkipped($pengajuan->keputusan_kanit) && in_array($pengajuan->status, ['menunggu_atasan', 'menunggu_kepala_unit'])) {
+            $pengajuan->status = 'menunggu_kanit_kepegawaian';
+        }
+
+        // --- Stage 2: Kanit Kepegawaian ---
+        if (in_array($pengajuan->keputusan_kanit_kepegawaian, ['tidak_disetujui', 'ditangguhkan', 'perubahan'])) {
+            $pengajuan->status = $pengajuan->keputusan_kanit_kepegawaian === 'tidak_disetujui'
+                ? 'ditolak_kanit_kepegawaian'
+                : ($pengajuan->keputusan_kanit_kepegawaian === 'ditangguhkan' ? 'ditangguhkan' : 'perubahan');
+            return;
+        }
+
+        if ($approvedOrSkipped($pengajuan->keputusan_kanit_kepegawaian) && $pengajuan->status === 'menunggu_kanit_kepegawaian') {
+            $pengajuan->status = 'menunggu_kasubag_tu';
+        }
+
+        // --- Stage 3: Kasubag TU (Kasubag) ---
+        if ($pengajuan->status === 'menunggu_kasubag_tu' && $pengajuan->keputusan_kasubag) {
+            if ($approvedOrSkipped($pengajuan->keputusan_kasubag)) {
                 $pengajuan->status = 'disetujui';
                 self::potongSaldo($pengajuan);
+            } else {
+                if ($pengajuan->keputusan_kasubag === 'tidak_disetujui') {
+                    $pengajuan->status = 'ditolak_kasubag';
+                } elseif ($pengajuan->keputusan_kasubag === 'ditangguhkan') {
+                    $pengajuan->status = 'ditangguhkan';
+                } else {
+                    $pengajuan->status = 'perubahan';
+                }
             }
         }
     }
